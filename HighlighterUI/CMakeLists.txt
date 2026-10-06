@@ -50,5 +50,9 @@ qt_add_qml_module(HighlighterUI
         textures/brushed.png
         textures/grain.png
         textures/scanlines.png
+        textures/knob.png
+        textures/screw.png
+        textures/sheen.png
+        textures/vignette.png
 )
 target_link_libraries(HighlighterUI PRIVATE Qt6::Quick Qt6::QuickControls2)

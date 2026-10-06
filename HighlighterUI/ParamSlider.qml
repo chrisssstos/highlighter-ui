@@ -187,6 +187,14 @@ Item {
             height: parent.height
             color: Theme.edgeOf(root.tint)
         }
+        // the fill catches the light, in the industrial look
+        Image {
+            visible: Theme.industrial && root.fillW > 0
+            x: root.fillX; width: root.fillW; height: parent.height
+            source: "textures/sheen.png"
+            smooth: true
+            opacity: 0.3
+        }
         // the bar sits in a groove, in the industrial look
         ParamBevel { anchors.fill: parent; visible: Theme.industrial; inset: true; dark: 0.45; light: 0.12 }
 

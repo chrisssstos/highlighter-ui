@@ -77,7 +77,10 @@ screws behind sections and groups, a grained page, inset grooves for the
 bars, LCD value boxes, a scope screen for the XY pad, knurled knobs with a
 pointer line, brushed buttons with an LED when they stay down, and stamped
 titles. Off gives the flat look. `ParamPlate`, `ParamScrew` and `ParamBevel`
-are the pieces, for a panel's own surfaces.
+are the pieces, for a panel's own surfaces. The surfaces are real CC0 scans
+(ambientCG brushed aluminium and worn steel); the knob caps and screws are
+rendered sprites, lit like a plugin's (`tools/render_assets.py` regenerates
+them; credits in `HighlighterUI/textures/CREDITS.txt`).
 `Theme.smooth` (off) turns antialiasing back on for arrows, knobs, gauges and
 round shapes; off gives the kit its hard, nearest-neighbour edges.
 `Theme.accent` recolours everything; the darker shades follow it, and

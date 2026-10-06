@@ -22,7 +22,8 @@ Rectangle {
         smooth: false
         opacity: 1
     }
-    ParamBevel { anchors.fill: parent; visible: Theme.industrial }
+    ParamBevel { anchors.fill: parent; visible: Theme.industrial; light: 0.16; dark: 0.55 }
+    ParamBevel { anchors.fill: parent; anchors.margins: 1; visible: Theme.industrial; light: 0.07; dark: 0.25 }
 
     Repeater {
         model: Theme.industrial && plate.screws && plate.width > Theme.s(60) && plate.height > Theme.s(40) ? 4 : 0
