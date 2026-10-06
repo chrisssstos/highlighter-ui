@@ -19,10 +19,8 @@ qt_add_qml_module(HighlighterUI
         PanelMemory.qml
         ParamMath.js
         ParamArrow.qml
-        ParamScrew.qml
         ParamPlate.qml
         ParamBevel.qml
-        ParamRail.qml
         ParamSizeMark.qml
         ParamValueBox.qml
         ParamSlider.qml
@@ -48,12 +46,7 @@ qt_add_qml_module(HighlighterUI
         ParamText.qml
         ParamLight.qml
     RESOURCES
-        textures/powder.png
-        textures/scanlines.png
-        textures/knob.png
         textures/knob_classic.png
-        textures/screw.png
         textures/sheen.png
-        textures/vignette.png
 )
 target_link_libraries(HighlighterUI PRIVATE Qt6::Quick Qt6::QuickControls2)

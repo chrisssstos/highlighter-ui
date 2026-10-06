@@ -62,7 +62,6 @@ Window {
         width: parent.width
         height: topFlow.implicitHeight + 2 * Theme.s(10)
         color: Theme.sunken
-        screwInset: Theme.s(4)
         Flow {
             id: topFlow
             x: Theme.s(24); y: Theme.s(10)
@@ -103,9 +102,9 @@ Window {
             }
             ParamChoice {
                 width: Theme.s(210)
-                model: ["flat", "modular", "2006"]
-                currentIndex: ["flat", "modular", "classic"].indexOf(Theme.skin)
-                onActivated: i => Theme.skin = ["flat", "modular", "classic"][i]
+                model: ["flat", "old FL studio"]
+                currentIndex: ["flat", "classic"].indexOf(Theme.skin)
+                onActivated: i => Theme.skin = ["flat", "classic"][i]
             }
             ParamToggle {
                 id: allOff

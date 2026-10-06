@@ -150,9 +150,7 @@ Item {
         height: Math.round(width / Math.max(0.05, root.aspect))
         // minimising and maximising grow the one grid, not swap it
         Behavior on width { NumberAnimation { duration: Theme.ease; easing.type: Easing.OutCubic } }
-        // a scope screen in the industrial look, the well otherwise
-        color: Theme.industrial ? (hover.hovered && !ma.pressed ? Qt.lighter(Theme.screen, 1.12) : Theme.screen)
-                                : (hover.hovered && !ma.pressed ? Theme.wellHover : Theme.well)
+        color: hover.hovered && !ma.pressed ? Theme.wellHover : Theme.well
         clip: true
 
         // the grid; the zero lines a little brighter
@@ -161,9 +159,8 @@ Item {
             Rectangle {
                 required property var modelData
                 x: Math.round(root.px(modelData)); width: 1; height: pad.height
-                color: Theme.industrial ? root.tint : modelData === 0 ? Theme.textFaint : Theme.line
-                opacity: Theme.industrial ? (modelData === 0 ? 0.45 : root.compact ? 0 : 0.14)
-                                          : (modelData === 0 ? 0.9 : root.compact ? 0 : 0.5)
+                color: modelData === 0 ? Theme.textFaint : Theme.line
+                opacity: modelData === 0 ? 0.9 : root.compact ? 0 : 0.5
             }
         }
         Repeater {
@@ -171,9 +168,8 @@ Item {
             Rectangle {
                 required property var modelData
                 y: Math.round(root.py(modelData)); height: 1; width: pad.width
-                color: Theme.industrial ? root.tint : modelData === 0 ? Theme.textFaint : Theme.line
-                opacity: Theme.industrial ? (modelData === 0 ? 0.45 : root.compact ? 0 : 0.14)
-                                          : (modelData === 0 ? 0.9 : root.compact ? 0 : 0.5)
+                color: modelData === 0 ? Theme.textFaint : Theme.line
+                opacity: modelData === 0 ? 0.9 : root.compact ? 0 : 0.5
             }
         }
 
@@ -254,21 +250,8 @@ Item {
             border.width: 1; border.color: Theme.page
         }
 
-        // scanlines and an inset edge, in the industrial look
-        Image {
-            anchors.fill: parent
-            visible: Theme.industrial
-            source: "textures/scanlines.png"
-            fillMode: Image.Tile
-            smooth: false
-        }
-        Image {
-            anchors.fill: parent
-            visible: Theme.industrial
-            source: "textures/vignette.png"
-            smooth: true
-        }
-        ParamBevel { anchors.fill: parent; visible: Theme.industrial || Theme.classic; inset: true; dark: 0.55; light: 0.12 }
+        // an inset edge, in the classic skin
+        ParamBevel { anchors.fill: parent; visible: Theme.classic; inset: true; dark: 0.55; light: 0.12 }
 
         // keyboard focus
         Rectangle {

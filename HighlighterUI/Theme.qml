@@ -33,10 +33,9 @@ QtObject {
     }
 
     // --- skin --------------------------------------------------------------
-    //! The look: "flat" (plain grey), "modular" (a synth rack: modules on
-    //! rails, rendered knobs, LCDs) or "classic" (a 2006 DAW: slate-blue
-    //! plugin windows with gradient title bars, raised bevels, small type,
-    //! glossy knobs). The colours below follow it.
+    //! The look: "classic" (old FL Studio: slate-blue plugin windows with
+    //! gradient title bars, raised bevels, small type, glossy knobs) or "flat"
+    //! (plain grey). The colours below follow it.
     property string skin: "classic"
     readonly property bool classic: skin === "classic"
 
@@ -84,9 +83,7 @@ QtObject {
     property color editFill:  "#a8abae"   // a value box while it is typed in
     property color editText:  "#4a25c9"
     property color danger:    "#e0664f"
-    property color screen:    classic ? "#14191c" : "#2b2f2e"   // a value box's LCD, the XY pad's scope, in the industrial look
-    property color screwFace: "#8e9391"
-    property color rack:      "#1c1e1d"   // the inside of the rack, behind the modules (industrial)
+    property color screen:    "#14191c"   // classic: a value box's LCD
 
     // --- size --------------------------------------------------------------
     // c(full, compact)
@@ -114,14 +111,8 @@ QtObject {
     property int smallSize: s(classic ? 10 : 11)
 
     // --- drawing -----------------------------------------------------------
-    //! The industrial look: brushed, bevelled plates with screws, a grained
-    //! page, inset grooves, LCD value boxes, a scope screen for the XY pad,
-    //! knurled knobs, LED buttons and stamped titles. Off: flat.
-    //! Whether the skin is "modular" (the name from when it was the only
-    //! other look). Set skin to change it.
-    readonly property bool industrial: skin === "modular"
-    //! A stamped title's style: a dark edge under the letters when industrial.
-    readonly property int titleStyle: industrial ? Text.Raised : Text.Normal
+    //! A title's style: a dark edge under the letters in the classic skin.
+    readonly property int titleStyle: classic ? Text.Raised : Text.Normal
     readonly property color titleStyleColor: Qt.rgba(0, 0, 0, 0.6)
     //! Antialiasing for arrows, dials and round shapes. Off: hard,
     //! nearest-neighbour edges, the kit's look. Text stays smooth.
