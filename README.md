@@ -90,6 +90,17 @@ ParamSlider {
 
 ## Use it in a project
 
+The repo is private: https://github.com/chrisssstos/highlighter-ui
+
+Either add it as a submodule (updates come with `git submodule update --remote`):
+
+```
+git submodule add https://github.com/chrisssstos/highlighter-ui external/highlighter-ui
+```
+
+or copy the `HighlighterUI/` folder into the project (for client work whose
+builds shouldn't need access to this repo). Then:
+
 ```cmake
 add_subdirectory(<path>/highlighter-ui/HighlighterUI ${CMAKE_BINARY_DIR}/HighlighterUI)
 target_link_libraries(<app> PRIVATE HighlighterUIplugin)
