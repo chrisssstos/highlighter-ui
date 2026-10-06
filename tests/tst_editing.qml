@@ -7,6 +7,8 @@ Item {
     id: top
     width: 600; height: 400
     ParamSlider { id: s; x: 20; y: 20; width: 400; from: 0; to: 46; limitFrom: 0; value: 23; unit: "px"; label: "Text size" }
+    // 1 unit per pixel along the bar (400 wide, less the 46px gutter)
+    ParamSlider { id: d; x: 20; y: 120; width: 400; from: 0; to: 354; value: 100; key: "test.d" }
     Rectangle { id: elsewhere; x: 20; y: 300; width: 100; height: 50 }
 
     TestCase {
@@ -41,6 +43,30 @@ Item {
             keyClick(Qt.Key_Escape)
             verify(!s.editing)
             compare(s.value, 23)
+        }
+        //! True if two items' boxes overlap, in the slider's coordinates.
+        function overlaps(a, b) {
+            const p = a.mapToItem(d, 0, 0), q = b.mapToItem(d, 0, 0)
+            return p.x < q.x + b.width && q.x < p.x + a.width && p.y < q.y + b.height && q.y < p.y + a.height
+        }
+        function test_defaultMarkNeverCrossesAnArrow() {
+            const mark = findChild(d, "defaultMark"), up = findChild(d, "upArrow"), down = findChild(d, "downArrow")
+            for (const compact of [true, false]) {
+                d.compact = compact
+                // walk the default across both arrows and the edge, a pixel at a time
+                for (let def = 80; def <= 120; ++def) {
+                    d.defaultValue = def
+                    wait(0)
+                    if (!mark.visible) continue
+                    for (let i = 0; i < mark.children.length; ++i) {
+                        const dot = mark.children[i]
+                        if (!dot.visible || dot.width === undefined || dot.height === 0) continue
+                        verify(!overlaps(dot, up), "a dot crosses the up arrow (default " + def + ", compact " + compact + ")")
+                        verify(!overlaps(dot, down), "a dot crosses the down arrow (default " + def + ", compact " + compact + ")")
+                    }
+                }
+            }
+            d.defaultValue = NaN
         }
         function test_saveDefault() {
             s.defaultValue = 10
