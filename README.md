@@ -73,5 +73,5 @@ target_link_libraries(<app> PRIVATE ParamKitplugin)
 Then `import ParamKit` in QML. `tests/build-check.bat` builds the gallery as
 a compiled app this way, to prove the module works.
 
-Inter is bundled (`ParamKit/fonts`, under the SIL OFL licence), so the panel
-looks the same on every machine.
+It uses Segoe UI and Consolas, which every Windows PC has, so nothing needs
+bundling.

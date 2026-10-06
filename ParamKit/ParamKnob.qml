@@ -52,7 +52,7 @@ Item {
         elide: Text.ElideRight
         color: Theme.text
         font.family: Theme.family
-        font.pixelSize: Theme.labelSize
+        font.pixelSize: Theme.titleSize
         height: text.length ? implicitHeight : 0
     }
 
@@ -198,6 +198,7 @@ Item {
             interactive: root.enabled
             onSubmitted: v => root.setValue(v)
             onStepped: (direction, big) => root.step(direction, big)
+            onFinished: { drag.focusedByMouse = true; root.forceActiveFocus(Qt.MouseFocusReason) }
         }
         StepArrow { direction: Qt.RightArrow; active: root.value < root.limitTo; onStep: big => root.step(+1, big) }
     }

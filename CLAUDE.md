@@ -38,7 +38,9 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   a change without clicking.
 - `tests/check.qml` checks the value logic headlessly
   (`qml.exe -I . tests/check.qml`; set `QT_FORCE_STDERR_LOGGING=1` to see its
-  output). `tests/build-check.bat` proves the CMake module compiles.
+  output). `tests/tst_editing.qml` drives the value box with real clicks and
+  keys (`qmltestrunner.exe -import . -input tests/tst_editing.qml`).
+  `tests/build-check.bat` proves the CMake module compiles.
 - Every new control goes in `ParamKit/qmldir`, `ParamKit/CMakeLists.txt` and
   the gallery, with its awkward states shown.
 - `ParamArrow` (a Shape) must keep an explicit width and height; an implicit
