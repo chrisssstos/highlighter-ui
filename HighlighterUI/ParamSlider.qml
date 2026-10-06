@@ -277,8 +277,11 @@ Item {
     MouseArea {
         id: ma
         // reaches left of the bar too, for a down arrow hanging past its start
-        x: -(root.arrowW + root.gap + Theme.s(6)); y: track.y
-        width: root.width - x; height: track.height
+        x: -(root.arrowW + root.gap + Theme.s(6))
+        // a thin bar still gets a grabbable strip, at least 20px tall
+        readonly property real grow: Math.max(0, (Theme.s(20) - track.height) / 2)
+        y: track.y - grow
+        width: root.width - x; height: track.height + 2 * grow
         enabled: root.enabled
         hoverEnabled: true
         preventStealing: true
