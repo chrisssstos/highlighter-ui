@@ -295,6 +295,7 @@ Window {
                 width: parent.width; title: "Signage card"
                 ParamXY {
                     width: parent.width
+                    key: "signage.position"
                     label: "card position on the screen, from centre"
                     unit: " mm"
                     xFrom: -960; xTo: 960; yFrom: -540; yTo: 540; gridStep: 120

@@ -5,12 +5,12 @@ import HighlighterUI
 // Run: qmltestrunner -import . -input tests/tst_editing.qml
 Item {
     id: top
-    width: 600; height: 400
+    width: 900; height: 600
     ParamSlider { id: s; x: 20; y: 20; width: 400; from: 0; to: 46; limitFrom: 0; value: 23; unit: "px"; label: "Text size" }
     // 1 unit per pixel along the bar (400 wide, less the 46px gutter)
     ParamSlider { id: d; x: 20; y: 120; width: 400; from: 0; to: 354; value: 100; key: "test.d" }
     // 200 x 200 px for -100..100 both ways: one unit per pixel, y down
-    ParamXY { id: xy; x: 440; y: 20; width: 200; xValue: 0; yValue: 0 }
+    ParamXY { id: xy; x: 440; y: 20; width: 200; key: "test.xy"; label: "position"; xValue: 0; yValue: 0 }
     Rectangle { id: elsewhere; x: 20; y: 300; width: 100; height: 50 }
 
     TestCase {
@@ -77,6 +77,7 @@ Item {
             verify(findChild(d, "upArrow").visible && findChild(d, "downArrow").visible)
         }
         function test_xyDragKeysTypeReset() {
+            xy.compact = false
             xy.xValue = 0; xy.yValue = 0; xy.defaultX = 10; xy.defaultY = 20
             const pad = findChild(xy, "pad")
             compare(pad.width, 200); compare(pad.height, 200)
@@ -98,6 +99,26 @@ Item {
             mousePress(pad, 100, 20); mouseRelease(pad, 100, 20)
             compare(xy.yValue, 80, "graph mode: y grows up the pad")
             xy.yDown = true
+        }
+        function test_xyMinMax() {
+            PanelMemory.store.maximised = "[]"
+            xy.compact = true
+            const pair = findChild(xy, "pair"), pad = findChild(xy, "pad")
+            verify(pair.visible && !pad.visible, "minimised: two sliders, no grid")
+            const xs = findChild(xy, "xSlider"), ys = findChild(xy, "ySlider")
+            xy.xValue = 25; xy.yValue = -30
+            compare(xs.value, 25); compare(ys.value, -30)
+            ys.setValue(40); ys.moved(40)
+            compare(xy.yValue, 40, "the y slider moves the point")
+            verify(!findChild(xs, "sizeMark").visible, "the bundled sliders have no min / max of their own")
+            const mark = findChild(xy, "sizeMark")
+            mouseMove(mark); wait(250); mouseClick(mark)
+            verify(!xy.compact && pad.visible && !pair.visible, "maximised: the grid")
+            verify(PanelMemory.isMaximised(xy.key), "remembered")
+            const again = Qt.createQmlObject('import HighlighterUI; ParamXY { key: "' + xy.key + '" }', top)
+            verify(!again.compact, "starts maximised after a restart"); again.destroy()
+            mouseMove(mark); wait(250); mouseClick(mark)
+            verify(xy.compact && !PanelMemory.isMaximised(xy.key))
         }
         function test_saveDefault() {
             s.defaultValue = 10

@@ -49,7 +49,7 @@ value box sits between its step arrows.
 |---|---|
 | `ParamSlider` | the bar slider above |
 | `ParamKnob` | rotary, same value rules |
-| `ParamXY` | a grid with a dot, to place something on a canvas: drag (Shift fine, Ctrl snaps), arrow keys, typed x / y, footprint and ghosts of other elements |
+| `ParamXY` | a grid with a dot, to place something on a canvas: drag (Shift fine, Ctrl snaps), arrow keys, typed x / y, footprint and ghosts of other elements. Minimised (the default, remembered like sliders) it is two thin x / y sliders |
 | `ParamButton` | `accent`, `danger`, `checkable`, `icon` |
 | `ParamToggle`, `ParamCheck` | on/off |
 | `ParamChoice` | a row of options (presets 1/2, shader), wraps |

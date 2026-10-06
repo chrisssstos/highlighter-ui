@@ -71,7 +71,8 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 - **Positions.** When two settings are an element's x and y on a screen or
   canvas (e.g. "left edge / top edge from centre"), offer a `ParamXY` with
   the canvas's range (it takes its shape), `footprintWidth/Height` for the
-  element's size and `ghosts` for the other elements already placed. Keep
+  element's size and `ghosts` for the other elements already placed, and a
+  `key` (it minimises to two sliders and remembers being maximised). Keep
   the two sliders too if the panel lists values to copy. A single position
   value stays a slider.
 - **Meters.** `ParamMeter`, `ParamGauge` and `ParamLevel` are read-only and
