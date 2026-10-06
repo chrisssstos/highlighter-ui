@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Window
-import ParamKit
+import HighlighterUI
 
-/// Every ParamKit control, in its ordinary and awkward states, for judging
+/// Every HighlighterUI control, in its ordinary and awkward states, for judging
 /// the look and feel. Run with run-gallery.bat.
 Window {
     id: win
@@ -10,7 +10,7 @@ Window {
     height: 940
     visible: true
     color: Theme.page
-    title: "ParamKit gallery"
+    title: "HighlighterUI gallery"
 
     //! Calls fn on every item under item.
     function walk(item, fn) {
@@ -60,7 +60,7 @@ Window {
             Text {
                 height: Theme.s(28)
                 verticalAlignment: Text.AlignVCenter
-                text: "PARAMKIT"
+                text: "HIGHLIGHTER UI"
                 color: Theme.accent
                 font.family: Theme.family
                 font.pixelSize: Theme.s(17)

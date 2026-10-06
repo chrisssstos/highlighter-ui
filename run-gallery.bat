@@ -1,5 +1,5 @@
 @echo off
-rem Opens the ParamKit gallery with Qt's qml runner: no build needed.
+rem Opens the HighlighterUI gallery with Qt's qml runner: no build needed.
 setlocal
 set "QML="
 for %%V in (6.11.2 6.10.3 6.10.2) do (

@@ -1,4 +1,4 @@
-module ParamKit
+module HighlighterUI
 singleton Theme 1.0 Theme.qml
 ParamArrow 1.0 ParamArrow.qml
 ParamValueBox 1.0 ParamValueBox.qml

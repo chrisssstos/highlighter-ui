@@ -1,6 +1,6 @@
 import QtQuick
-import ParamKit
-import "../ParamKit/ParamMath.js" as PM
+import HighlighterUI
+import "../HighlighterUI/ParamMath.js" as PM
 
 Item {
     ParamSlider { id: s; from: 0; to: 46; limitFrom: 0; value: 46; unit: "px" }

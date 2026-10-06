@@ -1,7 +1,7 @@
 pragma Singleton
 import QtQuick
 
-/// Colours, sizes and the font every ParamKit control draws with. Change
+/// Colours, sizes and the font every HighlighterUI control draws with. Change
 /// scale to grow or shrink the whole panel (a window on a high DPI screen,
 /// say), compact for smaller sliders and knobs that fit more on screen, and
 /// accent to recolour it: the darker shades follow the accent.
