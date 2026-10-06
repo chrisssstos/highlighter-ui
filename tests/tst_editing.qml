@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import ParamKit
+import HighlighterUI
 
 // Run: qmltestrunner -import . -input tests/tst_editing.qml
 Item {
@@ -54,9 +54,12 @@ Item {
             const full = s.height
             const mark = findChild(s, "sizeMark")
             verify(mark, "the min / max button exists")
+            // it only shows (and takes clicks) once the slider is hovered
+            mouseMove(mark); wait(250)
             mouseClick(mark)
             verify(s.compact, "a click minimises the slider")
             verify(s.height < full, "and it gets shorter")
+            mouseMove(mark); wait(250)
             mouseClick(mark)
             verify(!s.compact)
             compare(s.height, full)

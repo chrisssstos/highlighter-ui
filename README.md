@@ -1,8 +1,8 @@
-# ParamKit
+# HighlighterUI
 
 My control-panel look for Qt Quick apps: a dark grey page, lime fills and
 values, chunky bar sliders with step arrows at the fill's edge. One QML module
-(`import ParamKit`) that any Qt 6 project can link, so every app's tuning panel
+(`import HighlighterUI`) that any Qt 6 project can link, so every app's tuning panel
 looks and works the same.
 
 ## See it
@@ -86,11 +86,11 @@ ParamSlider {
 ## Use it in a project
 
 ```cmake
-add_subdirectory(<path>/param-kit/ParamKit ${CMAKE_BINARY_DIR}/ParamKit)
-target_link_libraries(<app> PRIVATE ParamKitplugin)
+add_subdirectory(<path>/highlighter-ui/HighlighterUI ${CMAKE_BINARY_DIR}/HighlighterUI)
+target_link_libraries(<app> PRIVATE HighlighterUIplugin)
 ```
 
-Then `import ParamKit` in QML. `tests/build-check.bat` builds the gallery as
+Then `import HighlighterUI` in QML. `tests/build-check.bat` builds the gallery as
 a compiled app this way, to prove the module works.
 
 It uses Segoe UI and Consolas, which every Windows PC has, so nothing needs

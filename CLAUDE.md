@@ -1,4 +1,4 @@
-# ParamKit: notes for Claude
+# HighlighterUI: notes for Claude
 
 This is Christos's personal control-panel kit for Qt Quick (QML) apps. When
 asked to build or restyle a params / tuning / control panel in a Qt project,
@@ -7,11 +7,11 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 ## Applying it to a project
 
 1. Link the module. In the app's CMakeLists.txt:
-   `add_subdirectory(<path>/param-kit/ParamKit ${CMAKE_BINARY_DIR}/ParamKit)`
-   and `target_link_libraries(<app> PRIVATE ParamKitplugin)`. If the project
-   should not depend on this folder's location, copy `ParamKit/` into the
+   `add_subdirectory(<path>/highlighter-ui/HighlighterUI ${CMAKE_BINARY_DIR}/HighlighterUI)`
+   and `target_link_libraries(<app> PRIVATE HighlighterUIplugin)`. If the project
+   should not depend on this folder's location, copy `HighlighterUI/` into the
    project instead (ask which they want).
-2. In the panel's QML, `import ParamKit`. Swap stock controls for kit ones:
+2. In the panel's QML, `import HighlighterUI`. Swap stock controls for kit ones:
    - `Slider` + label + value text → `ParamSlider`
    - `CheckBox` → `ParamCheck` (or `ParamToggle`)
    - preset buttons → `ParamChoice`
@@ -71,7 +71,7 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   output). `tests/tst_editing.qml` drives the value box with real clicks and
   keys (`qmltestrunner.exe -import . -input tests/tst_editing.qml`).
   `tests/build-check.bat` proves the CMake module compiles.
-- Every new control goes in `ParamKit/qmldir`, `ParamKit/CMakeLists.txt` and
+- Every new control goes in `HighlighterUI/qmldir`, `HighlighterUI/CMakeLists.txt` and
   the gallery, with its awkward states shown.
 - Draw with Shapes (GeometryRenderer when `!Theme.smooth`), not Canvas: a
   Canvas always antialiases, and the kit's look is hard-edged.
