@@ -18,9 +18,10 @@ QtObject {
     property bool slidersStartMinimised: true
     function c(full, small) { return s(theme.compact ? small : full) }
     //! Slider sizes, [full, compact], for a slider minimised on its own.
+    // Only the bar changes; the label, value box and spacing stay the same.
     readonly property var sliderSizes: ({
-        track: [44, 12], edge: [4, 2], box: [22, 16], arrowW: [10, 5], arrowH: [12, 8],
-        gap: [4, 2], title: [16, 12], value: [15, 12], row: [8, 3]
+        track: [44, 12], edge: [4, 2], box: [22, 22], arrowW: [10, 5], arrowH: [12, 8],
+        gap: [4, 2], title: [16, 16], value: [15, 15], row: [8, 8]
     })
     function sliderSize(key, small) { return s(sliderSizes[key][small ? 1 : 0]) }
 
