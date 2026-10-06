@@ -11,9 +11,11 @@ QtObject {
     //! Every size in the kit is multiplied by this.
     property real scale: 1
     function s(px) { return Math.round(px * theme.scale) }
-    //! Smaller sliders, knobs and spacing, to fit more on screen. Each
-    //! slider starts at this and has its own min / max button.
+    //! Smaller knobs and spacing, to fit more on screen.
     property bool compact: false
+    //! Sliders start minimised; each one the user maximises is remembered
+    //! (PanelMemory). False: they start maximised.
+    property bool slidersStartMinimised: true
     function c(full, small) { return s(theme.compact ? small : full) }
     //! Slider sizes, [full, compact], for a slider minimised on its own.
     readonly property var sliderSizes: ({

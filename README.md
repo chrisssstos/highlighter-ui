@@ -20,8 +20,11 @@ states.
   repeat, or drag them to slide as usual (Shift while dragging slides finely).
   They're always there: with no room on the bar they jump out clear of its
   end, and at a limit they grey out.
-- **Min / max:** the small bar picture by the label (next to ↺, both
-  appear on hover) shrinks that one slider to a thin bar and back.
+- **Min / max:** sliders start minimised (a thin bar). The − / + by the
+  label (next to ↺, both appear on hover) maximises one, and the panel
+  remembers which ones between runs, in `highlighterui.ini` in the app's
+  config folder. Give each slider a unique `key` (its setting's key) for
+  that; it falls back to the label.
 - **The default:** while the value is off its `defaultValue`, a dotted line
   marks where the default sits. `saveDefault()` makes the value the new
   default (call it on every slider from your "Save as defaults").
@@ -60,9 +63,11 @@ value box sits between its step arrows.
 | `ParamCode` | copyable block (TOML to paste) |
 | `ParamPage` | scrolling column on the page colour |
 | `ParamSwatches` | a row of colour swatches (a colour setting, or the accent) |
-| `Theme` | colours, sizes, font, `scale`, `compact`, `accent` |
+| `PanelMemory` | remembers which sliders are maximised |
+| `Theme` | colours, sizes, font, `scale`, `compact`, `accent`, `slidersStartMinimised` |
 
-`Theme.compact` starts every slider minimised and shrinks knobs and spacing.
+`Theme.compact` shrinks knobs and spacing; `Theme.slidersStartMinimised`
+(on) is whether sliders the user hasn't maximised start thin.
 `Theme.smooth` (off) turns antialiasing back on for arrows, knobs, gauges and
 round shapes; off gives the kit its hard, nearest-neighbour edges.
 `Theme.accent` recolours everything; the darker shades follow it, and

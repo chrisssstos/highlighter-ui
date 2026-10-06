@@ -22,19 +22,22 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 3. Keep the project's own setting plumbing. Value controls mirror Qt's
    Slider: bind `value`, write back in `onMoved: v => ...`. Watch for
    settings reloads the same way the old code did.
-4. Map ranges carefully: a centred range (−400..400 "from centre") gets
+4. Give every slider `key:` its setting's key (e.g. "fire.reachMin"). The
+   panel remembers which sliders the user maximised by that key; two
+   sliders sharing a label would otherwise share the memory.
+5. Map ranges carefully: a centred range (−400..400 "from centre") gets
    `origin: 0`; a value that must not go below 0 gets `limitFrom: 0`; a
    genuine hard maximum gets `limitTo`. Give a `defaultValue` when the
    installed default is known, so double-click resets and the dotted default
    mark shows. When the project saves defaults, set each slider's
    `defaultValue` to the saved value (or call `saveDefault()`), so the mark
    clears.
-5. Accent and size: set `Theme.accent` once if the project wants a colour
+6. Accent and size: set `Theme.accent` once if the project wants a colour
    other than the lime, and `Theme.compact = true` for a dense panel.
    Don't recolour controls one by one.
-6. Scale: if the window scales itself for DPI (an app's own `ui` scale), set
+7. Scale: if the window scales itself for DPI (an app's own `ui` scale), set
    `Theme.scale` to it once instead of multiplying sizes.
-7. Every kit control needs `width: parent.width` inside a Column, ParamPage
+8. Every kit control needs `width: parent.width` inside a Column, ParamPage
    or ParamGroup. Never bind a width to a Row's width (that makes a binding
    loop).
 

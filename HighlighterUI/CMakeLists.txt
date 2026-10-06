@@ -6,9 +6,9 @@
 # then `import HighlighterUI` in QML.
 cmake_minimum_required(VERSION 3.21)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Quick QuickControls2)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Quick QuickControls2)
 
-set_source_files_properties(Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+set_source_files_properties(Theme.qml PanelMemory.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_library(HighlighterUI STATIC)
 qt_add_qml_module(HighlighterUI
@@ -16,6 +16,7 @@ qt_add_qml_module(HighlighterUI
     VERSION 1.0
     QML_FILES
         Theme.qml
+        PanelMemory.qml
         ParamMath.js
         ParamArrow.qml
         ParamValueBox.qml
