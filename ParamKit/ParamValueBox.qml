@@ -15,13 +15,15 @@ Item {
     property string unit: ""
     property bool interactive: true
     property int align: Text.AlignLeft
+    property int boxHeight: Theme.boxHeight
+    property int fontSize: Theme.valueSize
     readonly property bool editing: input.activeFocus
 
     signal submitted(real v)
     signal stepped(int direction, bool big)
     signal finished()
 
-    implicitHeight: Theme.boxHeight
+    implicitHeight: box.boxHeight
     // Just wide enough for the text and its padding (and the cursor, typing).
     implicitWidth: Math.max(Theme.s(20),
                             editing ? input.contentWidth + input.leftPadding + input.rightPadding + Theme.s(2)
@@ -78,7 +80,7 @@ Item {
         text: PM.format(box.value, box.decimals) + box.unit
         color: Theme.accent
         font.family: Theme.family
-        font.pixelSize: Theme.valueSize
+        font.pixelSize: box.fontSize
     }
 
     TextInput {

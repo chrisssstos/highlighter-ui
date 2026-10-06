@@ -12,7 +12,8 @@ Shape {
     // which would feed back into the path and shrink it to nothing.
     width: Theme.arrowW
     height: Theme.arrowH
-    preferredRendererType: Shape.CurveRenderer
+    preferredRendererType: Theme.smooth ? Shape.CurveRenderer : Shape.GeometryRenderer
+    antialiasing: Theme.smooth
 
     ShapePath {
         strokeWidth: -1

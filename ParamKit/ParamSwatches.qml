@@ -11,11 +11,12 @@ Item {
     //! [{ name, color }], or plain colours.
     property var model: Theme.accents
     property color current: Theme.accent
-    property int size: Theme.s(20)
+    property int swatchWidth: Theme.s(14)
+    property int swatchHeight: Theme.s(26)
     signal picked(color color)
 
     // One row of them, unless given less width (then they wrap).
-    implicitWidth: model.length * size + Math.max(0, model.length - 1) * flow.spacing + 2 * flow.padding
+    implicitWidth: model.length * swatchWidth
     implicitHeight: (title.visible ? title.implicitHeight + Theme.rowGap : 0) + flow.implicitHeight
     opacity: enabled ? 1 : 0.4
 
@@ -40,9 +41,8 @@ Item {
     Flow {
         id: flow
         y: title.visible ? title.implicitHeight + Theme.rowGap : 0
-        width: Math.max(root.size, root.width)
-        padding: Theme.s(3)   // room for the ring
-        spacing: Theme.s(6)
+        width: Math.max(root.swatchWidth, root.width)
+        spacing: 0
         Repeater {
             model: root.model
             Item {
@@ -50,23 +50,19 @@ Item {
                 required property var modelData
                 readonly property color c: root.colorOf(modelData)
                 readonly property bool on: Qt.colorEqual(c, root.current)
-                width: root.size; height: root.size
-                // the ring round the picked one
-                Rectangle {
-                    anchors.fill: parent
-                    anchors.margins: -Theme.s(3)
-                    color: "transparent"
-                    border.width: Theme.s(2)
-                    border.color: Theme.text
-                    visible: swatch.on
-                }
+                width: root.swatchWidth; height: root.swatchHeight
+                z: on ? 1 : 0
                 Rectangle {
                     anchors.fill: parent
                     color: swatch.c
-                    scale: area.containsMouse && !swatch.on ? 1.12 : 1
-                    Behavior on scale { NumberAnimation { duration: Theme.quick } }
-                    border.width: 1
-                    border.color: Qt.rgba(0, 0, 0, 0.3)
+                }
+                // the picked one: an inner outline in the text colour; hover: a fainter one
+                Rectangle {
+                    anchors.fill: parent
+                    color: "transparent"
+                    border.width: swatch.on ? Theme.s(2) : 1
+                    border.color: swatch.on ? Theme.text : Qt.rgba(1, 1, 1, 0.6)
+                    visible: swatch.on || area.containsMouse
                 }
                 MouseArea {
                     id: area

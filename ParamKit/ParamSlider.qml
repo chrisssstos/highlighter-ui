@@ -27,6 +27,8 @@ Item {
     property real limitFrom: -Infinity
     property real limitTo: Infinity
     property real defaultValue: NaN
+    //! Minimised: a thin bar. The min / max button by the label flips it.
+    property bool compact: Theme.compact
 
     signal moved(real value)
 
@@ -50,9 +52,15 @@ Item {
     readonly property bool canUp: root.value < root.limitTo
     readonly property bool isDefault: isNaN(root.defaultValue) || Math.abs(root.value - root.defaultValue) < root.stepSize / 2
 
+    // This slider's sizes, minimised or not.
+    function sz(key) { return Theme.sliderSize(key, root.compact) }
+    readonly property int arrowW: sz("arrowW")
+    readonly property int arrowH: sz("arrowH")
+    readonly property int gap: sz("gap")
+
     // The bar leaves room on its right for the value box and the up arrow
     // to hang past a full bar, so every bar lines up whatever its limits.
-    readonly property real gutterR: Math.max(Theme.arrowW + 2 * Theme.arrowGap, Theme.s(46))
+    readonly property real gutterR: Math.max(Theme.sliderSize("arrowW", false) + 2 * Theme.sliderSize("gap", false), Theme.s(46))
 
     // Drawn from an eased copy of the value, so steps glide and drags don't lag.
     property real shown: value
@@ -66,47 +74,77 @@ Item {
     // --- where the arrows go -------------------------------------------------
     // Always either side of the edge line: down on the fill, up on the well
     // (swapped sides for a fill growing left). An arrow with no room on its
-    // side simply hangs past the bar's end. An arrow that can't step (the
+    // side jumps out past the bar's end, clear of it. An arrow that can't step (the
     // value is at its limit) stays, greyed out.
-    readonly property real lineW: Math.min(Theme.edgeLine, fillW)
+    readonly property real lineW: Math.min(sz("edge"), fillW)
     readonly property bool growsRight: edgeX >= originX
     readonly property var arrowX: {
-        const w = Theme.arrowW, g = Theme.arrowGap, e = edgeX
+        const w = arrowW, g = gap, e = edgeX
         const lineL = growsRight ? lineW : 0, lineR = growsRight ? 0 : lineW
-        const dx = e - lineL - g - w, ux = e + lineR + g
+        let dx = e - lineL - g - w, ux = e + lineR + g
+        // No room on the bar: jump clear of it rather than overlap its end.
+        if (dx < 0) dx = -g - w
+        if (ux + w > track.width) ux = track.width + g
         return { down: dx, up: ux }
     }
-    function onFill(x) { const c = x + Theme.arrowW / 2; return c > fillX && c < fillX + fillW }
+    function onFill(x) { const c = x + arrowW / 2; return c > fillX && c < fillX + fillW }
 
     // --- label row -----------------------------------------------------------
     Item {
         id: head
         width: parent.width
-        height: root.label.length ? title.implicitHeight + Theme.rowGap : 0
+        height: root.label.length ? title.implicitHeight + root.sz("row") : 0
         visible: height > 0
 
         Text {
             id: title
-            width: parent.width - resetMark.width - root.gutterR - Theme.s(6)
+            width: parent.width - root.gutterR - sizeMark.width - resetMark.width - Theme.s(12)
             text: root.label
             elide: Text.ElideRight
             color: Theme.text
             font.family: Theme.family
-            font.pixelSize: Theme.titleSize
+            font.pixelSize: root.sz("title")
         }
         Text {
             id: resetMark
-            anchors.right: parent.right
-            anchors.rightMargin: root.gutterR
-            anchors.baseline: title.baseline
+            anchors.right: sizeMark.left
+            anchors.rightMargin: Theme.s(8)
+            anchors.verticalCenter: sizeMark.verticalCenter
             text: "↺"   // ↺
             color: resetHover.hovered ? Theme.accent : Theme.textFaint
             font.family: Theme.family
-            font.pixelSize: Theme.titleSize
+            font.pixelSize: root.sz("title")
             opacity: !root.isDefault && (hover.hovered || root.activeFocus) ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.ease } }
             HoverHandler { id: resetHover; cursorShape: Qt.PointingHandCursor }
             TapHandler { enabled: resetMark.opacity > 0; onTapped: root.reset() }
+        }
+        // min / max: a picture of the bar it switches to, thin or full
+        Item {
+            id: sizeMark
+            objectName: "sizeMark"
+            anchors.right: parent.right
+            anchors.rightMargin: root.gutterR
+            anchors.verticalCenter: title.verticalCenter
+            width: Theme.s(16); height: Theme.s(14)
+            readonly property color ink: sizeHover.hovered ? Theme.accent : Theme.textFaint
+            opacity: hover.hovered || root.activeFocus || sizeHover.hovered ? 1 : 0.45
+            Behavior on opacity { NumberAnimation { duration: Theme.ease } }
+            Rectangle {
+                anchors.fill: parent
+                color: "transparent"
+                border.width: 1
+                border.color: sizeMark.ink
+            }
+            Rectangle {
+                anchors.left: parent.left; anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: Theme.s(3)
+                height: root.compact ? parent.height - Theme.s(6) : Theme.s(2)
+                color: sizeMark.ink
+            }
+            HoverHandler { id: sizeHover; cursorShape: Qt.PointingHandCursor }
+            TapHandler { onTapped: root.compact = !root.compact }
         }
     }
 
@@ -115,7 +153,7 @@ Item {
         id: track
         y: head.height
         width: root.width - root.gutterR
-        height: Theme.trackHeight
+        height: root.sz("track")
         radius: Theme.radius
         color: hover.hovered && !ma.pressed ? Theme.wellHover : Theme.well
         Behavior on color { ColorAnimation { duration: Theme.quick } }
@@ -164,6 +202,7 @@ Item {
             visible: root.enabled
             opacity: root.canDown ? 1 : 0.3
             x: root.arrowX.down
+            width: root.arrowW; height: root.arrowH
             anchors.verticalCenter: parent.verticalCenter
             readonly property bool hot: root.canDown && (ma.hoverZone === -1 || (ma.pressed && ma.pressZone === -1))
             color: root.onFill(x) ? (hot ? Theme.accentInk : Theme.accentDim)
@@ -176,6 +215,7 @@ Item {
             visible: root.enabled
             opacity: root.canUp ? 1 : 0.3
             x: root.arrowX.up
+            width: root.arrowW; height: root.arrowH
             anchors.verticalCenter: parent.verticalCenter
             readonly property bool hot: root.canUp && (ma.hoverZone === 1 || (ma.pressed && ma.pressZone === 1))
             color: root.onFill(x) ? (hot ? Theme.accentInk : Theme.accentDim)
@@ -189,7 +229,7 @@ Item {
     MouseArea {
         id: ma
         // reaches left of the bar too, for a down arrow hanging past its start
-        x: -(Theme.arrowW + Theme.arrowGap + Theme.s(6)); y: track.y
+        x: -(root.arrowW + root.gap + Theme.s(6)); y: track.y
         width: root.width - x; height: track.height
         enabled: root.enabled
         hoverEnabled: true
@@ -213,7 +253,7 @@ Item {
         //! Each arrow's zone is generous; where they meet, it splits halfway.
         function zoneAt(mx) {
             mx += ma.x
-            const w = Theme.arrowW, r = Theme.s(6)
+            const w = root.arrowW, r = Theme.s(6)
             const d = root.arrowX.down, u = root.arrowX.up
             const dVis = down.visible, uVis = up.visible
             let dLo = d - r, dHi = d + w + r, uLo = u - r, uHi = u + w + r
@@ -306,6 +346,8 @@ Item {
         decimals: root.decimals
         unit: root.unit
         interactive: root.enabled
+        boxHeight: root.sz("box")
+        fontSize: root.sz("value")
         onSubmitted: v => root.setValue(v)
         onStepped: (direction, big) => root.step(direction, big)
         // Give the keyboard back to the slider, without a focus ring.

@@ -42,6 +42,17 @@ Item {
             verify(!s.editing)
             compare(s.value, 23)
         }
+        function test_minMaxButton() {
+            const full = s.height
+            const mark = findChild(s, "sizeMark")
+            verify(mark, "the min / max button exists")
+            mouseClick(mark)
+            verify(s.compact, "a click minimises the slider")
+            verify(s.height < full, "and it gets shorter")
+            mouseClick(mark)
+            verify(!s.compact)
+            compare(s.height, full)
+        }
         function test_junkThenClickAway() {
             const b = box()
             mousePress(b, 5, 5); mouseRelease(b, 5, 5)
