@@ -6,6 +6,9 @@ import "ParamMath.js" as PM
 Item {
     id: root
 
+    //! The accent it draws in: its window's own, if that declares one (see Theme).
+    readonly property color tint: Theme.accentIn(Window.window)
+
     property string label: ""
     property real value: 0
     property real from: 0
@@ -41,7 +44,7 @@ Item {
             id: reading
             anchors.right: parent.right
             text: PM.format(root.value, root.decimals) + root.unit
-            color: Theme.accent
+            color: root.tint
             font.family: Theme.family
             font.pixelSize: Theme.valueSize
             font.features: { "tnum": 1 }
@@ -53,7 +56,7 @@ Item {
         width: parent.width
         height: Theme.s(6)
         color: Theme.sunken
-        Rectangle { width: parent.width * root.fraction(root.value); height: parent.height; color: Theme.accent }
+        Rectangle { width: parent.width * root.fraction(root.value); height: parent.height; color: root.tint }
         Rectangle {
             visible: root.showPeak && root.peak > 0
             x: Math.min(parent.width - width, parent.width * root.peak)

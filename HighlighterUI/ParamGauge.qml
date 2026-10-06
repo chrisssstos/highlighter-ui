@@ -8,6 +8,9 @@ import "ParamMath.js" as PM
 Item {
     id: root
 
+    //! The accent it draws in: its window's own, if that declares one (see Theme).
+    readonly property color tint: Theme.accentIn(Window.window)
+
     property string label: ""
     property real value: 0
     property real from: 0
@@ -79,7 +82,7 @@ Item {
                            startAngle: 180 + 180 * dial.fw; sweepAngle: 180 * (1 - dial.fw) }
         }
         ShapePath {   // the value
-            strokeColor: dial.f <= 0 ? "transparent" : root.warning ? Theme.danger : Theme.accent
+            strokeColor: dial.f <= 0 ? "transparent" : root.warning ? Theme.danger : root.tint
             strokeWidth: dial.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
             PathAngleArc { centerX: dial.cx; centerY: dial.cy; radiusX: dial.outer - dial.ring / 2; radiusY: radiusX; startAngle: 180; sweepAngle: 180 * dial.f }
         }
@@ -103,7 +106,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         y: dial.y + dial.height + Theme.s(2)
         text: PM.format(root.value, root.decimals) + root.unit
-        color: root.warning ? Theme.danger : Theme.accent
+        color: root.warning ? Theme.danger : root.tint
         font.family: Theme.family
         font.pixelSize: Theme.valueSize
     }

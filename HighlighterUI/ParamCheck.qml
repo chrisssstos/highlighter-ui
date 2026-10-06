@@ -5,6 +5,9 @@ import QtQuick
 Item {
     id: root
 
+    //! The accent it draws in: its window's own, if that declares one (see Theme).
+    readonly property color tint: Theme.accentIn(Window.window)
+
     property string text: ""
     property bool checked: false
     signal toggled(bool checked)
@@ -14,7 +17,13 @@ Item {
     activeFocusOnTab: true
     opacity: enabled ? 1 : 0.4
 
-    function flip() { root.checked = !root.checked; root.toggled(root.checked) }
+    // Tells you first; it only flips itself if you didn't, so checked bound
+    // to your own state stays bound.
+    function flip() {
+        const want = !root.checked
+        root.toggled(want)
+        if (root.checked !== want) root.checked = want
+    }
 
     Rectangle {
         id: box
@@ -23,11 +32,11 @@ Item {
         radius: Theme.radius
         color: area.containsMouse ? Theme.wellHover : Theme.well
         border.width: 1
-        border.color: root.checked || area.containsMouse || (root.activeFocus && !area.focusedByMouse) ? Theme.accent : Theme.line
+        border.color: root.checked || area.containsMouse || (root.activeFocus && !area.focusedByMouse) ? root.tint : Theme.line
         Rectangle {
             anchors.fill: parent
             anchors.margins: Theme.s(3)
-            color: Theme.accent
+            color: root.tint
             scale: root.checked ? 1 : 0
             Behavior on scale { NumberAnimation { duration: Theme.quick; easing.type: Easing.OutBack } }
         }

@@ -6,6 +6,9 @@ import QtQuick
 Item {
     id: root
 
+    //! The accent it draws in: its window's own, if that declares one (see Theme).
+    readonly property color tint: Theme.accentIn(Window.window)
+
     property string text: ""
     //! A glyph drawn before the text (any character, e.g. "✓").
     property string icon: ""
@@ -37,16 +40,16 @@ Item {
         root.clicked()
     }
 
-    readonly property color ink: root.accent ? Theme.accentInk
+    readonly property color ink: root.accent ? Theme.inkOf(root.tint)
                               : root.danger ? Theme.danger
-                              : root.checked ? Theme.accent
-                              : Theme.accent
+                              : root.checked ? root.tint
+                              : root.tint
 
     Rectangle {
         id: slab
         anchors.fill: parent
         radius: Theme.radius
-        color: root.accent ? (area.pressed ? Qt.darker(Theme.accent, 1.18) : area.containsMouse ? Qt.lighter(Theme.accent, 1.07) : Theme.accent)
+        color: root.accent ? (area.pressed ? Qt.darker(root.tint, 1.18) : area.containsMouse ? Qt.lighter(root.tint, 1.07) : root.tint)
              : root.checked ? (area.pressed ? Theme.sunken : Theme.sunkenHover)
              : (area.pressed ? Qt.darker(Theme.sunken, 1.15) : area.containsMouse ? Theme.sunkenHover : Theme.sunken)
         Behavior on color { ColorAnimation { duration: Theme.quick } }
@@ -59,13 +62,13 @@ Item {
         Rectangle {
             visible: root.checkable
             width: Theme.s(3); height: parent.height
-            color: root.checked ? Theme.accent : Theme.line
+            color: root.checked ? root.tint : Theme.line
         }
 
         // keyboard focus
         Rectangle {
             anchors.fill: parent; anchors.margins: -Theme.s(2)
-            color: "transparent"; border.width: 1; border.color: Theme.accent
+            color: "transparent"; border.width: 1; border.color: root.tint
             opacity: root.activeFocus && !area.focusedByMouse ? 0.6 : 0
         }
     }

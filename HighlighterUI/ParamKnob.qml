@@ -9,6 +9,9 @@ import "ParamMath.js" as PM
 Item {
     id: root
 
+    //! The accent it draws in: its window's own, if that declares one (see Theme).
+    readonly property color tint: Theme.accentIn(Window.window)
+
     property string label: ""
     property real value: 0
     property real from: 0
@@ -100,19 +103,19 @@ Item {
                 PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.outer - face.ring / 2; radiusY: radiusX; startAngle: 135; sweepAngle: 270 }
             }
             ShapePath {   // the value along it
-                strokeColor: face.fo === face.fv ? "transparent" : Theme.accent
+                strokeColor: face.fo === face.fv ? "transparent" : root.tint
                 strokeWidth: face.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
                 PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.outer - face.ring / 2; radiusY: radiusX
                                startAngle: face.deg(Math.min(face.fo, face.fv)); sweepAngle: 270 * Math.abs(face.fv - face.fo) }
             }
             ShapePath {   // the face
-                strokeColor: root.activeFocus && !drag.focusedByMouse ? Theme.accent : "transparent"
+                strokeColor: root.activeFocus && !drag.focusedByMouse ? root.tint : "transparent"
                 strokeWidth: 1
                 fillColor: face.hot ? Theme.sunkenHover : Theme.sunken
                 PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.fr; radiusY: face.fr; startAngle: 0; sweepAngle: 360 }
             }
             ShapePath {   // the pointer: a dot near the rim
-                strokeColor: "transparent"; fillColor: Theme.accent
+                strokeColor: "transparent"; fillColor: root.tint
                 PathAngleArc {
                     readonly property real pr: face.fr - Theme.s(8)
                     centerX: face.cx + Math.cos(face.rad(face.fv)) * pr
@@ -122,7 +125,7 @@ Item {
             }
             ShapePath {   // past an end: a dot beyond it
                 strokeColor: "transparent"
-                fillColor: root.value > root.to || root.value < root.from ? Theme.accent : "transparent"
+                fillColor: root.value > root.to || root.value < root.from ? root.tint : "transparent"
                 PathAngleArc {
                     readonly property real a: face.rad(root.value > root.to ? 1 : 0)
                     centerX: face.cx + Math.cos(a) * (face.outer + Theme.s(6))
@@ -214,7 +217,7 @@ Item {
             anchors.centerIn: parent
             direction: sa.direction
             opacity: sa.active && root.enabled ? 1 : 0.3
-            color: area.pressed ? Theme.accent : area.containsMouse ? Theme.arrowHot : Theme.arrow
+            color: area.pressed ? Theme.accentIn(Window.window) : area.containsMouse ? Theme.arrowHot : Theme.arrow
             scale: area.pressed ? 0.85 : 1
         }
         MouseArea {

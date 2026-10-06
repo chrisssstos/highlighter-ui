@@ -7,6 +7,9 @@ import "ParamMath.js" as PM
 Item {
     id: root
 
+    //! The accent it draws in: its window's own, if that declares one (see Theme).
+    readonly property color tint: Theme.accentIn(Window.window)
+
     property string label: ""
     property real value: 0
     property real from: 0
@@ -45,7 +48,7 @@ Item {
                 readonly property bool isPeak: Math.abs(root.peak - level) < 0.5 / root.segments
                 width: bar.width
                 height: bar.cell
-                color: lit || isPeak ? (hot ? Theme.danger : Theme.accent) : Theme.sunken
+                color: lit || isPeak ? (hot ? Theme.danger : root.tint) : Theme.sunken
                 opacity: isPeak && !lit ? 0.7 : 1
             }
         }

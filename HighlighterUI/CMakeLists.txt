@@ -39,5 +39,7 @@ qt_add_qml_module(HighlighterUI
         ParamGauge.qml
         ParamLevel.qml
         ParamSwatches.qml
+        ParamText.qml
+        ParamLight.qml
 )
 target_link_libraries(HighlighterUI PRIVATE Qt6::Quick Qt6::QuickControls2)
