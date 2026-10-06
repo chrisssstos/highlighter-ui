@@ -64,23 +64,21 @@ Item {
     readonly property real fillW: Math.abs(edgeX - originX)
 
     // --- where the arrows go -------------------------------------------------
-    // Normally either side of the edge line: down on the fill, up on the
-    // well (swapped sides for a fill growing left). Where that would push an
-    // arrow off the bar, both go on the side with room. Past a full bar the
-    // up arrow sits outside it, in the gutter.
+    // Either side of the edge line: down on the fill, up on the well
+    // (swapped sides for a fill growing left). An arrow with no room on its
+    // side of the edge is left out; that step is still a key press, a drag
+    // or a typed value away. Past a full bar the up arrow sits outside it,
+    // in the gutter.
     readonly property real lineW: Math.min(Theme.edgeLine, fillW)
     readonly property bool growsRight: edgeX >= originX
     readonly property var arrowX: {
         const w = Theme.arrowW, g = Theme.arrowGap, e = edgeX, pad = Theme.arrowPad
         const lineL = growsRight ? lineW : 0, lineR = growsRight ? 0 : lineW
-        let dx = e - lineL - g - w, ux = e + lineR + g
+        const dx = e - lineL - g - w, ux = e + lineR + g
         const atEnd = e >= track.width - 0.5
-        if (canDown && dx < pad) {
-            dx = e + lineR + g; ux = dx + w + g
-        } else if (canUp && !atEnd && ux + w > track.width - pad) {
-            ux = e - lineL - g - w; dx = ux - g - w
-        }
-        return { down: dx, up: ux }
+        return { down: dx, up: ux,
+                 downFits: dx >= pad,
+                 upFits: atEnd || ux + w <= track.width - pad }
     }
     function onFill(x) { const c = x + Theme.arrowW / 2; return c > fillX && c < fillX + fillW }
 
@@ -167,7 +165,7 @@ Item {
         ParamArrow {
             id: down
             direction: Qt.LeftArrow
-            visible: root.canDown && root.enabled
+            visible: root.canDown && root.enabled && root.arrowX.downFits
             x: root.arrowX.down
             anchors.verticalCenter: parent.verticalCenter
             readonly property bool hot: ma.hoverZone === -1 || (ma.pressed && ma.pressZone === -1)
@@ -178,7 +176,7 @@ Item {
         ParamArrow {
             id: up
             direction: Qt.RightArrow
-            visible: root.canUp && root.enabled
+            visible: root.canUp && root.enabled && root.arrowX.upFits
             x: root.arrowX.up
             anchors.verticalCenter: parent.verticalCenter
             readonly property bool hot: ma.hoverZone === 1 || (ma.pressed && ma.pressZone === 1)
