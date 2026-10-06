@@ -133,14 +133,17 @@ Item {
             opacity: hover.hovered || root.activeFocus ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.ease } }
             readonly property color ink: sizeHover.hovered ? Theme.accent : Theme.textFaint
-            // a picture of the bar it switches to: a hairline, or an outlined box
+            // a hairline minus to minimise; a hairline plus to restore
             Rectangle {
                 anchors.centerIn: parent
-                width: Theme.s(10)
-                height: root.compact ? Theme.s(7) : Math.max(1, Theme.s(1))
-                color: root.compact ? "transparent" : sizeMark.ink
-                border.width: root.compact ? 1 : 0
-                border.color: sizeMark.ink
+                width: Theme.s(10); height: Math.max(1, Theme.s(1))
+                color: sizeMark.ink
+            }
+            Rectangle {
+                anchors.centerIn: parent
+                visible: root.compact
+                width: Math.max(1, Theme.s(1)); height: Theme.s(10)
+                color: sizeMark.ink
             }
             HoverHandler { id: sizeHover; cursorShape: Qt.PointingHandCursor }
             TapHandler { enabled: sizeMark.opacity > 0; onTapped: root.compact = !root.compact }
