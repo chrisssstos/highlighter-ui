@@ -25,7 +25,10 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 4. Map ranges carefully: a centred range (−400..400 "from centre") gets
    `origin: 0`; a value that must not go below 0 gets `limitFrom: 0`; a
    genuine hard maximum gets `limitTo`. Give a `defaultValue` when the
-   installed default is known, so double-click resets.
+   installed default is known, so double-click resets and the dotted default
+   mark shows. When the project saves defaults, set each slider's
+   `defaultValue` to the saved value (or call `saveDefault()`), so the mark
+   clears.
 5. Accent and size: set `Theme.accent` once if the project wants a colour
    other than the lime, and `Theme.compact = true` for a dense panel.
    Don't recolour controls one by one.

@@ -12,6 +12,16 @@ Window {
     color: Theme.page
     title: "ParamKit gallery"
 
+    //! Calls fn on every item under item.
+    function walk(item, fn) {
+        fn(item)
+        for (let i = 0; i < item.children.length; ++i) walk(item.children[i], fn)
+    }
+    //! What an app's "Save as defaults" does: every slider's value becomes its default.
+    function saveDefaults() { walk(win.contentItem, o => { if (typeof o.saveDefault === "function") o.saveDefault() }) }
+    //! And "Reset": every slider back to its default.
+    function resetAll() { walk(win.contentItem, o => { if (typeof o.saveDefault === "function") o.reset() }) }
+
     // "-- --scale=<n>": start at that scale.
     Component.onCompleted: {
         const sca = Qt.application.arguments.find(a => a.startsWith("--scale="))
@@ -60,7 +70,6 @@ Window {
             Row {
                 spacing: Theme.s(10)
                 height: Theme.s(28)
-                Text { text: "accent"; color: Theme.textDim; font.family: Theme.family; font.pixelSize: Theme.smallSize; anchors.verticalCenter: parent.verticalCenter }
                 ParamSwatches {
                     anchors.verticalCenter: parent.verticalCenter
                     width: implicitWidth
@@ -154,8 +163,8 @@ Window {
             Flow {
                 width: parent.width
                 spacing: Theme.s(6)
-                ParamButton { text: "Save as defaults"; accent: true }
-                ParamButton { text: "Reset to installed defaults" }
+                ParamButton { text: "Save as defaults"; accent: true; onClicked: win.saveDefaults() }
+                ParamButton { text: "Reset to installed defaults"; onClicked: win.resetAll() }
                 ParamButton { text: "Copy"; icon: "\u2398" }
                 ParamButton { text: "Preview full screen"; checkable: true }
                 ParamButton { text: "Delete preset"; danger: true }
@@ -327,8 +336,8 @@ Window {
                 Flow {
                     width: parent.width
                     spacing: Theme.s(6)
-                    ParamButton { text: "Save as defaults"; accent: true }
-                    ParamButton { text: "Reset to installed defaults" }
+                    ParamButton { text: "Save as defaults"; accent: true; onClicked: win.saveDefaults() }
+                    ParamButton { text: "Reset to installed defaults"; onClicked: win.resetAll() }
                 }
             }
         }

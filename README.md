@@ -20,8 +20,11 @@ states.
   repeat, or drag them to slide as usual (Shift while dragging slides finely).
   They're always there: with no room on the bar they jump out clear of its
   end, and at a limit they grey out.
-- **Min / max:** the small bar picture by the label (next to ↺) shrinks that
-  one slider to a thin bar and back.
+- **Min / max:** the small bar picture by the label (next to ↺, both
+  appear on hover) shrinks that one slider to a thin bar and back.
+- **The default:** while the value is off its `defaultValue`, a dotted line
+  marks where the default sits. `saveDefault()` makes the value the new
+  default (call it on every slider from your "Save as defaults").
 - **The bar:** click anywhere else to jump there and drag. Double-click to
   reset to `defaultValue`. The ↺ by the label also resets.
 - **The value box** sits under the edge. Click it to type a value. It accepts
