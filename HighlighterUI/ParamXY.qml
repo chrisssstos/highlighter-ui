@@ -9,8 +9,9 @@ import "ParamMath.js" as PM
 /// ghosts mark where other elements sit. Away from the default, a dotted
 /// square marks it; double-click or the reset mark goes back.
 ///
-/// Minimised it is two thin sliders, x and y, bundled under its label;
-/// maximised, the grid. Like sliders it starts minimised unless the user
+/// Minimised it is the same grid as a thumbnail, its x and y boxes beside
+/// it (still draggable and typeable); maximised, the full grid, the boxes
+/// under it. The − / + grows one into the other. Like sliders it starts minimised unless the user
 /// maximised it before (remembered by key), and the − / + by its label
 /// flips it.
 ///
@@ -45,7 +46,7 @@ Item {
     property var ghosts: []
     //! What the panel remembers it by; the label if not given.
     property string key: label
-    //! Minimised: two thin sliders instead of the grid.
+    //! Minimised: a thumbnail of the grid, the boxes beside it.
     property bool compact: Theme.slidersStartMinimised && !PanelMemory.isMaximised(key)
 
     signal moved(real x, real y)
@@ -54,7 +55,10 @@ Item {
     readonly property bool pressed: ma.pressed
 
     implicitWidth: Theme.s(300)
-    implicitHeight: head.height + (root.compact ? pair.height : pad.height + Theme.s(6) + boxes.height)
+    implicitHeight: head.height + (root.compact ? Math.max(pad.height, boxes.height)
+                                                : pad.height + Theme.s(6) + boxes.height)
+    //! The thumbnail's width: the canvas's shape, no taller than 48px.
+    readonly property real thumbWidth: Math.min(Theme.s(72), Theme.s(48) * root.aspect)
     activeFocusOnTab: true
     opacity: enabled ? 1 : 0.4
 
@@ -133,49 +137,15 @@ Item {
         }
     }
 
-    // --- minimised: x and y as two thin sliders --------------------------------
-    Column {
-        id: pair
-        objectName: "pair"
-        visible: root.compact
-        y: head.height
-        width: parent.width
-        spacing: Theme.s(4)
-        Repeater {
-            model: ["x", "y"]
-            ParamSlider {
-                required property string modelData
-                readonly property bool isX: modelData === "x"
-                objectName: modelData + "Slider"
-                width: pair.width
-                label: modelData
-                key: root.key + "." + modelData
-                sizeToggle: false
-                compact: true
-                enabled: root.enabled
-                unit: root.unit
-                stepSize: root.stepSize
-                decimals: root.decimals
-                from: isX ? root.xFrom : root.yFrom
-                to: isX ? root.xTo : root.yTo
-                origin: from < 0 && to > 0 ? 0 : from
-                limitFrom: Math.min(from, to)
-                limitTo: Math.max(from, to)
-                defaultValue: isX ? root.defaultX : root.defaultY
-                value: isX ? root.xValue : root.yValue
-                onMoved: v => isX ? root.setXY(v, root.yValue) : root.setXY(root.xValue, v)
-            }
-        }
-    }
-
     // --- the pad -------------------------------------------------------------
     Rectangle {
         id: pad
         objectName: "pad"
-        visible: !root.compact
         y: head.height
-        width: parent.width
+        width: root.compact ? root.thumbWidth : parent.width
         height: Math.round(width / Math.max(0.05, root.aspect))
+        // minimising and maximising grow the one grid, not swap it
+        Behavior on width { NumberAnimation { duration: Theme.ease; easing.type: Easing.OutCubic } }
         color: hover.hovered && !ma.pressed ? Theme.wellHover : Theme.well
         clip: true
 
@@ -186,7 +156,7 @@ Item {
                 required property var modelData
                 x: Math.round(root.px(modelData)); width: 1; height: pad.height
                 color: modelData === 0 ? Theme.textFaint : Theme.line
-                opacity: modelData === 0 ? 0.9 : 0.5
+                opacity: modelData === 0 ? 0.9 : root.compact ? 0 : 0.5
             }
         }
         Repeater {
@@ -195,7 +165,7 @@ Item {
                 required property var modelData
                 y: Math.round(root.py(modelData)); height: 1; width: pad.width
                 color: modelData === 0 ? Theme.textFaint : Theme.line
-                opacity: modelData === 0 ? 0.9 : 0.5
+                opacity: modelData === 0 ? 0.9 : root.compact ? 0 : 0.5
             }
         }
 
@@ -206,10 +176,12 @@ Item {
                 required property var modelData
                 x: Math.round(root.px(modelData.x)); y: Math.round(root.py(modelData.y))
                 Rectangle {
-                    x: -Theme.s(3); y: -Theme.s(3); width: Theme.s(7); height: Theme.s(7)
+                    readonly property int side: root.compact ? Theme.s(3) : Theme.s(7)
+                    x: -Math.floor(side / 2); y: -Math.floor(side / 2); width: side; height: side
                     color: "transparent"; border.width: 1; border.color: Theme.textDim
                 }
                 Text {
+                    visible: !root.compact
                     x: Theme.s(6); y: -Theme.s(6)
                     text: modelData.label || ""
                     color: Theme.textDim
@@ -225,7 +197,7 @@ Item {
             visible: !root.isDefault
                      && (Math.abs(root.px(root.defaultX) - root.px(root.xValue)) > side
                          || Math.abs(root.py(root.defaultY) - root.py(root.yValue)) > side)
-            readonly property int side: Theme.s(11)
+            readonly property int side: root.compact ? Theme.s(7) : Theme.s(11)
             x: Math.round(root.px(root.defaultX)) - side / 2
             y: Math.round(root.py(root.defaultY)) - side / 2
             width: side; height: side
@@ -264,7 +236,8 @@ Item {
         Rectangle {
             id: dot
             objectName: "dot"
-            readonly property int side: ma.pressed ? Theme.s(11) : Theme.s(9)
+            readonly property int side: root.compact ? (ma.pressed ? Theme.s(7) : Theme.s(5))
+                                                     : (ma.pressed ? Theme.s(11) : Theme.s(9))
             x: Math.round(root.px(root.xValue)) - Math.floor(side / 2)
             y: Math.round(root.py(root.yValue)) - Math.floor(side / 2)
             width: side; height: side
@@ -344,8 +317,9 @@ Item {
     // --- the values ----------------------------------------------------------
     Row {
         id: boxes
-        visible: !root.compact
-        y: pad.y + pad.height + Theme.s(6)
+        // beside the thumbnail, or under the full grid
+        x: root.compact ? pad.width + Theme.s(12) : 0
+        y: root.compact ? pad.y + Math.round((pad.height - height) / 2) : pad.y + pad.height + Theme.s(6)
         spacing: Theme.s(14)
         Repeater {
             model: ["x", "y"]

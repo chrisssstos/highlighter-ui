@@ -80,6 +80,7 @@ Item {
             xy.compact = false
             xy.xValue = 0; xy.yValue = 0; xy.defaultX = 10; xy.defaultY = 20
             const pad = findChild(xy, "pad")
+            tryCompare(pad, "width", 200, 1000)
             compare(pad.width, 200); compare(pad.height, 200)
             mousePress(pad, 150, 50); mouseRelease(pad, 150, 50)
             compare(xy.xValue, 50, "click puts the dot there (x)")
@@ -103,17 +104,21 @@ Item {
         function test_xyMinMax() {
             PanelMemory.store.maximised = "[]"
             xy.compact = true
-            const pair = findChild(xy, "pair"), pad = findChild(xy, "pad")
-            verify(pair.visible && !pad.visible, "minimised: two sliders, no grid")
-            const xs = findChild(xy, "xSlider"), ys = findChild(xy, "ySlider")
-            xy.xValue = 25; xy.yValue = -30
-            compare(xs.value, 25); compare(ys.value, -30)
-            ys.setValue(40); ys.moved(40)
-            compare(xy.yValue, 40, "the y slider moves the point")
-            verify(!findChild(xs, "sizeMark").visible, "the bundled sliders have no min / max of their own")
+            const pad = findChild(xy, "pad")
+            tryVerify(() => pad.width < 100, 1000, "minimised: the same grid, as a thumbnail")
+            verify(pad.visible)
+            // the thumbnail still places the dot: its middle is the canvas's middle
+            xy.xValue = 50; xy.yValue = 50
+            mousePress(pad, pad.width / 2, pad.height / 2); mouseRelease(pad, pad.width / 2, pad.height / 2)
+            // (a thumbnail pixel is about 3 units here, so near 0 is right)
+            fuzzyCompare(xy.xValue, 0, 3); fuzzyCompare(xy.yValue, 0, 3)
+            const yBox = findChild(xy, "yBox")
+            verify(yBox.visible && yBox.mapToItem(xy, 0, 0).x > pad.width, "the boxes sit beside the thumbnail")
             const mark = findChild(xy, "sizeMark")
             mouseMove(mark); wait(250); mouseClick(mark)
-            verify(!xy.compact && pad.visible && !pair.visible, "maximised: the grid")
+            verify(!xy.compact)
+            tryCompare(pad, "width", xy.width, 1000, "maximised: the full grid")
+            verify(yBox.mapToItem(xy, 0, 0).y > pad.y + pad.height, "the boxes go under it")
             verify(PanelMemory.isMaximised(xy.key), "remembered")
             const again = Qt.createQmlObject('import HighlighterUI; ParamXY { key: "' + xy.key + '" }', top)
             verify(!again.compact, "starts maximised after a restart"); again.destroy()
