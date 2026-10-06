@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Shapes
 import "ParamMath.js" as PM
 
 /// A labelled rotary knob: drag up or right to raise it (Shift: finely),
@@ -42,7 +43,6 @@ Item {
 
     property real shown: value
     Behavior on shown { enabled: !drag.pressed; NumberAnimation { duration: Theme.quick; easing.type: Easing.OutCubic } }
-    onShownChanged: face.requestPaint()
 
     Text {
         id: title
@@ -63,71 +63,71 @@ Item {
         width: root.diameter + Theme.s(16)
         height: width
 
-        Canvas {
+        // Drawn as shapes, not a Canvas, so Theme.smooth can turn the
+        // antialiasing off (a Canvas always smooths).
+        Shape {
             id: face
             anchors.fill: parent
-            antialiasing: true
-            renderStrategy: Canvas.Cooperative
-            property bool hot: drag.containsMouse || drag.pressed
-            onHotChanged: requestPaint()
-            Component.onCompleted: requestPaint()
-            Connections { target: Theme; function onAccentChanged() { face.requestPaint() } function onScaleChanged() { face.requestPaint() } function onCompactChanged() { face.requestPaint() } }
-            Connections { target: root; function onFromChanged() { face.requestPaint() } function onToChanged() { face.requestPaint() } function onDiameterChanged() { face.requestPaint() } function onEnabledChanged() { face.requestPaint() } }
+            preferredRendererType: Theme.smooth ? Shape.CurveRenderer : Shape.GeometryRenderer
+            antialiasing: Theme.smooth
+            readonly property real cx: width / 2
+            readonly property real cy: height / 2
+            readonly property real outer: root.diameter / 2
+            readonly property real ring: Theme.s(4)
+            readonly property real fr: outer - ring - Theme.s(3)          // the face's radius
+            readonly property real fo: root.fraction(root.origin)
+            readonly property real fv: root.fraction(root.shown)
+            function deg(f) { return 135 + 270 * f }
+            function rad(f) { return deg(f) * Math.PI / 180 }
+            readonly property bool hot: drag.containsMouse || drag.pressed
+            readonly property var tickLines: {
+                const out = []
+                for (let i = 0; i < root.ticks && root.ticks > 1; ++i) {
+                    const a = rad(i / (root.ticks - 1))
+                    const r1 = outer + Theme.s(3), r2 = outer + Theme.s(i % 5 === 0 ? 7 : 5)
+                    out.push([Qt.point(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1),
+                              Qt.point(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2)])
+                }
+                return out
+            }
 
-            onPaint: {
-                const ctx = getContext("2d")
-                ctx.reset()
-                const cx = width / 2, cy = height / 2
-                const R = root.diameter / 2
-                const a0 = Math.PI * 0.75, sweep = Math.PI * 1.5
-                const at = f => a0 + sweep * f
-                const ring = Theme.s(4)
-
-                // ticks
-                if (root.ticks > 1) {
-                    ctx.strokeStyle = Theme.textFaint
-                    ctx.lineWidth = 1
-                    for (let i = 0; i < root.ticks; ++i) {
-                        const a = at(i / (root.ticks - 1))
-                        const r1 = R + Theme.s(3), r2 = R + Theme.s(i % 5 === 0 ? 7 : 5)
-                        ctx.beginPath()
-                        ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1)
-                        ctx.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2)
-                        ctx.stroke()
-                    }
+            ShapePath {   // ticks
+                strokeColor: Theme.textFaint; strokeWidth: 1; fillColor: "transparent"
+                PathMultiline { paths: face.tickLines }
+            }
+            ShapePath {   // the track
+                strokeColor: Theme.well; strokeWidth: face.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
+                PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.outer - face.ring / 2; radiusY: radiusX; startAngle: 135; sweepAngle: 270 }
+            }
+            ShapePath {   // the value along it
+                strokeColor: face.fo === face.fv ? "transparent" : Theme.accent
+                strokeWidth: face.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
+                PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.outer - face.ring / 2; radiusY: radiusX
+                               startAngle: face.deg(Math.min(face.fo, face.fv)); sweepAngle: 270 * Math.abs(face.fv - face.fo) }
+            }
+            ShapePath {   // the face
+                strokeColor: root.activeFocus && !drag.focusedByMouse ? Theme.accent : "transparent"
+                strokeWidth: 1
+                fillColor: face.hot ? Theme.sunkenHover : Theme.sunken
+                PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.fr; radiusY: face.fr; startAngle: 0; sweepAngle: 360 }
+            }
+            ShapePath {   // the pointer: a dot near the rim
+                strokeColor: "transparent"; fillColor: Theme.accent
+                PathAngleArc {
+                    readonly property real pr: face.fr - Theme.s(8)
+                    centerX: face.cx + Math.cos(face.rad(face.fv)) * pr
+                    centerY: face.cy + Math.sin(face.rad(face.fv)) * pr
+                    radiusX: Theme.s(4); radiusY: Theme.s(4); startAngle: 0; sweepAngle: 360
                 }
-                // the track, then the value along it
-                ctx.lineCap = "butt"
-                ctx.lineWidth = ring
-                ctx.strokeStyle = Theme.well
-                ctx.beginPath(); ctx.arc(cx, cy, R - ring / 2, a0, a0 + sweep, false); ctx.stroke()
-                const fo = root.fraction(root.origin), fv = root.fraction(root.shown)
-                if (fo !== fv) {
-                    ctx.strokeStyle = Theme.accent
-                    ctx.beginPath(); ctx.arc(cx, cy, R - ring / 2, at(Math.min(fo, fv)), at(Math.max(fo, fv)), false); ctx.stroke()
-                }
-                // the face
-                const fr = R - ring - Theme.s(3)
-                ctx.fillStyle = hot ? Theme.sunkenHover : Theme.sunken
-                ctx.beginPath(); ctx.arc(cx, cy, fr, 0, Math.PI * 2); ctx.fill()
-                ctx.strokeStyle = Qt.rgba(1, 1, 1, 0.07)
-                ctx.lineWidth = 1
-                ctx.beginPath(); ctx.arc(cx, cy, fr - 0.5, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke()
-                // the pointer: a dot near the rim
-                const a = at(fv), pr = fr - Theme.s(8)
-                ctx.fillStyle = Theme.accent
-                ctx.beginPath(); ctx.arc(cx + Math.cos(a) * pr, cy + Math.sin(a) * pr, Theme.s(3.5), 0, Math.PI * 2); ctx.fill()
-                // past an end: a mark beyond it
-                if (root.value > root.to || root.value < root.from) {
-                    const ae = root.value > root.to ? a0 + sweep : a0
-                    ctx.fillStyle = Theme.accent
-                    ctx.beginPath(); ctx.arc(cx + Math.cos(ae) * (R + Theme.s(6)), cy + Math.sin(ae) * (R + Theme.s(6)), Theme.s(2.5), 0, Math.PI * 2); ctx.fill()
-                }
-                // keyboard focus
-                if (root.activeFocus && !drag.focusedByMouse) {
-                    ctx.strokeStyle = Theme.accent
-                    ctx.globalAlpha = 0.6
-                    ctx.beginPath(); ctx.arc(cx, cy, fr + 1.5, 0, Math.PI * 2); ctx.stroke()
+            }
+            ShapePath {   // past an end: a dot beyond it
+                strokeColor: "transparent"
+                fillColor: root.value > root.to || root.value < root.from ? Theme.accent : "transparent"
+                PathAngleArc {
+                    readonly property real a: face.rad(root.value > root.to ? 1 : 0)
+                    centerX: face.cx + Math.cos(a) * (face.outer + Theme.s(6))
+                    centerY: face.cy + Math.sin(a) * (face.outer + Theme.s(6))
+                    radiusX: Theme.s(3); radiusY: Theme.s(3); startAngle: 0; sweepAngle: 360
                 }
             }
         }
@@ -161,7 +161,7 @@ Item {
         }
     }
 
-    onActiveFocusChanged: { if (!activeFocus) drag.focusedByMouse = false; face.requestPaint() }
+    onActiveFocusChanged: if (!activeFocus) drag.focusedByMouse = false
 
     Keys.onPressed: e => {
         const big = e.modifiers & Qt.ShiftModifier
@@ -177,7 +177,6 @@ Item {
         case Qt.Key_Backspace: case Qt.Key_Delete: root.reset(); break
         default: return
         }
-        face.requestPaint()
         e.accepted = true
     }
 

@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Shapes
 import "ParamMath.js" as PM
 
 /// A read-only half-dial for one live value that has a safe range and a too
@@ -26,9 +27,6 @@ Item {
 
     property real shown: value
     Behavior on shown { NumberAnimation { duration: Theme.ease; easing.type: Easing.OutCubic } }
-    onShownChanged: dial.requestPaint()
-    onWarningChanged: dial.requestPaint()
-    Connections { target: Theme; function onScaleChanged() { dial.requestPaint() } function onAccentChanged() { dial.requestPaint() } }
 
     Text {
         id: title
@@ -42,48 +40,61 @@ Item {
         height: text.length ? implicitHeight : 0
     }
 
-    Canvas {
+    // Drawn as shapes, so Theme.smooth can turn the antialiasing off.
+    Shape {
         id: dial
         anchors.horizontalCenter: parent.horizontalCenter
         y: title.height + Theme.rowGap
         width: root.diameter + Theme.s(16)
         height: root.diameter / 2 + Theme.s(10)
-        antialiasing: true
-        Component.onCompleted: requestPaint()
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.reset()
-            const cx = width / 2, cy = height - Theme.s(4)
-            const R = root.diameter / 2, ring = Theme.s(7)
-            const at = f => Math.PI + Math.PI * f
-            ctx.lineWidth = ring
-            ctx.strokeStyle = Theme.sunken
-            ctx.beginPath(); ctx.arc(cx, cy, R - ring / 2, Math.PI, 2 * Math.PI); ctx.stroke()
-            // the warning stretch, faintly, so you can see it coming
-            if (!isNaN(root.warnAt)) {
-                ctx.strokeStyle = Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.3)
-                ctx.beginPath(); ctx.arc(cx, cy, R - ring / 2, at(root.fraction(root.warnAt)), 2 * Math.PI); ctx.stroke()
+        preferredRendererType: Theme.smooth ? Shape.CurveRenderer : Shape.GeometryRenderer
+        antialiasing: Theme.smooth
+        readonly property real cx: width / 2
+        readonly property real cy: height - Theme.s(4)
+        readonly property real outer: root.diameter / 2
+        readonly property real ring: Theme.s(7)
+        readonly property real f: root.fraction(root.shown)
+        readonly property real fw: isNaN(root.warnAt) ? 1 : root.fraction(root.warnAt)
+        function rad(f) { return Math.PI + Math.PI * f }
+        readonly property var tickLines: {
+            const out = []
+            for (let i = 0; i < root.ticks && root.ticks > 1; ++i) {
+                const a = rad(i / (root.ticks - 1))
+                const r1 = outer - ring - Theme.s(2), r2 = outer - ring - Theme.s(6)
+                out.push([Qt.point(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1),
+                          Qt.point(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2)])
             }
-            const f = root.fraction(root.shown)
-            ctx.strokeStyle = root.warning ? Theme.danger : Theme.accent
-            if (f > 0) { ctx.beginPath(); ctx.arc(cx, cy, R - ring / 2, Math.PI, at(f)); ctx.stroke() }
-            // ticks
-            ctx.strokeStyle = Theme.textFaint
-            ctx.lineWidth = 1
-            for (let i = 0; i < root.ticks; ++i) {
-                const a = at(i / (root.ticks - 1))
-                ctx.beginPath()
-                ctx.moveTo(cx + Math.cos(a) * (R - ring - Theme.s(2)), cy + Math.sin(a) * (R - ring - Theme.s(2)))
-                ctx.lineTo(cx + Math.cos(a) * (R - ring - Theme.s(6)), cy + Math.sin(a) * (R - ring - Theme.s(6)))
-                ctx.stroke()
-            }
-            // the needle
-            const a = at(f)
-            ctx.strokeStyle = Theme.text
-            ctx.lineWidth = Theme.s(2)
-            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a) * (R - ring - Theme.s(4)), cy + Math.sin(a) * (R - ring - Theme.s(4))); ctx.stroke()
-            ctx.fillStyle = Theme.text
-            ctx.beginPath(); ctx.arc(cx, cy, Theme.s(4), 0, 2 * Math.PI); ctx.fill()
+            return out
+        }
+        readonly property real needle: outer - ring - Theme.s(4)
+
+        ShapePath {   // the track
+            strokeColor: Theme.sunken; strokeWidth: dial.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
+            PathAngleArc { centerX: dial.cx; centerY: dial.cy; radiusX: dial.outer - dial.ring / 2; radiusY: radiusX; startAngle: 180; sweepAngle: 180 }
+        }
+        ShapePath {   // the warning stretch, faintly, so you can see it coming
+            strokeColor: isNaN(root.warnAt) ? "transparent" : Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.3)
+            strokeWidth: dial.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
+            PathAngleArc { centerX: dial.cx; centerY: dial.cy; radiusX: dial.outer - dial.ring / 2; radiusY: radiusX
+                           startAngle: 180 + 180 * dial.fw; sweepAngle: 180 * (1 - dial.fw) }
+        }
+        ShapePath {   // the value
+            strokeColor: dial.f <= 0 ? "transparent" : root.warning ? Theme.danger : Theme.accent
+            strokeWidth: dial.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
+            PathAngleArc { centerX: dial.cx; centerY: dial.cy; radiusX: dial.outer - dial.ring / 2; radiusY: radiusX; startAngle: 180; sweepAngle: 180 * dial.f }
+        }
+        ShapePath {   // ticks
+            strokeColor: Theme.textFaint; strokeWidth: 1; fillColor: "transparent"
+            PathMultiline { paths: dial.tickLines }
+        }
+        ShapePath {   // the needle
+            strokeColor: Theme.text; strokeWidth: Theme.s(2); fillColor: "transparent"
+            startX: dial.cx; startY: dial.cy
+            PathLine { x: dial.cx + Math.cos(dial.rad(dial.f)) * dial.needle; y: dial.cy + Math.sin(dial.rad(dial.f)) * dial.needle }
+        }
+        ShapePath {   // its hub
+            strokeColor: "transparent"; fillColor: Theme.text
+            PathAngleArc { centerX: dial.cx; centerY: dial.cy; radiusX: Theme.s(4); radiusY: Theme.s(4); startAngle: 0; sweepAngle: 360 }
         }
     }
 

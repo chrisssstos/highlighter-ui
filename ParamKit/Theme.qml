@@ -11,9 +11,16 @@ QtObject {
     //! Every size in the kit is multiplied by this.
     property real scale: 1
     function s(px) { return Math.round(px * theme.scale) }
-    //! Smaller sliders, knobs and spacing, to fit more on screen.
+    //! Smaller sliders, knobs and spacing, to fit more on screen. Each
+    //! slider starts at this and has its own min / max button.
     property bool compact: false
     function c(full, small) { return s(theme.compact ? small : full) }
+    //! Slider sizes, [full, compact], for a slider minimised on its own.
+    readonly property var sliderSizes: ({
+        track: [44, 22], edge: [4, 3], box: [22, 18], arrowW: [10, 7], arrowH: [12, 9],
+        gap: [4, 3], title: [16, 13], value: [15, 13], row: [8, 4]
+    })
+    function sliderSize(key, small) { return s(sliderSizes[key][small ? 1 : 0]) }
 
     // --- colour ------------------------------------------------------------
     property color page:      "#4b4d4c"   // the window behind everything
@@ -73,6 +80,11 @@ QtObject {
     property int labelSize: s(14)
     property int valueSize: c(15, 13)
     property int smallSize: s(11)
+
+    // --- drawing -----------------------------------------------------------
+    //! Antialiasing for arrows, dials and round shapes. Off: hard,
+    //! nearest-neighbour edges, the kit's look. Text stays smooth.
+    property bool smooth: false
 
     // --- motion ------------------------------------------------------------
     property int quick: 90

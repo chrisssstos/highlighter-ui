@@ -70,6 +70,9 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   `tests/build-check.bat` proves the CMake module compiles.
 - Every new control goes in `ParamKit/qmldir`, `ParamKit/CMakeLists.txt` and
   the gallery, with its awkward states shown.
+- Draw with Shapes (GeometryRenderer when `!Theme.smooth`), not Canvas: a
+  Canvas always antialiases, and the kit's look is hard-edged.
+- QML property names can't start with a capital, and `z` is taken (Item.z).
 - `ParamArrow` (a Shape) must keep an explicit width and height; an implicit
   size collapses it in compiled builds.
 - Gallery screenshot flags (after `--`): `--shot=<png>`, `--scroll=<px>`,

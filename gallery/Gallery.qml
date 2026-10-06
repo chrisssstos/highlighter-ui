@@ -16,7 +16,7 @@ Window {
     Component.onCompleted: {
         const sca = Qt.application.arguments.find(a => a.startsWith("--scale="))
         if (sca) Theme.scale = Number(sca.substring(8))
-        if (Qt.application.arguments.indexOf("--compact") >= 0) Theme.compact = true
+        if (Qt.application.arguments.indexOf("--compact") >= 0) Theme.compact = true   // every slider starts minimised
         const acc = Qt.application.arguments.find(a => a.startsWith("--accent="))
         if (acc) Theme.accent = acc.substring(9)
     }
@@ -71,18 +71,6 @@ Window {
             Row {
                 spacing: Theme.s(10)
                 height: Theme.s(28)
-                Text { text: "sliders"; color: Theme.textDim; font.family: Theme.family; font.pixelSize: Theme.smallSize; anchors.verticalCenter: parent.verticalCenter }
-                ParamChoice {
-                    width: Theme.s(130)
-                    anchors.verticalCenter: parent.verticalCenter
-                    model: ["−  min", "+  max"]
-                    currentIndex: Theme.compact ? 0 : 1
-                    onActivated: i => Theme.compact = i === 0
-                }
-            }
-            Row {
-                spacing: Theme.s(10)
-                height: Theme.s(28)
                 Text { text: "scale"; color: Theme.textDim; font.family: Theme.family; font.pixelSize: Theme.smallSize; anchors.verticalCenter: parent.verticalCenter }
                 ParamChoice {
                     width: Theme.s(170)
@@ -116,6 +104,7 @@ Window {
             ParamSlider { width: parent.width; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 0; defaultValue: 16 }
             ParamSlider { width: parent.width; label: "Text size (1: the down arrow hangs past the start)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 1; defaultValue: 16 }
             ParamSlider { width: parent.width; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 23; defaultValue: 16 }
+            ParamSlider { width: parent.width; label: "Text size (minimised: the button by the label)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 23; defaultValue: 16; compact: true }
             ParamSlider { width: parent.width; label: "Text size (45: the up arrow hangs past the end)"; unit: "px"; from: 0; to: 46; limitFrom: 0; limitTo: 46; value: 45; defaultValue: 16 }
             ParamSlider { width: parent.width; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 46; defaultValue: 16 }
             ParamSlider { width: parent.width; label: "Text size (past the end)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 47; defaultValue: 16 }

@@ -20,6 +20,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: Theme.s(36); height: Theme.s(18)
         radius: height / 2
+        antialiasing: Theme.smooth
         color: root.checked ? Theme.accent : (area.containsMouse ? Theme.wellHover : Theme.well)
         Behavior on color { ColorAnimation { duration: Theme.ease } }
         border.width: root.activeFocus && !area.focusedByMouse ? 1 : 0
@@ -28,6 +29,7 @@ Item {
         Rectangle {
             width: parent.height - Theme.s(4); height: width
             radius: width / 2
+            antialiasing: Theme.smooth
             y: Theme.s(2)
             x: root.checked ? parent.width - width - Theme.s(2) : Theme.s(2)
             color: root.checked ? Theme.accentInk : Theme.arrow
