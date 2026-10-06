@@ -106,6 +106,12 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   `--scale=<n>`, `--compact`, `--accent=<#hex>`, `--second` (also shoots the
   second panel).
 - In qmltestrunner, a double-click is `mouseDoubleClickSequence`.
+- The industrial look (`Theme.industrial`) is drawn on top of the flat one:
+  every industrial touch is a `visible: Theme.industrial` layer (or a colour
+  choice), so switching it off must give the flat look back unchanged. Use
+  `ParamPlate` for a raised surface, `ParamBevel` (inset for sunk things)
+  and `ParamScrew`; textures are in `HighlighterUI/textures` (RESOURCES in
+  CMake), tiled with `smooth: false`. Gallery: `--flat` to shoot it flat.
 - Colours, sizes and the font live in `Theme.qml` only; sizes that change in
   compact mode use `Theme.c(full, compact)`. Write `Theme.s(px)`
   for every size, so `scale` works.

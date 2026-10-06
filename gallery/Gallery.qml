@@ -26,6 +26,7 @@ Window {
     Component.onCompleted: {
         const sca = Qt.application.arguments.find(a => a.startsWith("--scale="))
         if (sca) Theme.scale = Number(sca.substring(8))
+        if (Qt.application.arguments.indexOf("--flat") >= 0) Theme.industrial = false
         if (Qt.application.arguments.indexOf("--compact") >= 0) Theme.compact = true   // every slider starts minimised
         const acc = Qt.application.arguments.find(a => a.startsWith("--accent="))
         if (acc) Theme.accent = acc.substring(9)
@@ -54,15 +55,16 @@ Window {
 
     // --- the top bar ---------------------------------------------------------
     // Wraps onto a second line when the window (or the scale) runs out of room.
-    Rectangle {
+    ParamPlate {
         id: bar
         width: parent.width
         height: topFlow.implicitHeight + 2 * Theme.s(10)
         color: Theme.sunken
+        screwInset: Theme.s(4)
         Flow {
             id: topFlow
-            x: Theme.s(16); y: Theme.s(10)
-            width: parent.width - 2 * Theme.s(16)
+            x: Theme.s(24); y: Theme.s(10)
+            width: parent.width - 2 * Theme.s(24)
             spacing: Theme.s(28)
 
             Text {
@@ -96,6 +98,12 @@ Window {
                     currentIndex: [1, 1.25, 1.5, 2].indexOf(Theme.scale)
                     onActivated: i => Theme.scale = [1, 1.25, 1.5, 2][i]
                 }
+            }
+            ParamToggle {
+                height: Theme.s(28)
+                text: "industrial"
+                checked: Theme.industrial
+                onToggled: on => Theme.industrial = on
             }
             ParamToggle {
                 id: allOff

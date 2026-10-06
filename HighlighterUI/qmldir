@@ -2,6 +2,9 @@ module HighlighterUI
 singleton Theme 1.0 Theme.qml
 singleton PanelMemory 1.0 PanelMemory.qml
 ParamArrow 1.0 ParamArrow.qml
+ParamScrew 1.0 ParamScrew.qml
+ParamPlate 1.0 ParamPlate.qml
+ParamBevel 1.0 ParamBevel.qml
 ParamSizeMark 1.0 ParamSizeMark.qml
 ParamValueBox 1.0 ParamValueBox.qml
 ParamSlider 1.0 ParamSlider.qml

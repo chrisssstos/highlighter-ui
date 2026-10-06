@@ -72,6 +72,12 @@ value box sits between its step arrows.
 
 `Theme.compact` shrinks knobs and spacing; `Theme.slidersStartMinimised`
 (on) is whether sliders the user hasn't maximised start thin.
+`Theme.industrial` (on) is the analogue look: brushed, bevelled plates with
+screws behind sections and groups, a grained page, inset grooves for the
+bars, LCD value boxes, a scope screen for the XY pad, knurled knobs with a
+pointer line, brushed buttons with an LED when they stay down, and stamped
+titles. Off gives the flat look. `ParamPlate`, `ParamScrew` and `ParamBevel`
+are the pieces, for a panel's own surfaces.
 `Theme.smooth` (off) turns antialiasing back on for arrows, knobs, gauges and
 round shapes; off gives the kit its hard, nearest-neighbour edges.
 `Theme.accent` recolours everything; the darker shades follow it, and

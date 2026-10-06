@@ -32,6 +32,7 @@ Item {
                  + (glyph.visible && label.visible ? content.spacing : 0)
                  + (label.visible ? label.implicitWidth : 0)
                  + 2 * horizontalPadding
+                 + (Theme.industrial && checkable ? Theme.s(12) : 0)   // the LED
     activeFocusOnTab: true
     opacity: enabled ? 1 : 0.4
 
@@ -54,13 +55,47 @@ Item {
              : (area.pressed ? Qt.darker(Theme.sunken, 1.15) : area.containsMouse ? Theme.sunkenHover : Theme.sunken)
         Behavior on color { ColorAnimation { duration: Theme.quick } }
 
-        // bevel: a faint light top edge and a dark bottom edge, swapped when pressed
-        Rectangle { width: parent.width; height: 1; color: area.pressed ? Qt.rgba(0, 0, 0, 0.25) : Qt.rgba(1, 1, 1, root.accent ? 0.25 : 0.07) }
-        Rectangle { y: parent.height - 1; width: parent.width; height: 1; color: area.pressed ? Qt.rgba(1, 1, 1, 0.05) : Qt.rgba(0, 0, 0, 0.3) }
+        // brushed, in the industrial look
+        Image {
+            anchors.fill: parent
+            visible: Theme.industrial
+            source: "textures/brushed.png"
+            fillMode: Image.Tile
+            smooth: false
+            opacity: root.accent ? 0.35 : 0.7
+        }
+        // bevel: light top, dark bottom, swapped when pressed (all four edges when industrial)
+        Rectangle { visible: !Theme.industrial; width: parent.width; height: 1; color: area.pressed ? Qt.rgba(0, 0, 0, 0.25) : Qt.rgba(1, 1, 1, root.accent ? 0.25 : 0.07) }
+        Rectangle { visible: !Theme.industrial; y: parent.height - 1; width: parent.width; height: 1; color: area.pressed ? Qt.rgba(1, 1, 1, 0.05) : Qt.rgba(0, 0, 0, 0.3) }
+        ParamBevel {
+            anchors.fill: parent
+            visible: Theme.industrial
+            inset: area.pressed || root.checked
+            light: root.accent ? 0.3 : 0.13
+            dark: 0.5
+        }
 
-        // checked: a lime bar on the left
+        // checked, industrial: an LED, lit when down
+        Item {
+            id: led
+            visible: Theme.industrial && root.checkable
+            x: Theme.s(8); anchors.verticalCenter: parent.verticalCenter
+            width: Theme.s(6); height: width
+            Rectangle {   // its glow
+                anchors.centerIn: parent
+                width: parent.width + Theme.s(6); height: width
+                color: root.tint; opacity: root.checked ? 0.22 : 0
+            }
+            Rectangle {
+                anchors.fill: parent
+                color: root.checked ? root.tint : Qt.rgba(0, 0, 0, 0.45)
+                border.width: 1; border.color: Qt.rgba(0, 0, 0, 0.5)
+            }
+        }
+
+        // checked, flat: a lime bar on the left
         Rectangle {
-            visible: root.checkable
+            visible: root.checkable && !Theme.industrial
             width: Theme.s(3); height: parent.height
             color: root.checked ? root.tint : Theme.line
         }
@@ -77,6 +112,7 @@ Item {
         id: content
         anchors.centerIn: parent
         anchors.verticalCenterOffset: area.pressed ? 1 : 0
+        anchors.horizontalCenterOffset: led.visible ? Theme.s(6) : 0
         spacing: Theme.s(6)
         Text {
             id: glyph
@@ -91,6 +127,7 @@ Item {
             id: label
             visible: root.text.length > 0
             width: Math.max(0, Math.min(implicitWidth, root.width - 2 * root.horizontalPadding
+                                        - (led.visible ? Theme.s(12) : 0)
                                         - (glyph.visible ? glyph.implicitWidth + content.spacing : 0)))
             elide: Text.ElideRight
             text: root.text
