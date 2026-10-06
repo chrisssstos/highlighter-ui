@@ -37,5 +37,6 @@ qt_add_qml_module(ParamKit
         ParamSection.qml
         ParamGauge.qml
         ParamLevel.qml
+        ParamSwatches.qml
 )
 target_link_libraries(ParamKit PRIVATE Qt6::Quick Qt6::QuickControls2)

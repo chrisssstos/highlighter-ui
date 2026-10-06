@@ -28,7 +28,7 @@ Item {
     Behavior on shown { NumberAnimation { duration: Theme.ease; easing.type: Easing.OutCubic } }
     onShownChanged: dial.requestPaint()
     onWarningChanged: dial.requestPaint()
-    Connections { target: Theme; function onScaleChanged() { dial.requestPaint() } }
+    Connections { target: Theme; function onScaleChanged() { dial.requestPaint() } function onAccentChanged() { dial.requestPaint() } }
 
     Text {
         id: title

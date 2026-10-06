@@ -20,3 +20,4 @@ ParamGrid 1.0 ParamGrid.qml
 ParamSection 1.0 ParamSection.qml
 ParamGauge 1.0 ParamGauge.qml
 ParamLevel 1.0 ParamLevel.qml
+ParamSwatches 1.0 ParamSwatches.qml
