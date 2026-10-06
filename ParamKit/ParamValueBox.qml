@@ -22,9 +22,10 @@ Item {
     signal finished()
 
     implicitHeight: Theme.boxHeight
-    implicitWidth: Math.max(Theme.s(34),
-                            (editing ? input.contentWidth + Theme.s(16) : shown.implicitWidth)
-                            + Theme.s(12))
+    // Just wide enough for the text and its padding (and the cursor, typing).
+    implicitWidth: Math.max(Theme.s(20),
+                            editing ? input.contentWidth + input.leftPadding + input.rightPadding + Theme.s(2)
+                                    : shown.implicitWidth)
 
     property bool bad: false
     property bool ending: false
@@ -71,7 +72,7 @@ Item {
         id: shown
         visible: !box.editing
         anchors.fill: parent
-        leftPadding: Theme.s(6); rightPadding: Theme.s(6)
+        leftPadding: Theme.s(4); rightPadding: Theme.s(4)
         horizontalAlignment: box.align
         verticalAlignment: Text.AlignVCenter
         text: PM.format(box.value, box.decimals) + box.unit
@@ -84,7 +85,7 @@ Item {
         id: input
         visible: box.editing
         anchors.fill: parent
-        leftPadding: Theme.s(6); rightPadding: Theme.s(6)
+        leftPadding: Theme.s(4); rightPadding: Theme.s(4)
         horizontalAlignment: box.align
         verticalAlignment: Text.AlignVCenter
         color: Theme.editText

@@ -18,6 +18,7 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
    - section headings → `ParamHeading`, collapsible sections → `ParamGroup`
    - paste-into-TOML blocks → `ParamCode`
    - the scrolling column → `ParamPage`
+   - see "What goes where" below for sections, grids and meters
 3. Keep the project's own setting plumbing. Value controls mirror Qt's
    Slider: bind `value`, write back in `onMoved: v => ...`. Watch for
    settings reloads the same way the old code did.
@@ -30,6 +31,29 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 6. Every kit control needs `width: parent.width` inside a Column, ParamPage
    or ParamGroup. Never bind a width to a Row's width (that makes a binding
    loop).
+
+## What goes where (only where appropriate)
+
+- **Sections and groups.** Use `ParamSection` (always open) for each thing on
+  screen a run of controls tunes (the signage card, the call to action). Use
+  `ParamGroup` (folding) only when there are enough sections that some
+  should fold away, or when only one at a time makes sense (failure
+  factors, "one open at a time"). Use `ParamHeading` for a light label over
+  a few controls that don't need a box. Nest at most one group inside
+  another.
+- **Grids.** Use `ParamGrid` only for runs of short, alike controls: knobs,
+  checks and toggles, small gauges. Sliders go in a grid only with a big
+  `minColumnWidth` (about 300), so they pair up on a wide panel and stack on
+  a narrow one. Never put a long-labelled slider in a narrow column. Don't
+  grid a mix of control types, and don't grid one or two controls.
+- **Meters.** `ParamMeter`, `ParamGauge` and `ParamLevel` are read-only and
+  only for values the app reports live: the guess right now, load, fps, a
+  sound's level. Never use one to show a setting that has its own slider or
+  knob. Use a gauge only when there's a safe range and a "too much"
+  (`warnAt`); a level for sound or signal; a plain meter for everything
+  else. Gather live readouts into one section (e.g. "Running") rather than
+  scattering them, unless one belongs to a section's own visual (the guess
+  inside the factor it drives).
 
 ## Working on the kit itself
 

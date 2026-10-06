@@ -22,7 +22,13 @@ Item {
     readonly property bool hovered: area.containsMouse
 
     implicitHeight: Theme.s(26)
-    implicitWidth: content.implicitWidth + 2 * horizontalPadding
+    // From the texts' natural widths, so a button given less room (or the
+    // kit scaled up) cuts its label short with an ellipsis instead of
+    // spilling past its edges.
+    implicitWidth: (glyph.visible ? glyph.implicitWidth : 0)
+                 + (glyph.visible && label.visible ? content.spacing : 0)
+                 + (label.visible ? label.implicitWidth : 0)
+                 + 2 * horizontalPadding
     activeFocusOnTab: true
     opacity: enabled ? 1 : 0.4
 
@@ -70,6 +76,7 @@ Item {
         anchors.verticalCenterOffset: area.pressed ? 1 : 0
         spacing: Theme.s(6)
         Text {
+            id: glyph
             visible: root.icon.length > 0
             text: root.icon
             color: root.ink
@@ -78,7 +85,11 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
         }
         Text {
+            id: label
             visible: root.text.length > 0
+            width: Math.max(0, Math.min(implicitWidth, root.width - 2 * root.horizontalPadding
+                                        - (glyph.visible ? glyph.implicitWidth + content.spacing : 0)))
+            elide: Text.ElideRight
             text: root.text
             color: root.ink
             font.family: Theme.family

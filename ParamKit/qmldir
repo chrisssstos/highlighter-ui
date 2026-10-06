@@ -16,3 +16,7 @@ ParamGroup 1.0 ParamGroup.qml
 ParamCode 1.0 ParamCode.qml
 ParamPage 1.0 ParamPage.qml
 ParamScrollBar 1.0 ParamScrollBar.qml
+ParamGrid 1.0 ParamGrid.qml
+ParamSection 1.0 ParamSection.qml
+ParamGauge 1.0 ParamGauge.qml
+ParamLevel 1.0 ParamLevel.qml

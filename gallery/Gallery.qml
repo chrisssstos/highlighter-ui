@@ -12,9 +12,15 @@ Window {
     color: Theme.page
     title: "ParamKit gallery"
 
+    // "-- --scale=<n>": start at that scale.
+    Component.onCompleted: {
+        const sca = Qt.application.arguments.find(a => a.startsWith("--scale="))
+        if (sca) Theme.scale = Number(sca.substring(8))
+    }
+
     // "-- --shot=<file.png>": save a picture of the gallery and quit.
     Timer {
-        interval: 1200
+        interval: 1500
         running: Qt.application.arguments.some(a => a.startsWith("--shot="))
         onTriggered: {
             const file = Qt.application.arguments.find(a => a.startsWith("--shot=")).substring(7)
@@ -46,6 +52,8 @@ Window {
             }
             Text {
                 anchors.verticalCenter: parent.verticalCenter
+                width: Math.max(0, bar.width - rightBar.width - x - Theme.s(56))
+                elide: Text.ElideRight
                 text: "gallery: every control, every awkward state"
                 color: Theme.textFaint
                 font.family: Theme.family
@@ -53,6 +61,7 @@ Window {
             }
         }
         Row {
+            id: rightBar
             anchors.right: parent.right
             anchors.rightMargin: Theme.s(16)
             anchors.verticalCenter: parent.verticalCenter
@@ -117,16 +126,16 @@ Window {
                    text: "Arrows: click to step 1 (Shift 10), hold to repeat, drag to slide (Shift while dragging: fine). Bar: click to jump, double-click to reset. Box: click to type, sums allowed (40+6), Up/Down step, Esc cancels. Keyboard: Tab in, arrows / PgUp / PgDn / Home / End, Enter types, Delete resets." }
         }
 
-        // --- column 2: knobs, buttons, toggles, choices ----------------------------
+        // --- column 2: knobs, buttons, toggles, choices, meters --------------------
         ParamPage {
             id: page2
             width: parent.width / 3
             height: parent.height
 
-            ParamHeading { width: parent.width; text: "Knobs" }
-            Flow {
+            ParamHeading { width: parent.width; text: "Knobs"; note: "in a grid: as many columns as fit" }
+            ParamGrid {
                 width: parent.width
-                spacing: Theme.s(10)
+                minColumnWidth: Theme.s(120)
                 ParamKnob { label: "slices"; from: 3; to: 24; value: 15; defaultValue: 12 }
                 ParamKnob { label: "twist"; from: -1; to: 1; stepSize: 0.001; origin: 0; value: -0.297; defaultValue: 0 }
                 ParamKnob { label: "ring ignites"; unit: " ms"; from: 0; to: 4500; stepSize: 50; value: 2500; ticks: 0 }
@@ -157,22 +166,18 @@ Window {
             }
             ParamButton { width: parent.width; text: "A full-width button with a label long enough to need the room" }
 
-            ParamHeading { width: parent.width; text: "On / off" }
-            Flow {
+            ParamHeading { width: parent.width; text: "On / off"; note: "in a grid" }
+            ParamGrid {
                 width: parent.width
-                spacing: Theme.s(18)
+                minColumnWidth: Theme.s(170)
                 ParamCheck { text: "Tiles" }
                 ParamCheck { text: "Outline LED tiles"; checked: true }
                 ParamCheck { text: "Disabled"; enabled: false; checked: true }
-            }
-            Flow {
-                width: parent.width
-                spacing: Theme.s(18)
                 ParamToggle { text: "Preview full screen" }
                 ParamToggle { text: "Sound"; checked: true }
                 ParamToggle { text: "Disabled"; enabled: false }
+                ParamCheck { text: "a check with a label far too long to fit in its cell" }
             }
-            ParamCheck { width: Theme.s(200); text: "a check with a label far too long to fit in its width" }
 
             ParamHeading { width: parent.width; text: "Choices" }
             ParamChoice { width: parent.width; label: "overall preset"; model: ["1", "2"]; currentIndex: 0; cellHeight: Theme.s(44); cellMinWidth: Theme.s(44) }
@@ -185,9 +190,27 @@ Window {
             ParamHeading { width: parent.width; text: "Text" }
             ParamField { width: parent.width; label: "settings file"; mono: true; text: "C:/Users/someone/settings/MyApp/app_settings.toml" }
             ParamField { width: parent.width; label: "preset name"; placeholder: "untitled preset" }
+
+            ParamHeading { width: parent.width; text: "Meters"; note: "read-only, for live values only" }
+            ParamMeter { width: parent.width; label: "meter: a live 0..1"; value: live.a }
+            ParamGrid {
+                width: parent.width
+                minColumnWidth: Theme.s(130)
+                ParamGauge { label: "gauge, warns at 85%"; value: live.load; unit: "%"; decimals: 0; to: 100; warnAt: 85 }
+                ParamGauge { label: "gauge, no warning"; value: live.a }
+            }
+            Row {
+                spacing: Theme.s(10)
+                ParamLevel { label: "L"; value: live.l; warnAt: 0.8 }
+                ParamLevel { label: "R"; value: live.r; warnAt: 0.8 }
+                ParamLevel { label: "no warn"; value: live.a; segments: 10 }
+            }
         }
 
         // --- column 3: a panel in use -----------------------------------------------
+        // Sections for what's always wanted, folding groups where there are
+        // many and one at a time will do, grids only for runs of alike short
+        // controls, meters only for values the app reports.
         ParamPage {
             id: inUse
             width: parent.width / 3
@@ -204,8 +227,39 @@ Window {
                 property real twist: -0.297
             }
             property string openGroup: "fire"
-            property real guess: 0
-            NumberAnimation on guess { from: 0; to: 1; duration: 2600; loops: Animation.Infinite; easing.type: Easing.InOutSine }
+
+            ParamSection {
+                width: parent.width; title: "Signage card"
+                // Sliders only pair up when each still gets a full-width row's worth.
+                ParamGrid {
+                    width: parent.width
+                    minColumnWidth: Theme.s(300)
+                    ParamSlider { label: "left edge from centre"; unit: " mm"; from: -400; to: 400; origin: 0; value: 201; defaultValue: 200 }
+                    ParamSlider { label: "top edge from centre"; unit: " mm"; from: -400; to: 400; origin: 0; value: -300; defaultValue: -300 }
+                    ParamSlider { label: "width"; unit: " mm"; from: 100; to: 800; value: 431; defaultValue: 430 }
+                    ParamSlider { label: "name size"; unit: " mm"; from: 10; to: 150; value: 70; defaultValue: 70 }
+                }
+            }
+
+            ParamSection {
+                width: parent.width; title: "Running"; note: "live, read-only"
+                ParamGrid {
+                    width: parent.width
+                    minColumnWidth: Theme.s(130)
+                    ParamGauge { id: gpu; label: "GPU load"; value: live.load; unit: "%"; decimals: 0; to: 100; warnAt: 85 }
+                    Item {
+                        height: gpu.height
+                        Row {
+                            id: mix
+                            anchors.centerIn: parent
+                            spacing: Theme.s(8)
+                            ParamLevel { label: "turbine"; value: live.l; warnAt: 0.8; barHeight: Theme.s(80) }
+                            ParamLevel { label: "fire"; value: live.r; warnAt: 0.8; barHeight: Theme.s(80) }
+                        }
+                    }
+                }
+                ParamMeter { width: parent.width; label: "the guess the visuals follow"; value: live.a }
+            }
 
             ParamHeading { width: parent.width; text: "Failure factor visuals"; note: "one open at a time" }
             ParamGroup {
@@ -220,21 +274,19 @@ Window {
                 open: inUse.openGroup === "fire"
                 onToggled: o => inUse.openGroup = o ? "fire" : ""
                 ParamChoice { width: parent.width; label: "overall preset"; model: ["1", "2"]; currentIndex: fire.overall; onActivated: i => fire.overall = i; cellHeight: Theme.s(40); cellMinWidth: Theme.s(40) }
-                ParamMeter { width: parent.width; label: "guess, live"; value: inUse.guess }
                 ParamSlider { width: parent.width; label: "reach min"; from: 0; to: 1; stepSize: 0.001; value: fire.reachMin; onMoved: v => fire.reachMin = v; defaultValue: 0.05 }
                 ParamSlider { width: parent.width; label: "reach max"; from: 0; to: 1; stepSize: 0.001; value: fire.reachMax; onMoved: v => fire.reachMax = v; defaultValue: 0.7 }
                 ParamSlider { width: parent.width; label: "speed"; from: 0; to: 2; stepSize: 0.01; value: fire.speed; onMoved: v => fire.speed = v; defaultValue: 0.3 }
                 ParamSlider { width: parent.width; label: "distortion"; from: 0; to: 1; stepSize: 0.001; value: fire.distortion; onMoved: v => fire.distortion = v }
-                Flow {
-                    width: parent.width
-                    spacing: Theme.s(10)
-                    ParamKnob { label: "slices"; from: 3; to: 24; value: fire.slices; onMoved: v => fire.slices = v; defaultValue: 12 }
-                    ParamKnob { label: "twist"; from: -1; to: 1; stepSize: 0.001; origin: 0; value: fire.twist; onMoved: v => fire.twist = v; defaultValue: 0 }
-                }
                 ParamGroup {
-                    width: parent.width; title: "Kaleidoscope"; note: "nested"; open: false
-                    ParamSlider { width: parent.width; label: "strength"; from: 0; to: 1; stepSize: 0.01; value: 0.9 }
-                    ParamSlider { width: parent.width; label: "spin speed"; from: 0; to: 20; stepSize: 0.01; value: 7.03 }
+                    width: parent.width; title: "Kaleidoscope"; open: true
+                    ParamGrid {
+                        width: parent.width
+                        minColumnWidth: Theme.s(110)
+                        ParamKnob { label: "slices"; from: 3; to: 24; value: fire.slices; onMoved: v => fire.slices = v; defaultValue: 12 }
+                        ParamKnob { label: "twist"; from: -1; to: 1; stepSize: 0.001; origin: 0; value: fire.twist; onMoved: v => fire.twist = v; defaultValue: 0 }
+                        ParamKnob { label: "strength"; from: 0; to: 1; stepSize: 0.01; value: 0.9 }
+                    }
                 }
             }
             ParamGroup {
@@ -261,14 +313,35 @@ Window {
                     + "\ntwist = " + fire.twist
             }
 
-            ParamHeading { width: parent.width; text: "Defaults on this machine" }
-            Text { width: parent.width; wrapMode: Text.Wrap; color: Theme.textDim; font.family: Theme.family; font.pixelSize: Theme.labelSize
-                   text: "Changes here last until the app restarts. Save them to make them this machine's defaults." }
-            Flow {
-                width: parent.width
-                spacing: Theme.s(6)
-                ParamButton { text: "Save as defaults"; accent: true }
-                ParamButton { text: "Reset to installed defaults" }
+            ParamSection {
+                width: parent.width; title: "Defaults on this machine"
+                Text { width: parent.width; wrapMode: Text.Wrap; color: Theme.textDim; font.family: Theme.family; font.pixelSize: Theme.labelSize
+                       text: "Changes here last until the app restarts. Save them to make them this machine's defaults." }
+                Flow {
+                    width: parent.width
+                    spacing: Theme.s(6)
+                    ParamButton { text: "Save as defaults"; accent: true }
+                    ParamButton { text: "Reset to installed defaults" }
+                }
+            }
+        }
+    }
+
+    // Stand-ins for live values from an app.
+    QtObject {
+        id: live
+        property real a: 0
+        property real load: 40
+        property real l: 0.3
+        property real r: 0.3
+        readonly property Timer tick: Timer {
+            interval: 70; running: true; repeat: true
+            onTriggered: {
+                const n = Date.now() / 1000
+                live.a = 0.5 + 0.45 * Math.sin(n * 0.9)
+                live.load = Math.max(0, Math.min(100, live.load + (Math.random() - 0.48) * 9))
+                live.l = Math.max(0, Math.min(1, 0.55 + 0.35 * Math.sin(n * 3.1) + (Math.random() - 0.5) * 0.25))
+                live.r = Math.max(0, Math.min(1, 0.5 + 0.35 * Math.sin(n * 2.7 + 1) + (Math.random() - 0.5) * 0.25))
             }
         }
     }
