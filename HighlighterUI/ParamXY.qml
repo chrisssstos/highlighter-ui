@@ -42,6 +42,10 @@ Item {
     //! The placed element's size, in value units, outlined round the dot (0: none).
     property real footprintWidth: 0
     property real footprintHeight: 0
+    //! True: the dot is the element's top left corner (x / y are "left edge /
+    //! top edge"), so the outline hangs right and down from it. False: the
+    //! dot is its centre.
+    property bool footprintFromCorner: false
     //! Other elements, faintly, for reference: [{ x, y, label }].
     property var ghosts: []
     //! What the panel remembers it by; the label if not given.
@@ -226,7 +230,8 @@ Item {
             visible: root.footprintWidth > 0 && root.footprintHeight > 0
             readonly property real w: Math.abs(root.px(root.xFrom + root.footprintWidth) - root.px(root.xFrom))
             readonly property real h: Math.abs(root.py(root.yFrom + root.footprintHeight) - root.py(root.yFrom))
-            x: Math.round(root.px(root.xValue) - w / 2); y: Math.round(root.py(root.yValue) - h / 2)
+            x: Math.round(root.px(root.xValue) - (root.footprintFromCorner ? 0 : w / 2))
+            y: Math.round(root.py(root.yValue) - (root.footprintFromCorner ? 0 : h / 2))
             width: Math.round(w); height: Math.round(h)
             color: Qt.rgba(root.tint.r, root.tint.g, root.tint.b, 0.12)
             border.width: 1; border.color: root.tint
