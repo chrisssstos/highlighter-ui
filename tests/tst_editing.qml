@@ -61,12 +61,18 @@ Item {
                     for (let i = 0; i < mark.children.length; ++i) {
                         const dot = mark.children[i]
                         if (!dot.visible || dot.width === undefined || dot.height === 0) continue
-                        verify(!overlaps(dot, up), "a dot crosses the up arrow (default " + def + ", compact " + compact + ")")
-                        verify(!overlaps(dot, down), "a dot crosses the down arrow (default " + def + ", compact " + compact + ")")
+                        verify(!up.visible || !overlaps(dot, up), "a dot crosses the up arrow (default " + def + ", compact " + compact + ")")
+                        verify(!down.visible || !overlaps(dot, down), "a dot crosses the down arrow (default " + def + ", compact " + compact + ")")
                     }
                 }
             }
             d.defaultValue = NaN
+        }
+        function test_minimisedHasNoArrows() {
+            d.compact = true
+            verify(!findChild(d, "upArrow").visible && !findChild(d, "downArrow").visible)
+            d.compact = false
+            verify(findChild(d, "upArrow").visible && findChild(d, "downArrow").visible)
         }
         function test_saveDefault() {
             s.defaultValue = 10

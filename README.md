@@ -20,7 +20,8 @@ states.
   repeat, or drag them to slide as usual (Shift while dragging slides finely).
   They're always there: with no room on the bar they jump out clear of its
   end, and at a limit they grey out.
-- **Min / max:** sliders start minimised (a thin bar). The − / + by the
+- **Min / max:** sliders start minimised: a thin bar with no arrows (click
+  or drag it, or type in its box). The − / + by the
   label (next to ↺, both appear on hover) maximises one, and the panel
   remembers which ones between runs, in `highlighterui.ini` in the app's
   config folder. Give each slider a unique `key` (its setting's key) for
