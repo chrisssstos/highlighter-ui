@@ -201,22 +201,33 @@ Item {
         // the saved default, dotted, while the value is away from it
         Item {
             id: defaultMark
-            visible: !root.isDefault
+            objectName: "defaultMark"
             readonly property real at: root.defaultValue > root.to ? track.width
                                      : track.width * root.fraction(root.defaultValue)
             readonly property bool overFill: at > root.fillX && at < root.fillX + root.fillW
             x: Math.round(Math.min(at, track.width - width))
             width: Theme.s(2)
             height: parent.height
-            Column {
-                spacing: Theme.s(3)
-                Repeater {
-                    model: Math.ceil(track.height / Theme.s(6))
-                    Rectangle {
-                        width: defaultMark.width; height: Theme.s(3)
-                        color: defaultMark.overFill ? Theme.accentInk : Theme.text
-                        opacity: defaultMark.overFill ? 0.55 : 0.6
-                    }
+            // Hidden where it would sit on the fill's edge line (the value is
+            // a hair from the default anyway).
+            visible: !root.isDefault && Math.abs(x + width / 2 - root.edgeX) > width + root.lineW
+            // Where it crosses an arrow it breaks, leaving a gap round it.
+            readonly property real clear: Theme.s(2)
+            function crosses(arrow) {
+                return arrow.visible && x + width > arrow.x - clear && x < arrow.x + arrow.width + clear
+            }
+            readonly property bool broken: crosses(down) || crosses(up)
+            readonly property real gapTop: (height - root.arrowH) / 2 - clear
+            readonly property real gapBottom: (height + root.arrowH) / 2 + clear
+            Repeater {
+                model: Math.ceil(track.height / Theme.s(6))
+                Rectangle {
+                    required property int index
+                    y: index * Theme.s(6)
+                    width: defaultMark.width; height: Theme.s(3)
+                    visible: !(defaultMark.broken && y + height > defaultMark.gapTop && y < defaultMark.gapBottom)
+                    color: defaultMark.overFill ? Theme.accentInk : Theme.text
+                    opacity: defaultMark.overFill ? 0.55 : 0.6
                 }
             }
         }
@@ -233,6 +244,7 @@ Item {
 
         ParamArrow {
             id: down
+            objectName: "downArrow"
             direction: Qt.LeftArrow
             visible: root.enabled
             opacity: root.canDown ? 1 : 0.3
@@ -246,6 +258,7 @@ Item {
         }
         ParamArrow {
             id: up
+            objectName: "upArrow"
             direction: Qt.RightArrow
             visible: root.enabled
             opacity: root.canUp ? 1 : 0.3
