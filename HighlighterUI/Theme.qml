@@ -20,8 +20,8 @@ QtObject {
     //! Slider sizes, [full, compact], for a slider minimised on its own.
     // Only the bar changes; the label, value box and spacing stay the same.
     readonly property var sliderSizes: ({
-        track: [44, 12], edge: [4, 2], box: [22, 22], arrowW: [10, 5], arrowH: [12, 8],
-        gap: [4, 2], title: [16, 16], value: [15, 15], row: [8, 8]
+        track: [44, 12], edge: [4, 2], box: [18, 18], arrowW: [10, 5], arrowH: [12, 8],
+        gap: [4, 2], title: [13, 13], value: [13, 13], row: [5, 5]
     })
     function sliderSize(key, small) { return s(sliderSizes[key][small ? 1 : 0]) }
 
@@ -66,11 +66,11 @@ QtObject {
     // c(full, compact)
     property int trackHeight: c(44, 22)
     property int edgeLine:    c(4, 3)    // the darker line along the fill's edge
-    property int boxHeight:   c(22, 18)
+    property int boxHeight:   s(18)
     property int arrowW:      c(10, 7)
     property int arrowH:      c(12, 9)
     property int arrowGap:    c(4, 3)    // between an arrow and the fill's edge
-    property int rowGap:      c(8, 4)    // label to control
+    property int rowGap:      s(5)    // label to control
     property int controlGap:  c(16, 10)  // one control to the next
     property int knobSize:    c(58, 42)
     property int radius:      0
@@ -79,9 +79,9 @@ QtObject {
     // Fonts every Windows PC has.
     property string family: "Segoe UI"
     property string mono: "Consolas"
-    property int titleSize: c(16, 13)   // a slider's or knob's label
+    property int titleSize: s(13)   // every control's label: sliders, knobs, gauges
     property int labelSize: s(14)
-    property int valueSize: c(15, 13)
+    property int valueSize: s(13)
     property int smallSize: s(11)
 
     // --- drawing -----------------------------------------------------------
