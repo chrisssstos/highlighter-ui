@@ -1,0 +1,77 @@
+# ParamKit
+
+My control-panel look for Qt Quick apps: a dark grey page, lime fills and
+values, chunky bar sliders with step arrows at the fill's edge. One QML module
+(`import ParamKit`) that any Qt 6 project can link, so every app's tuning panel
+looks and works the same.
+
+## See it
+
+`run-gallery.bat` opens the gallery with Qt's `qml.exe`, so there's nothing to
+build. It shows every control in its normal and awkward states. The scale
+picker in the top bar resizes the whole kit, and "disable everything" shows
+the disabled states.
+
+## The slider
+
+- The lime fill grows from `origin`, which is `from` by default. Set it to 0
+  for a centred range like "from screen centre".
+- **◀ ▶ at the fill's edge:** click to step by 1 (Shift: by 10), hold to
+  repeat, or drag them to slide as usual (Shift while dragging slides finely).
+- **The bar:** click anywhere else to jump there and drag. Double-click to
+  reset to `defaultValue`. The ↺ by the label also resets.
+- **The value box** sits under the edge. Click it to type a value. It accepts
+  the unit (`46px`) and simple sums (`40+6`). Up and Down step, Enter keeps the
+  value and Esc drops it.
+- **Past the ends:** the bar spans `from..to`, but the arrows and typing can go
+  past it, up to `limitFrom..limitTo` (no limit by default). A full bar can
+  still be nudged; it shows a notch and the ▶ sits outside the bar.
+- **Keyboard:** Tab in, then use the arrow keys, PgUp/PgDn, Home/End. Enter
+  starts typing and Delete resets.
+
+The knob works the same way: drag up or right, double-click to reset, and the
+value box sits between its step arrows.
+
+## Controls
+
+| | |
+|---|---|
+| `ParamSlider` | the bar slider above |
+| `ParamKnob` | rotary, same value rules |
+| `ParamButton` | `accent`, `danger`, `checkable`, `icon` |
+| `ParamToggle`, `ParamCheck` | on/off |
+| `ParamChoice` | a row of options (presets 1/2, shader), wraps |
+| `ParamCombo` | drop-down |
+| `ParamField` | one-line text |
+| `ParamMeter` | read-only live value with peak |
+| `ParamHeading` | small caps heading with a rule |
+| `ParamGroup` | folding group in a lime bracket |
+| `ParamCode` | copyable block (TOML to paste) |
+| `ParamPage` | scrolling column on the page colour |
+| `Theme` | colours, sizes, font, `scale` |
+
+Value controls behave like Qt's `Slider`: bind `value`, write back in
+`onMoved`:
+
+```qml
+ParamSlider {
+    width: parent.width
+    label: "ring, from screen centre"; unit: " mm"
+    from: -400; to: 400; origin: 0; defaultValue: 0
+    value: Tuning.read("fire.ringMm")
+    onMoved: v => Tuning.set("fire.ringMm", v)
+}
+```
+
+## Use it in a project
+
+```cmake
+add_subdirectory(<path>/param-kit/ParamKit ${CMAKE_BINARY_DIR}/ParamKit)
+target_link_libraries(<app> PRIVATE ParamKitplugin)
+```
+
+Then `import ParamKit` in QML. `tests/build-check.bat` builds the gallery as
+a compiled app this way, to prove the module works.
+
+Inter is bundled (`ParamKit/fonts`, under the SIL OFL licence), so the panel
+looks the same on every machine.

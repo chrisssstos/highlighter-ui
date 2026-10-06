@@ -1,0 +1,3 @@
+tests/consumer/build/
+tests/consumer/Gallery.qml
+*.user

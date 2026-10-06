@@ -1,0 +1,18 @@
+module ParamKit
+singleton Theme 1.0 Theme.qml
+ParamArrow 1.0 ParamArrow.qml
+ParamValueBox 1.0 ParamValueBox.qml
+ParamSlider 1.0 ParamSlider.qml
+ParamKnob 1.0 ParamKnob.qml
+ParamButton 1.0 ParamButton.qml
+ParamToggle 1.0 ParamToggle.qml
+ParamCheck 1.0 ParamCheck.qml
+ParamChoice 1.0 ParamChoice.qml
+ParamCombo 1.0 ParamCombo.qml
+ParamField 1.0 ParamField.qml
+ParamMeter 1.0 ParamMeter.qml
+ParamHeading 1.0 ParamHeading.qml
+ParamGroup 1.0 ParamGroup.qml
+ParamCode 1.0 ParamCode.qml
+ParamPage 1.0 ParamPage.qml
+ParamScrollBar 1.0 ParamScrollBar.qml
