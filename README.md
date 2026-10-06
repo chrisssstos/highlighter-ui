@@ -57,22 +57,31 @@ value box sits between its step arrows.
 | `ParamMeter` | read-only live value with peak |
 | `ParamGauge` | read-only half-dial with a warning zone |
 | `ParamLevel` | read-only segmented level (sound, signal) |
+| `ParamLight` | a small square lit while something is on (a sound playing) |
+| `ParamText` | the panel's own text: a note, a status, a path, or (`caps`) a column's name over rows |
 | `ParamGrid` | equal columns, as many as fit, for short alike controls |
-| `ParamSection` | an always-open titled section in a lime bracket |
+| `ParamSection` | an always-open titled section (no bracket: only what folds has one) |
 | `ParamHeading` | small caps heading with a rule |
 | `ParamGroup` | folding group in a lime bracket |
-| `ParamCode` | copyable block (TOML to paste) |
+| `ParamCode` | copyable block (TOML to paste), folded to its title and a Copy button until opened |
 | `ParamPage` | scrolling column on the page colour |
 | `ParamSwatches` | a row of colour swatches (a colour setting, or the accent) |
 | `PanelMemory` | remembers which sliders are maximised |
-| `Theme` | colours, sizes, font, `scale`, `compact`, `accent`, `slidersStartMinimised` |
+| `Theme` | colours, sizes (`groupInset`: where a folding group's controls start, `sectionInset`: a section's, either side), font, `scale`, `compact`, `accent`, `slidersStartMinimised` |
 
 `Theme.compact` shrinks knobs and spacing; `Theme.slidersStartMinimised`
 (on) is whether sliders the user hasn't maximised start thin.
 `Theme.smooth` (off) turns antialiasing back on for arrows, knobs, gauges and
 round shapes; off gives the kit its hard, nearest-neighbour edges.
 `Theme.accent` recolours everything; the darker shades follow it, and
-`Theme.accents` lists ones that read well on the grey.
+`Theme.accents` lists ones that read well on the grey. A window that declares
+its own `property color accent` draws its controls in that colour instead, so
+two panels in one app can look apart:
+
+```qml
+Window { property color accent: "#ff79c6"   // this panel in pink
+    ParamPage { ... } }
+```
 
 CLAUDE.md says when each layout piece and meter is the right one.
 

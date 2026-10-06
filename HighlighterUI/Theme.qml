@@ -4,7 +4,9 @@ import QtQuick
 /// Colours, sizes and the font every HighlighterUI control draws with. Change
 /// scale to grow or shrink the whole panel (a window on a high DPI screen,
 /// say), compact for smaller sliders and knobs that fit more on screen, and
-/// accent to recolour it: the darker shades follow the accent.
+/// accent to recolour it: the darker shades follow the accent. A window
+/// that declares its own `property color accent` draws in that colour
+/// instead, so two panels can tell themselves apart.
 QtObject {
     id: theme
 
@@ -35,9 +37,15 @@ QtObject {
     property color line:      "#6a6f6d"   // quiet outlines and dividers
     property color accent:    "#b8de52"   // the lime: fills, values, focus
     // Shades of the accent, so any accent works.
-    property color accentDim:  Qt.darker(accent, 1.48)  // an arrow drawn on the accent
-    property color accentEdge: Qt.darker(accent, 1.36)  // the line along the fill's edge
-    property color accentInk:  Qt.darker(accent, 4.2)   // text drawn on the accent
+    property color accentDim:  dimOf(accent)   // an arrow drawn on the accent
+    property color accentEdge: edgeOf(accent)  // the line along the fill's edge
+    property color accentInk:  inkOf(accent)   // text drawn on the accent
+    function dimOf(c)  { return Qt.darker(c, 1.48) }
+    function edgeOf(c) { return Qt.darker(c, 1.36) }
+    function inkOf(c)  { return Qt.darker(c, 4.2) }
+    //! The accent a control in this window draws with: the window's own
+    //! accent if it declares one, the kit's otherwise.
+    function accentIn(win) { return win && win.accent !== undefined ? win.accent : theme.accent }
 
     //! Accents that read well on the grey, for a swatch row.
     readonly property var accents: [
@@ -73,6 +81,9 @@ QtObject {
     property int rowGap:      s(5)    // label to control
     property int controlGap:  c(16, 10)  // one control to the next
     property int knobSize:    c(58, 42)
+    property int groupInset:    s(18)   // a folding group's controls from its left edge (past the bracket)
+    property int groupInsetEnd: s(14)   // and from its right edge
+    property int sectionInset:  groupInsetEnd   // an always-open section's controls from either edge (no bracket)
     property int radius:      0
 
     // --- type --------------------------------------------------------------

@@ -6,6 +6,9 @@ import QtQuick
 Item {
     id: root
 
+    //! The accent it draws in: its window's own, if that declares one (see Theme).
+    readonly property color tint: Theme.accentIn(Window.window)
+
     property string title: ""
     property string note: ""
     property bool open: true
@@ -14,6 +17,15 @@ Item {
     property alias spacing: body.spacing
 
     signal toggled(bool open)
+
+    //! Folds it open or shut, as a click on its title does. Tells you first;
+    //! it only folds itself if you didn't, so open bound to your own state
+    //! stays bound (one open at a time).
+    function flip() {
+        const want = !root.open
+        root.toggled(want)
+        if (root.open !== want) root.open = want
+    }
 
     implicitWidth: Theme.s(300)
     implicitHeight: header.height + frame.height
@@ -30,7 +42,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             direction: Qt.RightArrow
             width: Theme.s(7); height: Theme.s(9)
-            color: headArea.containsMouse ? Theme.accent : Theme.textDim
+            color: headArea.containsMouse ? root.tint : Theme.textDim
             rotation: root.open ? 90 : 0
             Behavior on rotation { NumberAnimation { duration: Theme.ease; easing.type: Easing.OutCubic } }
         }
@@ -61,7 +73,7 @@ Item {
             enabled: root.collapsible
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: { root.open = !root.open; root.toggled(root.open) }
+            onClicked: root.flip()
         }
     }
 
@@ -75,16 +87,22 @@ Item {
         Behavior on height { NumberAnimation { duration: Theme.ease; easing.type: Easing.OutCubic } }
 
         Rectangle { anchors.fill: parent; color: Theme.raised }
-        // the bracket: a bar with a foot at each end
-        Rectangle { width: Theme.s(4); height: parent.height; color: Theme.accent }
-        Rectangle { width: Theme.s(10); height: Theme.s(3); color: Theme.accent }
-        Rectangle { y: parent.height - height; width: Theme.s(10); height: Theme.s(3); color: Theme.accent }
+        // the bracket, a bar with a foot at each end: only on a group that
+        // folds, so it marks what can fold
+        Item {
+            anchors.fill: parent
+            visible: root.collapsible
+            Rectangle { width: Theme.s(4); height: parent.height; color: root.tint }
+            Rectangle { width: Theme.s(10); height: Theme.s(3); color: root.tint }
+            Rectangle { y: parent.height - height; width: Theme.s(10); height: Theme.s(3); color: root.tint }
+        }
 
         Column {
             id: body
-            x: Theme.s(18)
+            // past the bracket; with none, the same margin both sides
+            x: root.collapsible ? Theme.groupInset : Theme.sectionInset
             y: frame.pad
-            width: parent.width - x - Theme.s(14)
+            width: parent.width - x - Theme.groupInsetEnd
             spacing: Theme.controlGap
             opacity: root.open ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.ease } }

@@ -5,6 +5,9 @@ import QtQuick.Controls.Basic as B
 Item {
     id: root
 
+    //! The accent it draws in: its window's own, if that declares one (see Theme).
+    readonly property color tint: Theme.accentIn(Window.window)
+
     property string label: ""
     property alias model: combo.model
     property alias currentIndex: combo.currentIndex
@@ -38,9 +41,9 @@ Item {
         background: Rectangle {
             color: combo.hovered || combo.popup.visible ? Theme.sunkenHover : Theme.sunken
             border.width: 1
-            border.color: combo.popup.visible || combo.visualFocus ? Theme.accent : "transparent"
+            border.color: combo.popup.visible || combo.visualFocus ? root.tint : "transparent"
             radius: Theme.radius
-            Rectangle { width: Theme.s(3); height: parent.height; color: Theme.accent }
+            Rectangle { width: Theme.s(3); height: parent.height; color: root.tint }
         }
         contentItem: Text {
             leftPadding: Theme.s(12)
@@ -56,7 +59,7 @@ Item {
             y: (combo.height - height) / 2
             direction: Qt.DownArrow
             width: Theme.arrowH; height: Theme.arrowW
-            color: Theme.accent
+            color: root.tint
             rotation: combo.popup.visible ? 180 : 0
             Behavior on rotation { NumberAnimation { duration: Theme.ease } }
         }
@@ -71,11 +74,11 @@ Item {
                 text: d.modelData
                 leftPadding: Theme.s(4)
                 font: combo.font
-                color: d.highlighted ? Theme.accentInk : (combo.currentIndex === d.index ? Theme.accent : Theme.text)
+                color: d.highlighted ? Theme.inkOf(root.tint) : (combo.currentIndex === d.index ? root.tint : Theme.text)
                 verticalAlignment: Text.AlignVCenter
                 elide: Text.ElideRight
             }
-            background: Rectangle { color: d.highlighted ? Theme.accent : "transparent" }
+            background: Rectangle { color: d.highlighted ? root.tint : "transparent" }
         }
         popup: B.Popup {
             y: combo.height + 1
@@ -90,7 +93,7 @@ Item {
                 boundsBehavior: Flickable.StopAtBounds
                 B.ScrollBar.vertical: ParamScrollBar {}
             }
-            background: Rectangle { color: Theme.sunken; border.width: 1; border.color: Theme.accent }
+            background: Rectangle { color: Theme.sunken; border.width: 1; border.color: root.tint }
         }
     }
 }

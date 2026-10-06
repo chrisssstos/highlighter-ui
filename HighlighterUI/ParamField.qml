@@ -5,6 +5,9 @@ import QtQuick
 Item {
     id: root
 
+    //! The accent it draws in: its window's own, if that declares one (see Theme).
+    readonly property color tint: Theme.accentIn(Window.window)
+
     property string label: ""
     property string text: ""
     property string placeholder: ""
@@ -36,7 +39,7 @@ Item {
         radius: Theme.radius
         color: root.editing ? Theme.sunken : (hover.hovered ? Theme.wellHover : Theme.well)
         border.width: 1
-        border.color: root.editing ? Theme.accent : "transparent"
+        border.color: root.editing ? root.tint : "transparent"
         Behavior on color { ColorAnimation { duration: Theme.quick } }
 
         TextInput {
@@ -48,8 +51,8 @@ Item {
             clip: true
             selectByMouse: true
             color: Theme.text
-            selectionColor: Theme.accent
-            selectedTextColor: Theme.accentInk
+            selectionColor: root.tint
+            selectedTextColor: Theme.inkOf(root.tint)
             font.family: root.mono ? Theme.mono : Theme.family
             font.pixelSize: Theme.labelSize
             property bool cancelling: false

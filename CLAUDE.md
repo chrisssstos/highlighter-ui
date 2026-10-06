@@ -22,11 +22,18 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
    - preset buttons → `ParamChoice`
    - section headings → `ParamHeading`, collapsible sections → `ParamGroup`
    - paste-into-TOML blocks → `ParamCode`
+   - notes, statuses, paths, column names over rows → `ParamText` (never a
+     hand-styled `Text`); an "is playing" dot → `ParamLight`
    - the scrolling column → `ParamPage`
    - see "What goes where" below for sections, grids and meters
 3. Keep the project's own setting plumbing. Value controls mirror Qt's
    Slider: bind `value`, write back in `onMoved: v => ...`. Watch for
-   settings reloads the same way the old code did.
+   settings reloads the same way the old code did. Checks, toggles, choices
+   and groups tell you first and only change themselves if you didn't, so
+   `checked` / `currentIndex` / `open` bound to your state stay bound: bind
+   them and set your state in the handler, no re-syncing needed.
+   Anything a panel needs that the kit lacks goes into the kit (with the
+   gallery and the checks), not into the project.
 4. Give every slider `key:` its setting's key (e.g. "fire.reachMin"). The
    panel remembers which sliders the user maximised by that key; two
    sliders sharing a label would otherwise share the memory.
@@ -39,7 +46,8 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
    clears.
 6. Accent and size: set `Theme.accent` once if the project wants a colour
    other than the lime, and `Theme.compact = true` for a dense panel.
-   Don't recolour controls one by one.
+   Two panels that should look apart: give one window its own
+   `property color accent` (Theme.accentIn). Don't recolour controls one by one.
 7. Scale: if the window scales itself for DPI (an app's own `ui` scale), set
    `Theme.scale` to it once instead of multiplying sizes.
 8. Every kit control needs `width: parent.width` inside a Column, ParamPage

@@ -194,6 +194,26 @@ Window {
                 ParamCheck { text: "a check with a label far too long to fit in its cell" }
             }
 
+            ParamHeading { width: parent.width; text: "Text and lights" }
+            ParamText { width: parent.width; text: "A note under some controls, dim, wrapping when it runs longer than the column is wide." }
+            ParamText { width: parent.width; tone: "normal"; text: "Saved." }
+            ParamText { width: parent.width; tone: "faint"; small: true; mono: true; elide: Text.ElideMiddle; wrapMode: Text.NoWrap; text: "C:/Users/someone/Documents/downstream/settings/a/very/long/path/app_settings.toml" }
+            Row {
+                spacing: Theme.s(10)
+                ParamText { caps: true; text: "sound" }
+                ParamText { caps: true; text: "plays" }
+                ParamText { caps: true; text: "level" }
+            }
+            Row {
+                spacing: Theme.s(10)
+                ParamLight { on: true; anchors.verticalCenter: parent.verticalCenter }
+                ParamText { tone: "normal"; text: "playing" }
+                ParamLight { on: false; anchors.verticalCenter: parent.verticalCenter }
+                ParamText { text: "silent" }
+                ParamLight { on: true; enabled: false; anchors.verticalCenter: parent.verticalCenter }
+                ParamText { text: "disabled" }
+            }
+
             ParamHeading { width: parent.width; text: "Choices" }
             ParamChoice { width: parent.width; label: "overall preset"; model: ["1", "2"]; currentIndex: 0; cellHeight: Theme.s(44); cellMinWidth: Theme.s(44) }
             ParamChoice { width: parent.width; label: "shader"; model: ["ring", "kaleidoscope", "flood", "explosion"]; currentIndex: 1 }
@@ -318,6 +338,7 @@ Window {
 
             ParamCode {
                 width: parent.width
+                open: true
                 title: "Fire values (paste into settings/app_settings.toml)"
                 text: "[fire]\noverall = " + (fire.overall + 1)
                     + "\n\n[fire.preset2]\nreachMin = " + fire.reachMin
@@ -327,6 +348,7 @@ Window {
                     + "\n\n[fire.kaleidoscope.preset2]\nslices = " + fire.slices
                     + "\ntwist = " + fire.twist
             }
+            ParamCode { width: parent.width; title: "Layout values (folded, the default)"; text: "[ambient.signage]\nxMm = 201\nyMm = -300\n\n[touch]\nyMm = 126" }
 
             ParamSection {
                 width: parent.width; title: "Defaults on this machine"

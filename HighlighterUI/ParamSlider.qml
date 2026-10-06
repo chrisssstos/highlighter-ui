@@ -15,6 +15,9 @@ import "ParamMath.js" as PM
 Item {
     id: root
 
+    //! The accent it draws in: its window's own, if that declares one (see Theme).
+    readonly property color tint: Theme.accentIn(Window.window)
+
     property string label: ""
     property real value: 0
     property real from: 0
@@ -64,9 +67,10 @@ Item {
     readonly property int arrowH: sz("arrowH")
     readonly property int gap: sz("gap")
 
-    // The bar leaves room on its right for the value box and the up arrow
-    // to hang past a full bar, so every bar lines up whatever its limits.
-    readonly property real gutterR: Math.max(Theme.sliderSize("arrowW", false) + 2 * Theme.sliderSize("gap", false), Theme.s(46))
+    // The bar leaves room on its right for the up arrow to sit past a full
+    // bar, so every bar lines up whatever its limits; the value box stays
+    // inside the slider's width.
+    readonly property real gutterR: Theme.sliderSize("arrowW", false) + 2 * Theme.sliderSize("gap", false)
 
     // Drawn from an eased copy of the value, so steps glide and drags don't lag.
     property real shown: value
@@ -117,7 +121,7 @@ Item {
             anchors.rightMargin: Theme.s(8)
             anchors.verticalCenter: sizeMark.verticalCenter
             text: "↺"   // ↺
-            color: resetHover.hovered ? Theme.accent : Theme.textFaint
+            color: resetHover.hovered ? root.tint : Theme.textFaint
             font.family: Theme.family
             font.pixelSize: root.sz("title")
             opacity: !root.isDefault && (hover.hovered || root.activeFocus) ? 1 : 0
@@ -136,7 +140,7 @@ Item {
             // Like the reset mark: only there while the slider is hovered or focused.
             opacity: hover.hovered || root.activeFocus ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.ease } }
-            readonly property color ink: sizeHover.hovered ? Theme.accent : Theme.textFaint
+            readonly property color ink: sizeHover.hovered ? root.tint : Theme.textFaint
             // a hairline minus to minimise; a hairline plus to restore
             Rectangle {
                 anchors.centerIn: parent
@@ -176,7 +180,7 @@ Item {
             anchors.margins: -Theme.s(2)
             color: "transparent"
             border.width: 1
-            border.color: Theme.accent
+            border.color: root.tint
             opacity: root.activeFocus && !ma.focusedByMouse && !box.editing ? 0.6 : 0
             radius: Theme.radius
         }
@@ -186,7 +190,7 @@ Item {
             x: root.fillX
             width: root.fillW
             height: parent.height
-            color: Theme.accent
+            color: root.tint
             radius: Theme.radius
         }
         // the darker line along the fill's moving edge
@@ -195,7 +199,7 @@ Item {
             x: root.growsRight ? root.edgeX - root.lineW : root.edgeX
             width: root.lineW
             height: parent.height
-            color: Theme.accentEdge
+            color: Theme.edgeOf(root.tint)
         }
 
         // the saved default, dotted, while the value is away from it
@@ -226,7 +230,7 @@ Item {
                     y: index * Theme.s(6)
                     width: defaultMark.width; height: Theme.s(3)
                     visible: !(defaultMark.broken && y + height > defaultMark.gapTop && y < defaultMark.gapBottom)
-                    color: defaultMark.overFill ? Theme.accentInk : Theme.text
+                    color: defaultMark.overFill ? Theme.inkOf(root.tint) : Theme.text
                     opacity: defaultMark.overFill ? 0.55 : 0.6
                 }
             }
@@ -238,7 +242,7 @@ Item {
             x: Math.round(root.originX)
             width: 1
             height: parent.height
-            color: root.fillW < 1 ? Theme.accent : Theme.page
+            color: root.fillW < 1 ? root.tint : Theme.page
             opacity: 0.7
         }
 
@@ -252,7 +256,7 @@ Item {
             width: root.arrowW; height: root.arrowH
             anchors.verticalCenter: parent.verticalCenter
             readonly property bool hot: root.canDown && (ma.hoverZone === -1 || (ma.pressed && ma.pressZone === -1))
-            color: root.onFill(x) ? (hot ? Theme.accentInk : Theme.accentDim)
+            color: root.onFill(x) ? (hot ? Theme.inkOf(root.tint) : Theme.dimOf(root.tint))
                                   : (hot ? Theme.arrowHot : Theme.arrow)
             scale: hot && ma.pressed && !ma.dragging ? 0.85 : 1
         }
@@ -266,7 +270,7 @@ Item {
             width: root.arrowW; height: root.arrowH
             anchors.verticalCenter: parent.verticalCenter
             readonly property bool hot: root.canUp && (ma.hoverZone === 1 || (ma.pressed && ma.pressZone === 1))
-            color: root.onFill(x) ? (hot ? Theme.accentInk : Theme.accentDim)
+            color: root.onFill(x) ? (hot ? Theme.inkOf(root.tint) : Theme.dimOf(root.tint))
                                   : (hot ? Theme.arrowHot : Theme.arrow)
             scale: hot && ma.pressed && !ma.dragging ? 0.85 : 1
         }

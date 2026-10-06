@@ -4,6 +4,9 @@ import QtQuick.Controls.Basic as B
 /// A thin scroll bar that turns lime while it is held.
 B.ScrollBar {
     id: bar
+
+    //! The accent it draws in: its window's own, if that declares one (see Theme).
+    readonly property color tint: Theme.accentIn(Window.window)
     policy: B.ScrollBar.AsNeeded
     padding: Theme.s(2)
     contentItem: Rectangle {
@@ -11,7 +14,7 @@ B.ScrollBar {
         implicitHeight: implicitWidth
         radius: width / 2
         antialiasing: Theme.smooth
-        color: bar.pressed ? Theme.accent : bar.hovered ? Theme.arrow : Theme.line
+        color: bar.pressed ? bar.tint : bar.hovered ? Theme.arrow : Theme.line
         opacity: bar.size < 1 ? 1 : 0
         Behavior on implicitWidth { NumberAnimation { duration: Theme.quick } }
     }
