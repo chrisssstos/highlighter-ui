@@ -1,4 +1,3 @@
-Industrial-look assets for HighlighterUI, all made for the kit:
-knob.png, screw.png, powder.png, sheen.png and vignette.png are rendered by
-tools/render_assets.py; scanlines.png is a three-pixel tile.
+Classic-skin assets for HighlighterUI, made for the kit:
+knob_classic.png and sheen.png are rendered by tools/render_assets.py.
 No third-party graphics.

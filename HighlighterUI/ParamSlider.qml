@@ -187,16 +187,16 @@ Item {
             height: parent.height
             color: Theme.edgeOf(root.tint)
         }
-        // the fill catches the light, in the industrial look
+        // the fill catches the light, in the classic skin
         Image {
-            visible: (Theme.industrial || Theme.classic) && root.fillW > 0
+            visible: Theme.classic && root.fillW > 0
             x: root.fillX; width: root.fillW; height: parent.height
             source: "textures/sheen.png"
             smooth: true
             opacity: 0.3
         }
-        // the bar sits in a groove, in the industrial look
-        ParamBevel { anchors.fill: parent; visible: Theme.industrial || Theme.classic; inset: true; dark: 0.55; light: 0.14 }
+        // the bar sits in a channel, in the classic skin
+        ParamBevel { anchors.fill: parent; visible: Theme.classic; inset: true; dark: 0.55; light: 0.14 }
 
         // the saved default, dotted, while the value is away from it
         Item {

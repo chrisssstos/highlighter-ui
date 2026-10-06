@@ -18,16 +18,6 @@ Flickable {
 
     Rectangle {
         parent: root; z: -1; anchors.fill: parent; color: Theme.page
-        // industrial: the inside of a rack, dark and deep
-        Rectangle {
-            anchors.fill: parent
-            visible: Theme.industrial
-            gradient: Gradient {
-                GradientStop { position: 0; color: Qt.darker(Theme.rack, 1.25) }
-                GradientStop { position: 0.5; color: Theme.rack }
-                GradientStop { position: 1; color: Qt.darker(Theme.rack, 1.35) }
-            }
-        }
     }
 
     Column {
