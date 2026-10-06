@@ -9,8 +9,9 @@ looks and works the same.
 
 `run-gallery.bat` opens the gallery with Qt's `qml.exe`, so there's nothing to
 build. It shows every control in its normal and awkward states. The scale
-picker in the top bar resizes the whole kit, and "disable everything" shows
-the disabled states.
+picker resizes the whole kit, "sliders min / max" switches compact mode, the
+swatches change the accent, and "disable everything" shows the disabled
+states.
 
 ## The slider
 
@@ -18,6 +19,8 @@ the disabled states.
   for a centred range like "from screen centre".
 - **◀ ▶ at the fill's edge:** click to step by 1 (Shift: by 10), hold to
   repeat, or drag them to slide as usual (Shift while dragging slides finely).
+  They're always there: with no room they hang just past the bar's end, and
+  at a limit they grey out.
 - **The bar:** click anywhere else to jump there and drag. Double-click to
   reset to `defaultValue`. The ↺ by the label also resets.
 - **The value box** sits under the edge. Click it to type a value. It accepts
@@ -52,7 +55,12 @@ value box sits between its step arrows.
 | `ParamGroup` | folding group in a lime bracket |
 | `ParamCode` | copyable block (TOML to paste) |
 | `ParamPage` | scrolling column on the page colour |
-| `Theme` | colours, sizes, font, `scale` |
+| `ParamSwatches` | a row of colour swatches (a colour setting, or the accent) |
+| `Theme` | colours, sizes, font, `scale`, `compact`, `accent` |
+
+`Theme.compact` shrinks sliders, knobs and spacing to fit more on screen.
+`Theme.accent` recolours everything; the darker shades follow it, and
+`Theme.accents` lists ones that read well on the grey.
 
 CLAUDE.md says when each layout piece and meter is the right one.
 

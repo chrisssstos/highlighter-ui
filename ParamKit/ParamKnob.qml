@@ -21,7 +21,7 @@ Item {
     property real defaultValue: NaN
     //! Tick marks around the dial, 0 for none.
     property int ticks: 11
-    property int diameter: Theme.s(58)
+    property int diameter: Theme.knobSize
 
     signal moved(real value)
 
@@ -71,8 +71,8 @@ Item {
             property bool hot: drag.containsMouse || drag.pressed
             onHotChanged: requestPaint()
             Component.onCompleted: requestPaint()
-            Connections { target: Theme; function onAccentChanged() { face.requestPaint() } function onScaleChanged() { face.requestPaint() } }
-            Connections { target: root; function onFromChanged() { face.requestPaint() } function onToChanged() { face.requestPaint() } function onEnabledChanged() { face.requestPaint() } }
+            Connections { target: Theme; function onAccentChanged() { face.requestPaint() } function onScaleChanged() { face.requestPaint() } function onCompactChanged() { face.requestPaint() } }
+            Connections { target: root; function onFromChanged() { face.requestPaint() } function onToChanged() { face.requestPaint() } function onDiameterChanged() { face.requestPaint() } function onEnabledChanged() { face.requestPaint() } }
 
             onPaint: {
                 const ctx = getContext("2d")
@@ -214,7 +214,7 @@ Item {
         ParamArrow {
             anchors.centerIn: parent
             direction: sa.direction
-            opacity: sa.active && root.enabled ? 1 : 0.25
+            opacity: sa.active && root.enabled ? 1 : 0.3
             color: area.pressed ? Theme.accent : area.containsMouse ? Theme.arrowHot : Theme.arrow
             scale: area.pressed ? 0.85 : 1
         }

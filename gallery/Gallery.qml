@@ -16,6 +16,9 @@ Window {
     Component.onCompleted: {
         const sca = Qt.application.arguments.find(a => a.startsWith("--scale="))
         if (sca) Theme.scale = Number(sca.substring(8))
+        if (Qt.application.arguments.indexOf("--compact") >= 0) Theme.compact = true
+        const acc = Qt.application.arguments.find(a => a.startsWith("--accent="))
+        if (acc) Theme.accent = acc.substring(9)
     }
 
     // "-- --shot=<file.png>": save a picture of the gallery and quit.
@@ -32,17 +35,21 @@ Window {
     }
 
     // --- the top bar ---------------------------------------------------------
+    // Wraps onto a second line when the window (or the scale) runs out of room.
     Rectangle {
         id: bar
         width: parent.width
-        height: Theme.s(48)
+        height: topFlow.implicitHeight + 2 * Theme.s(10)
         color: Theme.sunken
-        Row {
-            x: Theme.s(16)
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: Theme.s(20)
+        Flow {
+            id: topFlow
+            x: Theme.s(16); y: Theme.s(10)
+            width: parent.width - 2 * Theme.s(16)
+            spacing: Theme.s(28)
+
             Text {
-                anchors.verticalCenter: parent.verticalCenter
+                height: Theme.s(28)
+                verticalAlignment: Text.AlignVCenter
                 text: "PARAMKIT"
                 color: Theme.accent
                 font.family: Theme.family
@@ -50,33 +57,44 @@ Window {
                 font.weight: Font.Black
                 font.letterSpacing: Theme.s(2)
             }
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                width: Math.max(0, bar.width - rightBar.width - x - Theme.s(56))
-                elide: Text.ElideRight
-                text: "gallery: every control, every awkward state"
-                color: Theme.textFaint
-                font.family: Theme.family
-                font.pixelSize: Theme.smallSize
+            Row {
+                spacing: Theme.s(10)
+                height: Theme.s(28)
+                Text { text: "accent"; color: Theme.textDim; font.family: Theme.family; font.pixelSize: Theme.smallSize; anchors.verticalCenter: parent.verticalCenter }
+                ParamSwatches {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: implicitWidth
+                    current: Theme.accent
+                    onPicked: c => Theme.accent = c
+                }
             }
-        }
-        Row {
-            id: rightBar
-            anchors.right: parent.right
-            anchors.rightMargin: Theme.s(16)
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: Theme.s(16)
-            Text { text: "scale"; color: Theme.textDim; font.family: Theme.family; font.pixelSize: Theme.smallSize; anchors.verticalCenter: parent.verticalCenter }
-            ParamChoice {
-                width: Theme.s(170)
-                anchors.verticalCenter: parent.verticalCenter
-                model: ["1", "1.25", "1.5", "2"]
-                currentIndex: 0
-                onActivated: i => Theme.scale = [1, 1.25, 1.5, 2][i]
+            Row {
+                spacing: Theme.s(10)
+                height: Theme.s(28)
+                Text { text: "sliders"; color: Theme.textDim; font.family: Theme.family; font.pixelSize: Theme.smallSize; anchors.verticalCenter: parent.verticalCenter }
+                ParamChoice {
+                    width: Theme.s(130)
+                    anchors.verticalCenter: parent.verticalCenter
+                    model: ["−  min", "+  max"]
+                    currentIndex: Theme.compact ? 0 : 1
+                    onActivated: i => Theme.compact = i === 0
+                }
+            }
+            Row {
+                spacing: Theme.s(10)
+                height: Theme.s(28)
+                Text { text: "scale"; color: Theme.textDim; font.family: Theme.family; font.pixelSize: Theme.smallSize; anchors.verticalCenter: parent.verticalCenter }
+                ParamChoice {
+                    width: Theme.s(170)
+                    anchors.verticalCenter: parent.verticalCenter
+                    model: ["1", "1.25", "1.5", "2"]
+                    currentIndex: [1, 1.25, 1.5, 2].indexOf(Theme.scale)
+                    onActivated: i => Theme.scale = [1, 1.25, 1.5, 2][i]
+                }
             }
             ParamToggle {
                 id: allOff
-                anchors.verticalCenter: parent.verticalCenter
+                height: Theme.s(28)
                 text: "disable everything"
             }
         }
@@ -96,9 +114,9 @@ Window {
 
             ParamHeading { width: parent.width; text: "The mockup"; note: "0..46, no lower than 0, may go past 46" }
             ParamSlider { width: parent.width; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 0; defaultValue: 16 }
-            ParamSlider { width: parent.width; label: "Text size (1: no room for the down arrow)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 1; defaultValue: 16 }
+            ParamSlider { width: parent.width; label: "Text size (1: the down arrow hangs past the start)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 1; defaultValue: 16 }
             ParamSlider { width: parent.width; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 23; defaultValue: 16 }
-            ParamSlider { width: parent.width; label: "Text size (45: no room for the up arrow)"; unit: "px"; from: 0; to: 46; limitFrom: 0; limitTo: 46; value: 45; defaultValue: 16 }
+            ParamSlider { width: parent.width; label: "Text size (45: the up arrow hangs past the end)"; unit: "px"; from: 0; to: 46; limitFrom: 0; limitTo: 46; value: 45; defaultValue: 16 }
             ParamSlider { width: parent.width; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 46; defaultValue: 16 }
             ParamSlider { width: parent.width; label: "Text size (past the end)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 47; defaultValue: 16 }
 
@@ -111,7 +129,7 @@ Window {
             ParamSlider { width: parent.width; label: "all below zero"; from: -10; to: -2; value: -6 }
 
             ParamHeading { width: parent.width; text: "Limits" }
-            ParamSlider { width: parent.width; label: "hard 0..10: no arrow past either end"; from: 0; to: 10; limitFrom: 0; limitTo: 10; value: 10 }
+            ParamSlider { width: parent.width; label: "hard 0..10: at the top, the up arrow greys out"; from: 0; to: 10; limitFrom: 0; limitTo: 10; value: 10 }
             ParamSlider { width: parent.width; label: "may go under 0"; from: 0; to: 20; value: -3 }
             ParamSlider { width: parent.width; label: "1 of 0..1000: fill thinner than an arrow"; from: 0; to: 1000; limitFrom: 0; value: 1 }
             ParamSlider { width: parent.width; label: "from = to (a range of nothing)"; from: 5; to: 5; value: 5 }

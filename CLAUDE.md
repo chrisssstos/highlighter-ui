@@ -26,9 +26,12 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
    `origin: 0`; a value that must not go below 0 gets `limitFrom: 0`; a
    genuine hard maximum gets `limitTo`. Give a `defaultValue` when the
    installed default is known, so double-click resets.
-5. Scale: if the window scales itself for DPI (an app's own `ui` scale), set
+5. Accent and size: set `Theme.accent` once if the project wants a colour
+   other than the lime, and `Theme.compact = true` for a dense panel.
+   Don't recolour controls one by one.
+6. Scale: if the window scales itself for DPI (an app's own `ui` scale), set
    `Theme.scale` to it once instead of multiplying sizes.
-6. Every kit control needs `width: parent.width` inside a Column, ParamPage
+7. Every kit control needs `width: parent.width` inside a Column, ParamPage
    or ParamGroup. Never bind a width to a Row's width (that makes a binding
    loop).
 
@@ -69,5 +72,8 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   the gallery, with its awkward states shown.
 - `ParamArrow` (a Shape) must keep an explicit width and height; an implicit
   size collapses it in compiled builds.
-- Colours, sizes and the font live in `Theme.qml` only. Write `Theme.s(px)`
+- Gallery screenshot flags (after `--`): `--shot=<png>`, `--scroll=<px>`,
+  `--scale=<n>`, `--compact`, `--accent=<#hex>`.
+- Colours, sizes and the font live in `Theme.qml` only; sizes that change in
+  compact mode use `Theme.c(full, compact)`. Write `Theme.s(px)`
   for every size, so `scale` works.

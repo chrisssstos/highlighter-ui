@@ -64,21 +64,17 @@ Item {
     readonly property real fillW: Math.abs(edgeX - originX)
 
     // --- where the arrows go -------------------------------------------------
-    // Either side of the edge line: down on the fill, up on the well
+    // Always either side of the edge line: down on the fill, up on the well
     // (swapped sides for a fill growing left). An arrow with no room on its
-    // side of the edge is left out; that step is still a key press, a drag
-    // or a typed value away. Past a full bar the up arrow sits outside it,
-    // in the gutter.
+    // side simply hangs past the bar's end. An arrow that can't step (the
+    // value is at its limit) stays, greyed out.
     readonly property real lineW: Math.min(Theme.edgeLine, fillW)
     readonly property bool growsRight: edgeX >= originX
     readonly property var arrowX: {
-        const w = Theme.arrowW, g = Theme.arrowGap, e = edgeX, pad = Theme.arrowPad
+        const w = Theme.arrowW, g = Theme.arrowGap, e = edgeX
         const lineL = growsRight ? lineW : 0, lineR = growsRight ? 0 : lineW
         const dx = e - lineL - g - w, ux = e + lineR + g
-        const atEnd = e >= track.width - 0.5
-        return { down: dx, up: ux,
-                 downFits: dx >= pad,
-                 upFits: atEnd || ux + w <= track.width - pad }
+        return { down: dx, up: ux }
     }
     function onFill(x) { const c = x + Theme.arrowW / 2; return c > fillX && c < fillX + fillW }
 
@@ -165,24 +161,26 @@ Item {
         ParamArrow {
             id: down
             direction: Qt.LeftArrow
-            visible: root.canDown && root.enabled && root.arrowX.downFits
+            visible: root.enabled
+            opacity: root.canDown ? 1 : 0.3
             x: root.arrowX.down
             anchors.verticalCenter: parent.verticalCenter
-            readonly property bool hot: ma.hoverZone === -1 || (ma.pressed && ma.pressZone === -1)
+            readonly property bool hot: root.canDown && (ma.hoverZone === -1 || (ma.pressed && ma.pressZone === -1))
             color: root.onFill(x) ? (hot ? Theme.accentInk : Theme.accentDim)
                                   : (hot ? Theme.arrowHot : Theme.arrow)
-            scale: ma.pressed && ma.pressZone === -1 && !ma.dragging ? 0.85 : 1
+            scale: hot && ma.pressed && !ma.dragging ? 0.85 : 1
         }
         ParamArrow {
             id: up
             direction: Qt.RightArrow
-            visible: root.canUp && root.enabled && root.arrowX.upFits
+            visible: root.enabled
+            opacity: root.canUp ? 1 : 0.3
             x: root.arrowX.up
             anchors.verticalCenter: parent.verticalCenter
-            readonly property bool hot: ma.hoverZone === 1 || (ma.pressed && ma.pressZone === 1)
+            readonly property bool hot: root.canUp && (ma.hoverZone === 1 || (ma.pressed && ma.pressZone === 1))
             color: root.onFill(x) ? (hot ? Theme.accentInk : Theme.accentDim)
                                   : (hot ? Theme.arrowHot : Theme.arrow)
-            scale: ma.pressed && ma.pressZone === 1 && !ma.dragging ? 0.85 : 1
+            scale: hot && ma.pressed && !ma.dragging ? 0.85 : 1
         }
     }
 
@@ -190,8 +188,9 @@ Item {
 
     MouseArea {
         id: ma
-        y: track.y
-        width: root.width; height: track.height
+        // reaches left of the bar too, for a down arrow hanging past its start
+        x: -(Theme.arrowW + Theme.arrowGap + Theme.s(6)); y: track.y
+        width: root.width - x; height: track.height
         enabled: root.enabled
         hoverEnabled: true
         preventStealing: true
@@ -207,12 +206,13 @@ Item {
         readonly property int hoverZone: containsMouse && !pressed ? zoneAt(mouseX) : 0
 
         cursorShape: dragging ? Qt.SizeHorCursor
-                   : hoverZone !== 0 ? Qt.PointingHandCursor
+                   : (hoverZone === -1 && root.canDown) || (hoverZone === 1 && root.canUp) ? Qt.PointingHandCursor
                    : Qt.ArrowCursor
 
         //! -1 over the down arrow, +1 over the up arrow, 0 over the bar.
         //! Each arrow's zone is generous; where they meet, it splits halfway.
         function zoneAt(mx) {
+            mx += ma.x
             const w = Theme.arrowW, r = Theme.s(6)
             const d = root.arrowX.down, u = root.arrowX.up
             const dVis = down.visible, uVis = up.visible
@@ -227,7 +227,7 @@ Item {
             return 0
         }
         function valueAt(mx) {
-            return root.from + PM.clamp(mx / track.width, 0, 1) * (root.to - root.from)
+            return root.from + PM.clamp((mx + ma.x) / track.width, 0, 1) * (root.to - root.from)
         }
         function rebase(mx) { startX = mx; startValue = root.value }
 
