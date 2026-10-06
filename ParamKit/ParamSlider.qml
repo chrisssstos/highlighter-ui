@@ -132,12 +132,15 @@ Item {
             // Like the reset mark: only there while the slider is hovered or focused.
             opacity: hover.hovered || root.activeFocus ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.ease } }
-            // a picture of the bar it switches to: a thin line, or a full block
+            readonly property color ink: sizeHover.hovered ? Theme.accent : Theme.textFaint
+            // a picture of the bar it switches to: a hairline, or an outlined box
             Rectangle {
                 anchors.centerIn: parent
-                width: parent.width
-                height: root.compact ? parent.height : Theme.s(3)
-                color: sizeHover.hovered ? Theme.accent : Theme.textFaint
+                width: Theme.s(10)
+                height: root.compact ? Theme.s(7) : Math.max(1, Theme.s(1))
+                color: root.compact ? "transparent" : sizeMark.ink
+                border.width: root.compact ? 1 : 0
+                border.color: sizeMark.ink
             }
             HoverHandler { id: sizeHover; cursorShape: Qt.PointingHandCursor }
             TapHandler { enabled: sizeMark.opacity > 0; onTapped: root.compact = !root.compact }
