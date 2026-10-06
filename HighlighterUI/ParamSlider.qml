@@ -33,6 +33,9 @@ Item {
     //! What the panel remembers this slider by (whether it was maximised).
     //! Give it the setting's key; the label is used if not.
     property string key: label
+    //! Whether it has its own min / max button (off when it is part of
+    //! another control, as in a minimised ParamXY).
+    property bool sizeToggle: true
     //! Minimised: a thin bar. Sliders start minimised, unless the user
     //! maximised this one before; the min / max button by the label flips it.
     property bool compact: Theme.slidersStartMinimised && !PanelMemory.isMaximised(key)
@@ -117,8 +120,8 @@ Item {
         }
         Text {
             id: resetMark
-            anchors.right: sizeMark.left
-            anchors.rightMargin: Theme.s(8)
+            anchors.right: root.sizeToggle ? sizeMark.left : parent.right
+            anchors.rightMargin: root.sizeToggle ? Theme.s(8) : root.gutterR
             anchors.verticalCenter: sizeMark.verticalCenter
             text: "↺"   // ↺
             color: resetHover.hovered ? root.tint : Theme.textFaint
@@ -129,37 +132,20 @@ Item {
             HoverHandler { id: resetHover; cursorShape: Qt.PointingHandCursor }
             TapHandler { enabled: resetMark.opacity > 0; onTapped: root.reset() }
         }
-        // min / max: a picture of the bar it switches to, thin or full
-        Item {
+        // min / max, like the reset mark only there while hovered or focused
+        ParamSizeMark {
             id: sizeMark
             objectName: "sizeMark"
             anchors.right: parent.right
             anchors.rightMargin: root.gutterR
             anchors.verticalCenter: title.verticalCenter
-            width: Theme.s(14); height: Theme.s(12)
-            // Like the reset mark: only there while the slider is hovered or focused.
-            opacity: hover.hovered || root.activeFocus ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: Theme.ease } }
-            readonly property color ink: sizeHover.hovered ? root.tint : Theme.textFaint
-            // a hairline minus to minimise; a hairline plus to restore
-            Rectangle {
-                anchors.centerIn: parent
-                width: Theme.s(10); height: Math.max(1, Theme.s(1))
-                color: sizeMark.ink
-            }
-            Rectangle {
-                anchors.centerIn: parent
-                visible: root.compact
-                width: Math.max(1, Theme.s(1)); height: Theme.s(10)
-                color: sizeMark.ink
-            }
-            HoverHandler { id: sizeHover; cursorShape: Qt.PointingHandCursor }
-            TapHandler {
-                enabled: sizeMark.opacity > 0
-                onTapped: {
-                    root.compact = !root.compact
-                    PanelMemory.setMaximised(root.key, !root.compact)
-                }
+            visible: root.sizeToggle
+            compact: root.compact
+            shown: hover.hovered || root.activeFocus
+            tint: root.tint
+            onToggled: {
+                root.compact = !root.compact
+                PanelMemory.setMaximised(root.key, !root.compact)
             }
         }
     }

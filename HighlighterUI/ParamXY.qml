@@ -9,6 +9,11 @@ import "ParamMath.js" as PM
 /// ghosts mark where other elements sit. Away from the default, a dotted
 /// square marks it; double-click or the reset mark goes back.
 ///
+/// Minimised it is two thin sliders, x and y, bundled under its label;
+/// maximised, the grid. Like sliders it starts minimised unless the user
+/// maximised it before (remembered by key), and the − / + by its label
+/// flips it.
+///
 /// Like the slider: xValue/yValue are set by the user and moved(x, y)
 /// reports only user changes, so bind them to your settings and write them
 /// back in onMoved.
@@ -38,6 +43,10 @@ Item {
     property real footprintHeight: 0
     //! Other elements, faintly, for reference: [{ x, y, label }].
     property var ghosts: []
+    //! What the panel remembers it by; the label if not given.
+    property string key: label
+    //! Minimised: two thin sliders instead of the grid.
+    property bool compact: Theme.slidersStartMinimised && !PanelMemory.isMaximised(key)
 
     signal moved(real x, real y)
 
@@ -45,7 +54,7 @@ Item {
     readonly property bool pressed: ma.pressed
 
     implicitWidth: Theme.s(300)
-    implicitHeight: head.height + pad.height + Theme.s(6) + boxes.height
+    implicitHeight: head.height + (root.compact ? pair.height : pad.height + Theme.s(6) + boxes.height)
     activeFocusOnTab: true
     opacity: enabled ? 1 : 0.4
 
@@ -88,7 +97,7 @@ Item {
         visible: height > 0
         Text {
             id: title
-            width: parent.width - resetMark.width - Theme.s(8)
+            width: parent.width - resetMark.width - sizeMark.width - Theme.s(16)
             text: root.label
             elide: Text.ElideRight
             color: Theme.text
@@ -97,7 +106,8 @@ Item {
         }
         Text {
             id: resetMark
-            anchors.right: parent.right
+            anchors.right: sizeMark.left
+            anchors.rightMargin: Theme.s(8)
             anchors.verticalCenter: title.verticalCenter
             text: "↺"   // ↺
             color: resetHover.hovered ? root.tint : Theme.textFaint
@@ -108,12 +118,61 @@ Item {
             HoverHandler { id: resetHover; cursorShape: Qt.PointingHandCursor }
             TapHandler { enabled: resetMark.opacity > 0; onTapped: root.reset() }
         }
+        ParamSizeMark {
+            id: sizeMark
+            objectName: "sizeMark"
+            anchors.right: parent.right
+            anchors.verticalCenter: title.verticalCenter
+            compact: root.compact
+            shown: hover.hovered || root.activeFocus
+            tint: root.tint
+            onToggled: {
+                root.compact = !root.compact
+                PanelMemory.setMaximised(root.key, !root.compact)
+            }
+        }
+    }
+
+    // --- minimised: x and y as two thin sliders --------------------------------
+    Column {
+        id: pair
+        objectName: "pair"
+        visible: root.compact
+        y: head.height
+        width: parent.width
+        spacing: Theme.s(4)
+        Repeater {
+            model: ["x", "y"]
+            ParamSlider {
+                required property string modelData
+                readonly property bool isX: modelData === "x"
+                objectName: modelData + "Slider"
+                width: pair.width
+                label: modelData
+                key: root.key + "." + modelData
+                sizeToggle: false
+                compact: true
+                enabled: root.enabled
+                unit: root.unit
+                stepSize: root.stepSize
+                decimals: root.decimals
+                from: isX ? root.xFrom : root.yFrom
+                to: isX ? root.xTo : root.yTo
+                origin: from < 0 && to > 0 ? 0 : from
+                limitFrom: Math.min(from, to)
+                limitTo: Math.max(from, to)
+                defaultValue: isX ? root.defaultX : root.defaultY
+                value: isX ? root.xValue : root.yValue
+                onMoved: v => isX ? root.setXY(v, root.yValue) : root.setXY(root.xValue, v)
+            }
+        }
     }
 
     // --- the pad -------------------------------------------------------------
     Rectangle {
         id: pad
         objectName: "pad"
+        visible: !root.compact
         y: head.height
         width: parent.width
         height: Math.round(width / Math.max(0.05, root.aspect))
@@ -285,6 +344,7 @@ Item {
     // --- the values ----------------------------------------------------------
     Row {
         id: boxes
+        visible: !root.compact
         y: pad.y + pad.height + Theme.s(6)
         spacing: Theme.s(14)
         Repeater {

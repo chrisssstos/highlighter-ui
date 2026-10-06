@@ -19,6 +19,7 @@ qt_add_qml_module(HighlighterUI
         PanelMemory.qml
         ParamMath.js
         ParamArrow.qml
+        ParamSizeMark.qml
         ParamValueBox.qml
         ParamSlider.qml
         ParamKnob.qml
