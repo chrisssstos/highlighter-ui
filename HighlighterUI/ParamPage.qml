@@ -16,7 +16,17 @@ Flickable {
     boundsBehavior: Flickable.StopAtBounds
     B.ScrollBar.vertical: ParamScrollBar {}
 
-    Rectangle { parent: root; z: -1; anchors.fill: parent; color: Theme.page }
+    Rectangle {
+        parent: root; z: -1; anchors.fill: parent; color: Theme.page
+        // a fine grain over the page, in the industrial look
+        Image {
+            anchors.fill: parent
+            visible: Theme.industrial
+            source: "textures/grain.png"
+            fillMode: Image.Tile
+            smooth: false
+        }
+    }
 
     Column {
         id: column

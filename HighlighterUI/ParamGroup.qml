@@ -56,6 +56,7 @@ Item {
             font.pixelSize: Theme.labelSize
             font.weight: Font.Bold
             font.letterSpacing: Theme.s(0.5)
+            style: Theme.titleStyle; styleColor: Theme.titleStyleColor
         }
         Text {
             x: titleText.x + titleText.width + Theme.s(8)
@@ -86,7 +87,10 @@ Item {
         readonly property int pad: Theme.s(12)
         Behavior on height { NumberAnimation { duration: Theme.ease; easing.type: Easing.OutCubic } }
 
-        Rectangle { anchors.fill: parent; color: Theme.raised }
+        ParamPlate {
+            anchors.fill: parent
+            screwInsetLeft: root.collapsible ? Theme.s(13) : Theme.s(5)
+        }
         // the bracket, a bar with a foot at each end: only on a group that
         // folds, so it marks what can fold
         Item {

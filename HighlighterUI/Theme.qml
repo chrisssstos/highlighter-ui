@@ -69,6 +69,8 @@ QtObject {
     property color editFill:  "#a8abae"   // a value box while it is typed in
     property color editText:  "#4a25c9"
     property color danger:    "#e0664f"
+    property color screen:    "#2b2f2e"   // a value box's LCD, the XY pad's scope, in the industrial look
+    property color screwFace: "#8e9391"
 
     // --- size --------------------------------------------------------------
     // c(full, compact)
@@ -96,6 +98,13 @@ QtObject {
     property int smallSize: s(11)
 
     // --- drawing -----------------------------------------------------------
+    //! The industrial look: brushed, bevelled plates with screws, a grained
+    //! page, inset grooves, LCD value boxes, a scope screen for the XY pad,
+    //! knurled knobs, LED buttons and stamped titles. Off: flat.
+    property bool industrial: true
+    //! A stamped title's style: a dark edge under the letters when industrial.
+    readonly property int titleStyle: industrial ? Text.Raised : Text.Normal
+    readonly property color titleStyleColor: Qt.rgba(0, 0, 0, 0.6)
     //! Antialiasing for arrows, dials and round shapes. Off: hard,
     //! nearest-neighbour edges, the kit's look. Text stays smooth.
     property bool smooth: false

@@ -187,6 +187,8 @@ Item {
             height: parent.height
             color: Theme.edgeOf(root.tint)
         }
+        // the bar sits in a groove, in the industrial look
+        ParamBevel { anchors.fill: parent; visible: Theme.industrial; inset: true; dark: 0.45; light: 0.12 }
 
         // the saved default, dotted, while the value is away from it
         Item {

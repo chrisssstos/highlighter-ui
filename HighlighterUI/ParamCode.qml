@@ -58,6 +58,7 @@ Item {
             font.family: Theme.family
             font.pixelSize: Theme.smallSize
             font.weight: Font.Bold
+            style: Theme.titleStyle; styleColor: Theme.titleStyleColor
             font.letterSpacing: Theme.s(1)
         }
         MouseArea {
