@@ -47,6 +47,8 @@ Item {
     }
     function step(direction, big) { setValue(root.value + direction * root.stepSize * (big ? 10 : 1)) }
     function reset() { if (!isNaN(root.defaultValue)) setValue(root.defaultValue) }
+    //! Makes the value the new default (what a panel's "Save as defaults" does).
+    function saveDefault() { root.defaultValue = root.value }
 
     readonly property bool canDown: root.value > root.limitFrom
     readonly property bool canUp: root.value < root.limitTo
@@ -126,25 +128,19 @@ Item {
             anchors.right: parent.right
             anchors.rightMargin: root.gutterR
             anchors.verticalCenter: title.verticalCenter
-            width: Theme.s(16); height: Theme.s(14)
-            readonly property color ink: sizeHover.hovered ? Theme.accent : Theme.textFaint
-            opacity: hover.hovered || root.activeFocus || sizeHover.hovered ? 1 : 0.45
+            width: Theme.s(14); height: Theme.s(12)
+            // Like the reset mark: only there while the slider is hovered or focused.
+            opacity: hover.hovered || root.activeFocus ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.ease } }
+            // a picture of the bar it switches to: a thin line, or a full block
             Rectangle {
-                anchors.fill: parent
-                color: "transparent"
-                border.width: 1
-                border.color: sizeMark.ink
-            }
-            Rectangle {
-                anchors.left: parent.left; anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.margins: Theme.s(3)
-                height: root.compact ? parent.height - Theme.s(6) : Theme.s(2)
-                color: sizeMark.ink
+                anchors.centerIn: parent
+                width: parent.width
+                height: root.compact ? parent.height : Theme.s(3)
+                color: sizeHover.hovered ? Theme.accent : Theme.textFaint
             }
             HoverHandler { id: sizeHover; cursorShape: Qt.PointingHandCursor }
-            TapHandler { onTapped: root.compact = !root.compact }
+            TapHandler { enabled: sizeMark.opacity > 0; onTapped: root.compact = !root.compact }
         }
     }
 
@@ -184,6 +180,29 @@ Item {
             width: root.lineW
             height: parent.height
             color: Theme.accentEdge
+        }
+
+        // the saved default, dotted, while the value is away from it
+        Item {
+            id: defaultMark
+            visible: !root.isDefault
+            readonly property real at: root.defaultValue > root.to ? track.width
+                                     : track.width * root.fraction(root.defaultValue)
+            readonly property bool overFill: at > root.fillX && at < root.fillX + root.fillW
+            x: Math.round(Math.min(at, track.width - width))
+            width: Theme.s(2)
+            height: parent.height
+            Column {
+                spacing: Theme.s(3)
+                Repeater {
+                    model: Math.ceil(track.height / Theme.s(6))
+                    Rectangle {
+                        width: defaultMark.width; height: Theme.s(3)
+                        color: defaultMark.overFill ? Theme.accentInk : Theme.text
+                        opacity: defaultMark.overFill ? 0.55 : 0.6
+                    }
+                }
+            }
         }
 
         // the origin of a centred range

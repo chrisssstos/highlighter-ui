@@ -42,6 +42,14 @@ Item {
             verify(!s.editing)
             compare(s.value, 23)
         }
+        function test_saveDefault() {
+            s.defaultValue = 10
+            verify(!s.isDefault, "away from the default: the dotted line shows")
+            s.saveDefault()
+            compare(s.defaultValue, 23)
+            verify(s.isDefault, "saved: it goes")
+            s.defaultValue = NaN
+        }
         function test_minMaxButton() {
             const full = s.height
             const mark = findChild(s, "sizeMark")
