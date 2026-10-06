@@ -14,6 +14,8 @@ Item {
     Text {
         id: cap
         visible: root.title.length > 0
+        width: parent.width
+        elide: Text.ElideRight
         text: root.title.toUpperCase()
         color: Theme.textDim
         font.family: Theme.family

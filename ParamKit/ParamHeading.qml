@@ -25,6 +25,8 @@ Item {
         }
         Text {
             visible: root.note.length > 0
+            width: Math.min(implicitWidth, Math.max(0, root.width - t.width - row.spacing))
+            elide: Text.ElideRight
             text: root.note
             color: Theme.textFaint
             font.family: Theme.family

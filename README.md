@@ -44,11 +44,17 @@ value box sits between its step arrows.
 | `ParamCombo` | drop-down |
 | `ParamField` | one-line text |
 | `ParamMeter` | read-only live value with peak |
+| `ParamGauge` | read-only half-dial with a warning zone |
+| `ParamLevel` | read-only segmented level (sound, signal) |
+| `ParamGrid` | equal columns, as many as fit, for short alike controls |
+| `ParamSection` | an always-open titled section in a lime bracket |
 | `ParamHeading` | small caps heading with a rule |
 | `ParamGroup` | folding group in a lime bracket |
 | `ParamCode` | copyable block (TOML to paste) |
 | `ParamPage` | scrolling column on the page colour |
 | `Theme` | colours, sizes, font, `scale` |
+
+CLAUDE.md says when each layout piece and meter is the right one.
 
 Value controls behave like Qt's `Slider`: bind `value`, write back in
 `onMoved`:
