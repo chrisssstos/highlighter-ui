@@ -110,12 +110,11 @@ Window {
             height: parent.height
 
             ParamHeading { width: parent.width; text: "The mockup"; note: "0..46, no lower than 0, may go past 46" }
-            ParamSlider { width: parent.width; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 0; defaultValue: 16 }
+            ParamSlider { width: parent.width; key: "mockup.textSize1"; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 0; defaultValue: 16 }
             ParamSlider { width: parent.width; label: "Text size (1: the down arrow hangs past the start)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 1; defaultValue: 16 }
-            ParamSlider { width: parent.width; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 23; defaultValue: 16 }
-            ParamSlider { width: parent.width; label: "Text size (minimised: the button by the label)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 23; defaultValue: 16; compact: true }
+            ParamSlider { width: parent.width; key: "mockup.textSize2"; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 23; defaultValue: 16 }
             ParamSlider { width: parent.width; label: "Text size (45: the up arrow hangs past the end)"; unit: "px"; from: 0; to: 46; limitFrom: 0; limitTo: 46; value: 45; defaultValue: 16 }
-            ParamSlider { width: parent.width; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 46; defaultValue: 16 }
+            ParamSlider { width: parent.width; key: "mockup.textSize3"; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 46; defaultValue: 16 }
             ParamSlider { width: parent.width; label: "Text size (past the end)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 47; defaultValue: 16 }
 
             ParamHeading { width: parent.width; text: "Ranges" }

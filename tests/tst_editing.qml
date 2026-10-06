@@ -51,18 +51,30 @@ Item {
             s.defaultValue = NaN
         }
         function test_minMaxButton() {
-            const full = s.height
+            PanelMemory.store.maximised = "[]"
+            s.compact = true
+            const small = s.height
             const mark = findChild(s, "sizeMark")
             verify(mark, "the min / max button exists")
             // it only shows (and takes clicks) once the slider is hovered
             mouseMove(mark); wait(250)
             mouseClick(mark)
-            verify(s.compact, "a click minimises the slider")
-            verify(s.height < full, "and it gets shorter")
+            verify(!s.compact, "a click maximises the slider")
+            verify(s.height > small, "and it gets taller")
+            verify(PanelMemory.isMaximised(s.key), "and the panel remembers it")
+
+            // as if the app restarted: a new slider with the same key starts maximised
+            const again = Qt.createQmlObject('import HighlighterUI; ParamSlider { key: "' + s.key + '" }', top)
+            verify(!again.compact, "remembered across a restart")
+            const other = Qt.createQmlObject('import HighlighterUI; ParamSlider { key: "never.touched" }', top)
+            verify(other.compact, "others still start minimised")
+            again.destroy(); other.destroy()
+
             mouseMove(mark); wait(250)
             mouseClick(mark)
-            verify(!s.compact)
-            compare(s.height, full)
+            verify(s.compact)
+            compare(s.height, small)
+            verify(!PanelMemory.isMaximised(s.key), "minimising forgets it")
         }
         function test_junkThenClickAway() {
             const b = box()

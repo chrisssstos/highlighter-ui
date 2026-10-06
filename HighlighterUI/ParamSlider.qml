@@ -27,8 +27,12 @@ Item {
     property real limitFrom: -Infinity
     property real limitTo: Infinity
     property real defaultValue: NaN
-    //! Minimised: a thin bar. The min / max button by the label flips it.
-    property bool compact: Theme.compact
+    //! What the panel remembers this slider by (whether it was maximised).
+    //! Give it the setting's key; the label is used if not.
+    property string key: label
+    //! Minimised: a thin bar. Sliders start minimised, unless the user
+    //! maximised this one before; the min / max button by the label flips it.
+    property bool compact: Theme.slidersStartMinimised && !PanelMemory.isMaximised(key)
 
     signal moved(real value)
 
@@ -146,7 +150,13 @@ Item {
                 color: sizeMark.ink
             }
             HoverHandler { id: sizeHover; cursorShape: Qt.PointingHandCursor }
-            TapHandler { enabled: sizeMark.opacity > 0; onTapped: root.compact = !root.compact }
+            TapHandler {
+                enabled: sizeMark.opacity > 0
+                onTapped: {
+                    root.compact = !root.compact
+                    PanelMemory.setMaximised(root.key, !root.compact)
+                }
+            }
         }
     }
 
