@@ -40,6 +40,14 @@ Window {
             // "--scroll=<px>": scroll every column down first
             const sc = Qt.application.arguments.find(a => a.startsWith("--scroll="))
             if (sc) for (const p of [page1, page2, inUse]) p.contentY = Math.min(Number(sc.substring(9)), Math.max(0, p.contentHeight - p.height))
+            if (Qt.application.arguments.indexOf("--second") >= 0) {
+                second.visible = true
+                second.contentItem.grabToImage(r2 => {
+                    r2.saveToFile(file.replace(/\.png$/, "-second.png"))
+                    win.contentItem.grabToImage(r => { r.saveToFile(file); Qt.quit() })
+                })
+                return
+            }
             win.contentItem.grabToImage(r => { r.saveToFile(file); Qt.quit() })
         }
     }
@@ -93,6 +101,13 @@ Window {
                 id: allOff
                 height: Theme.s(28)
                 text: "disable everything"
+            }
+            ParamButton {
+                height: Theme.s(28)
+                text: "second panel"
+                checkable: true
+                checked: second.visible
+                onClicked: second.visible = !second.visible
             }
         }
     }
@@ -361,6 +376,39 @@ Window {
                     ParamButton { text: "Reset to installed defaults"; onClicked: win.resetAll() }
                 }
             }
+        }
+    }
+
+    // A second panel that declares its own accent: its controls draw in pink
+    // whatever the swatches set, so two panels in one app look apart.
+    Window {
+        id: second
+        property color accent: "#ff79c6"
+        objectName: "secondPanel"
+        title: "HighlighterUI second panel (own accent)"
+        width: Theme.s(380); height: Theme.s(460)
+        color: Theme.page
+        ParamPage {
+            anchors.fill: parent
+            ParamHeading { width: parent.width; text: "Sound panel"; note: "property color accent: pink" }
+            ParamSlider { width: parent.width; key: "second.volume"; label: "turbine volume"; unit: " %"; from: 0; to: 100; value: 70; defaultValue: 80; compact: false }
+            ParamSlider { width: parent.width; key: "second.fire"; label: "fire volume"; unit: " %"; from: 0; to: 100; value: 45 }
+            ParamGrid {
+                width: parent.width
+                minColumnWidth: Theme.s(110)
+                ParamKnob { label: "pan"; from: -1; to: 1; stepSize: 0.01; origin: 0; value: -0.3 }
+                ParamKnob { label: "reverb"; from: 0; to: 1; stepSize: 0.01; value: 0.6 }
+            }
+            ParamCheck { text: "mute while idle"; checked: true }
+            ParamToggle { text: "sparks"; checked: true }
+            ParamChoice { width: parent.width; label: "mix"; model: ["quiet", "normal", "loud"]; currentIndex: 1 }
+            Row {
+                spacing: Theme.s(10)
+                ParamLight { on: true; anchors.verticalCenter: parent.verticalCenter }
+                ParamText { tone: "normal"; text: "turbine playing" }
+            }
+            ParamMeter { width: parent.width; label: "level"; value: live.l }
+            ParamButton { text: "Save as defaults"; accent: true }
         }
     }
 
