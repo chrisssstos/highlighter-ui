@@ -59,10 +59,9 @@ Item {
         Image {
             anchors.fill: parent
             visible: Theme.industrial
-            source: "textures/brushed.png"
+            source: "textures/powder.png"
             fillMode: Image.Tile
             smooth: false
-            opacity: root.accent ? 0.35 : 0.7
         }
         Image {   // a convex sheen, turned over when it is pressed in
             anchors.fill: parent

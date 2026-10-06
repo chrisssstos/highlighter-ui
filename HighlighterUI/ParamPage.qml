@@ -18,13 +18,15 @@ Flickable {
 
     Rectangle {
         parent: root; z: -1; anchors.fill: parent; color: Theme.page
-        // a fine grain over the page, in the industrial look
-        Image {
+        // industrial: the inside of a rack, dark and deep
+        Rectangle {
             anchors.fill: parent
             visible: Theme.industrial
-            source: "textures/grain.png"
-            fillMode: Image.Tile
-            smooth: false
+            gradient: Gradient {
+                GradientStop { position: 0; color: Qt.darker(Theme.rack, 1.25) }
+                GradientStop { position: 0.5; color: Theme.rack }
+                GradientStop { position: 1; color: Qt.darker(Theme.rack, 1.35) }
+            }
         }
     }
 

@@ -72,15 +72,17 @@ value box sits between its step arrows.
 
 `Theme.compact` shrinks knobs and spacing; `Theme.slidersStartMinimised`
 (on) is whether sliders the user hasn't maximised start thin.
-`Theme.industrial` (on) is the analogue look: brushed, bevelled plates with
-screws behind sections and groups, a grained page, inset grooves for the
-bars, LCD value boxes, a scope screen for the XY pad, knurled knobs with a
-pointer line, brushed buttons with an LED when they stay down, and stamped
-titles. Off gives the flat look. `ParamPlate`, `ParamScrew` and `ParamBevel`
-are the pieces, for a panel's own surfaces. The surfaces are real CC0 scans
-(ambientCG brushed aluminium and worn steel); the knob caps and screws are
-rendered sprites, lit like a plugin's (`tools/render_assets.py` regenerates
-them; credits in `HighlighterUI/textures/CREDITS.txt`).
+`Theme.industrial` (on) is the modular-synth look: the page is the inside
+of a rack, and every section and group is a module, its own satin
+powder-coated faceplate bolted to a pair of rack rails, its name printed
+across the top, a maker's mark at the foot, screws in the corners. A group
+that folds has a power LED (lit while open) and folds to a slim blank panel;
+a group inside another is a recessed sub-panel. Sliders sit in grooves, value
+boxes are LCDs, the XY pad is a scope, knobs are rendered aluminium caps,
+buttons have a sheen and an LED when they stay down. Off gives the flat look.
+`ParamPlate`, `ParamRail`, `ParamScrew` and `ParamBevel` are the pieces. All
+the assets are rendered for the kit (`tools/render_assets.py`); see
+`HighlighterUI/textures/CREDITS.txt`.
 `Theme.smooth` (off) turns antialiasing back on for arrows, knobs, gauges and
 round shapes; off gives the kit its hard, nearest-neighbour edges.
 `Theme.accent` recolours everything; the darker shades follow it, and

@@ -1,10 +1,9 @@
 """Renders HighlighterUI's industrial-look assets into HighlighterUI/textures.
 
-Run from the repo root:  python tools/render_assets.py <path to ambientCG downloads>
+Run from the repo root:  python tools/render_assets.py
 
-- Surfaces come from real CC0 scans (ambientCG Metal009 brushed aluminium,
-  Metal011 worn steel), turned into light/dark overlays so they sit on any
-  Theme colour.
+- Faceplates get a fine powder-coat grain (rendered noise, softened), as a
+  light/dark overlay so it sits on any Theme colour.
 - Knob caps and screws are rendered like a plugin's knob sprites: lit from
   the upper left, supersampled 4x and scaled down.
 Needs numpy and Pillow.
@@ -28,6 +27,16 @@ def overlay_from_scan(path, size, strength, blur=0):
     a = np.asarray(im, dtype=np.float32)
     d = (a - a.mean()) / (a.std() + 1e-6)
     d = np.clip(d / 2.5, -1, 1)
+    alpha = (np.abs(d) * strength).astype(np.uint8)
+    rgb = np.where(d[..., None] > 0, 255, 0).astype(np.uint8).repeat(3, axis=2)
+    return Image.fromarray(np.dstack([rgb, alpha]), "RGBA")
+
+
+def powder(n=128, strength=11):
+    """A satin powder-coat: a fine, even, quiet grain, tiling."""
+    rng = np.random.default_rng(5)
+    a = rng.normal(0, 1, (n, n)).astype(np.float32)
+    d = np.clip(a / 2.2, -1, 1)
     alpha = (np.abs(d) * strength).astype(np.uint8)
     rgb = np.where(d[..., None] > 0, 255, 0).astype(np.uint8).repeat(3, axis=2)
     return Image.fromarray(np.dstack([rgb, alpha]), "RGBA")
@@ -142,9 +151,7 @@ def vignette(n=256):
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    scan = lambda name: os.path.join(SRC, name, f"{name}_1K-JPG_Color.jpg")
-    overlay_from_scan(scan("Metal009"), 512, 42).save(os.path.join(OUT, "brushed.png"))
-    overlay_from_scan(scan("Metal011"), 512, 30).save(os.path.join(OUT, "grain.png"))
+    powder().save(os.path.join(OUT, "powder.png"))
     knob_cap().save(os.path.join(OUT, "knob.png"))
     screw().save(os.path.join(OUT, "screw.png"))
     sheen().save(os.path.join(OUT, "sheen.png"))

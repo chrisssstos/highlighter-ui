@@ -132,36 +132,44 @@ Window {
             width: parent.width / 3
             height: parent.height
 
-            ParamHeading { width: parent.width; text: "The mockup"; note: "0..46, no lower than 0, may go past 46" }
-            ParamSlider { width: parent.width; key: "mockup.textSize1"; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 0; defaultValue: 16 }
-            ParamSlider { width: parent.width; label: "Text size (1: the down arrow hangs past the start)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 1; defaultValue: 16 }
-            ParamSlider { width: parent.width; key: "mockup.textSize2"; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 23; defaultValue: 16 }
-            ParamSlider { width: parent.width; label: "Text size (45: the up arrow hangs past the end)"; unit: "px"; from: 0; to: 46; limitFrom: 0; limitTo: 46; value: 45; defaultValue: 16 }
-            ParamSlider { width: parent.width; key: "mockup.textSize3"; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 46; defaultValue: 16 }
-            ParamSlider { width: parent.width; label: "Text size (past the end)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 47; defaultValue: 16 }
+            ParamSection {
+                width: parent.width; title: "The mockup"; note: "0..46, no lower than 0, may go past 46"
+                ParamSlider { width: parent.width; key: "mockup.textSize1"; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 0; defaultValue: 16 }
+                ParamSlider { width: parent.width; label: "Text size (1: the down arrow hangs past the start)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 1; defaultValue: 16 }
+                ParamSlider { width: parent.width; key: "mockup.textSize2"; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 23; defaultValue: 16 }
+                ParamSlider { width: parent.width; label: "Text size (45: the up arrow hangs past the end)"; unit: "px"; from: 0; to: 46; limitFrom: 0; limitTo: 46; value: 45; defaultValue: 16 }
+                ParamSlider { width: parent.width; key: "mockup.textSize3"; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 46; defaultValue: 16 }
+                ParamSlider { width: parent.width; label: "Text size (past the end)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 47; defaultValue: 16 }
 
-            ParamHeading { width: parent.width; text: "Ranges" }
-            ParamSlider { width: parent.width; label: "top edge from centre (fills from 0)"; unit: " mm"; from: -400; to: 400; origin: 0; value: -300; defaultValue: 0 }
-            ParamSlider { width: parent.width; label: "left edge from centre"; unit: " mm"; from: -400; to: 400; origin: 0; value: 201; defaultValue: 0 }
-            ParamSlider { width: parent.width; label: "preview reach"; from: 0; to: 1; stepSize: 0.01; value: 0.5; defaultValue: 0.5 }
-            ParamSlider { width: parent.width; label: "kaleidoscope blooms over (step 50)"; unit: " ms"; from: 0; to: 10000; stepSize: 50; value: 4500; defaultValue: 4500 }
-            ParamSlider { width: parent.width; label: "fine: 0.001 steps"; from: 0; to: 0.1; stepSize: 0.001; value: 0.053 }
-            ParamSlider { width: parent.width; label: "all below zero"; from: -10; to: -2; value: -6 }
+            }
+            ParamSection {
+                width: parent.width; title: "Ranges"
+                ParamSlider { width: parent.width; label: "top edge from centre (fills from 0)"; unit: " mm"; from: -400; to: 400; origin: 0; value: -300; defaultValue: 0 }
+                ParamSlider { width: parent.width; label: "left edge from centre"; unit: " mm"; from: -400; to: 400; origin: 0; value: 201; defaultValue: 0 }
+                ParamSlider { width: parent.width; label: "preview reach"; from: 0; to: 1; stepSize: 0.01; value: 0.5; defaultValue: 0.5 }
+                ParamSlider { width: parent.width; label: "kaleidoscope blooms over (step 50)"; unit: " ms"; from: 0; to: 10000; stepSize: 50; value: 4500; defaultValue: 4500 }
+                ParamSlider { width: parent.width; label: "fine: 0.001 steps"; from: 0; to: 0.1; stepSize: 0.001; value: 0.053 }
+                ParamSlider { width: parent.width; label: "all below zero"; from: -10; to: -2; value: -6 }
 
-            ParamHeading { width: parent.width; text: "Limits" }
-            ParamSlider { width: parent.width; label: "hard 0..10: at the top, the up arrow greys out"; from: 0; to: 10; limitFrom: 0; limitTo: 10; value: 10 }
-            ParamSlider { width: parent.width; label: "may go under 0"; from: 0; to: 20; value: -3 }
-            ParamSlider { width: parent.width; label: "1 of 0..1000: fill thinner than an arrow"; from: 0; to: 1000; limitFrom: 0; value: 1 }
-            ParamSlider { width: parent.width; label: "from = to (a range of nothing)"; from: 5; to: 5; value: 5 }
+            }
+            ParamSection {
+                width: parent.width; title: "Limits"
+                ParamSlider { width: parent.width; label: "hard 0..10: at the top, the up arrow greys out"; from: 0; to: 10; limitFrom: 0; limitTo: 10; value: 10 }
+                ParamSlider { width: parent.width; label: "may go under 0"; from: 0; to: 20; value: -3 }
+                ParamSlider { width: parent.width; label: "1 of 0..1000: fill thinner than an arrow"; from: 0; to: 1000; limitFrom: 0; value: 1 }
+                ParamSlider { width: parent.width; label: "from = to (a range of nothing)"; from: 5; to: 5; value: 5 }
 
-            ParamHeading { width: parent.width; text: "Awkward" }
-            ParamSlider { width: parent.width; label: "turbine dimming under every visual (0 none, 1 black), a label far too long for its row"; from: 0; to: 1; stepSize: 0.01; value: 1 }
-            ParamSlider { width: parent.width; label: "disabled"; from: 0; to: 100; value: 40; enabled: false }
-            ParamSlider { width: Theme.s(150); label: "narrow"; unit: " mm"; from: 0; to: 900; value: 690 }
-            ParamSlider { width: parent.width; label: "a big unit"; unit: " frames per second"; from: 0; to: 240; value: 60 }
-            ParamSlider { width: parent.width; label: ""; from: 0; to: 100; value: 30 }
-            Text { width: parent.width; wrapMode: Text.Wrap; color: Theme.textFaint; font.family: Theme.family; font.pixelSize: Theme.smallSize
-                   text: "Arrows: click to step 1 (Shift 10), hold to repeat, drag to slide (Shift while dragging: fine). Bar: click to jump, double-click to reset. Box: click to type, sums allowed (40+6), Up/Down step, Esc cancels. Keyboard: Tab in, arrows / PgUp / PgDn / Home / End, Enter types, Delete resets." }
+            }
+            ParamSection {
+                width: parent.width; title: "Awkward"
+                ParamSlider { width: parent.width; label: "turbine dimming under every visual (0 none, 1 black), a label far too long for its row"; from: 0; to: 1; stepSize: 0.01; value: 1 }
+                ParamSlider { width: parent.width; label: "disabled"; from: 0; to: 100; value: 40; enabled: false }
+                ParamSlider { width: Theme.s(150); label: "narrow"; unit: " mm"; from: 0; to: 900; value: 690 }
+                ParamSlider { width: parent.width; label: "a big unit"; unit: " frames per second"; from: 0; to: 240; value: 60 }
+                ParamSlider { width: parent.width; label: ""; from: 0; to: 100; value: 30 }
+                Text { width: parent.width; wrapMode: Text.Wrap; color: Theme.textFaint; font.family: Theme.family; font.pixelSize: Theme.smallSize
+                       text: "Arrows: click to step 1 (Shift 10), hold to repeat, drag to slide (Shift while dragging: fine). Bar: click to jump, double-click to reset. Box: click to type, sums allowed (40+6), Up/Down step, Esc cancels. Keyboard: Tab in, arrows / PgUp / PgDn / Home / End, Enter types, Delete resets." }
+            }
         }
 
         // --- column 2: knobs, buttons, toggles, choices, meters --------------------
@@ -170,111 +178,127 @@ Window {
             width: parent.width / 3
             height: parent.height
 
-            ParamHeading { width: parent.width; text: "Knobs"; note: "in a grid: as many columns as fit" }
-            ParamGrid {
-                width: parent.width
-                minColumnWidth: Theme.s(120)
-                ParamKnob { label: "slices"; from: 3; to: 24; value: 15; defaultValue: 12 }
-                ParamKnob { label: "twist"; from: -1; to: 1; stepSize: 0.001; origin: 0; value: -0.297; defaultValue: 0 }
-                ParamKnob { label: "ring ignites"; unit: " ms"; from: 0; to: 4500; stepSize: 50; value: 2500; ticks: 0 }
-                ParamKnob { label: "past the end"; from: 0; to: 10; limitFrom: 0; value: 12 }
-                ParamKnob { label: "disabled"; from: 0; to: 10; value: 4; enabled: false }
-            }
+            ParamSection {
+                width: parent.width; title: "Knobs"; note: "in a grid: as many columns as fit"
+                ParamGrid {
+                    width: parent.width
+                    minColumnWidth: Theme.s(120)
+                    ParamKnob { label: "slices"; from: 3; to: 24; value: 15; defaultValue: 12 }
+                    ParamKnob { label: "twist"; from: -1; to: 1; stepSize: 0.001; origin: 0; value: -0.297; defaultValue: 0 }
+                    ParamKnob { label: "ring ignites"; unit: " ms"; from: 0; to: 4500; stepSize: 50; value: 2500; ticks: 0 }
+                    ParamKnob { label: "past the end"; from: 0; to: 10; limitFrom: 0; value: 12 }
+                    ParamKnob { label: "disabled"; from: 0; to: 10; value: 4; enabled: false }
+                }
 
-            ParamHeading { width: parent.width; text: "Buttons" }
-            Flow {
-                width: parent.width
-                spacing: Theme.s(6)
-                ParamButton { text: "Save as defaults"; accent: true; onClicked: win.saveDefaults() }
-                ParamButton { text: "Reset to installed defaults"; onClicked: win.resetAll() }
-                ParamButton { text: "Copy"; icon: "\u2398" }
-                ParamButton { text: "Preview full screen"; checkable: true }
-                ParamButton { text: "Delete preset"; danger: true }
-                ParamButton { text: "Disabled"; enabled: false }
-                ParamButton { text: "Disabled accent"; accent: true; enabled: false }
             }
-            Flow {
-                width: parent.width
-                spacing: 1
-                ParamButton { icon: "\u25AE\u25C0"; text: "" ; implicitWidth: Theme.s(34) }
-                ParamButton { icon: "\u25B6"; text: "Play"; checkable: true; checked: true }
-                ParamButton { icon: "\u275A\u275A"; text: "Pause" }
-                ParamButton { icon: "\u25A0"; text: "Stop" }
-                ParamButton { icon: "\u25B6\u25AE"; text: ""; implicitWidth: Theme.s(34) }
-            }
-            ParamButton { width: parent.width; text: "A full-width button with a label long enough to need the room" }
+            ParamSection {
+                width: parent.width; title: "Buttons"
+                Flow {
+                    width: parent.width
+                    spacing: Theme.s(6)
+                    ParamButton { text: "Save as defaults"; accent: true; onClicked: win.saveDefaults() }
+                    ParamButton { text: "Reset to installed defaults"; onClicked: win.resetAll() }
+                    ParamButton { text: "Copy"; icon: "\u2398" }
+                    ParamButton { text: "Preview full screen"; checkable: true }
+                    ParamButton { text: "Delete preset"; danger: true }
+                    ParamButton { text: "Disabled"; enabled: false }
+                    ParamButton { text: "Disabled accent"; accent: true; enabled: false }
+                }
+                Flow {
+                    width: parent.width
+                    spacing: 1
+                    ParamButton { icon: "\u25AE\u25C0"; text: "" ; implicitWidth: Theme.s(34) }
+                    ParamButton { icon: "\u25B6"; text: "Play"; checkable: true; checked: true }
+                    ParamButton { icon: "\u275A\u275A"; text: "Pause" }
+                    ParamButton { icon: "\u25A0"; text: "Stop" }
+                    ParamButton { icon: "\u25B6\u25AE"; text: ""; implicitWidth: Theme.s(34) }
+                }
+                ParamButton { width: parent.width; text: "A full-width button with a label long enough to need the room" }
 
-            ParamHeading { width: parent.width; text: "On / off"; note: "in a grid" }
-            ParamGrid {
-                width: parent.width
-                minColumnWidth: Theme.s(170)
-                ParamCheck { text: "Tiles" }
-                ParamCheck { text: "Outline LED tiles"; checked: true }
-                ParamCheck { text: "Disabled"; enabled: false; checked: true }
-                ParamToggle { text: "Preview full screen" }
-                ParamToggle { text: "Sound"; checked: true }
-                ParamToggle { text: "Disabled"; enabled: false }
-                ParamCheck { text: "a check with a label far too long to fit in its cell" }
             }
+            ParamSection {
+                width: parent.width; title: "On / off"; note: "in a grid"
+                ParamGrid {
+                    width: parent.width
+                    minColumnWidth: Theme.s(170)
+                    ParamCheck { text: "Tiles" }
+                    ParamCheck { text: "Outline LED tiles"; checked: true }
+                    ParamCheck { text: "Disabled"; enabled: false; checked: true }
+                    ParamToggle { text: "Preview full screen" }
+                    ParamToggle { text: "Sound"; checked: true }
+                    ParamToggle { text: "Disabled"; enabled: false }
+                    ParamCheck { text: "a check with a label far too long to fit in its cell" }
+                }
 
-            ParamHeading { width: parent.width; text: "XY pad"; note: "drag the dot; Shift fine, Ctrl snaps" }
-            ParamXY {
-                width: parent.width
-                label: "plain, −100..100"
-                xValue: 30; yValue: -40; defaultX: 0; defaultY: 0
             }
-            ParamGrid {
-                width: parent.width
-                minColumnWidth: Theme.s(180)
-                ParamXY { label: "graph (y up), 0..1"; xFrom: 0; xTo: 1; yFrom: 0; yTo: 1; stepSize: 0.01; yDown: false; xValue: 0.7; yValue: 0.25 }
-                ParamXY { label: "disabled"; xValue: -20; yValue: 50; enabled: false }
-            }
+            ParamSection {
+                width: parent.width; title: "XY pad"; note: "drag the dot; Shift fine, Ctrl snaps"
+                ParamXY {
+                    width: parent.width
+                    label: "plain, −100..100"
+                    xValue: 30; yValue: -40; defaultX: 0; defaultY: 0
+                }
+                ParamGrid {
+                    width: parent.width
+                    minColumnWidth: Theme.s(180)
+                    ParamXY { label: "graph (y up), 0..1"; xFrom: 0; xTo: 1; yFrom: 0; yTo: 1; stepSize: 0.01; yDown: false; xValue: 0.7; yValue: 0.25 }
+                    ParamXY { label: "disabled"; xValue: -20; yValue: 50; enabled: false }
+                }
 
-            ParamHeading { width: parent.width; text: "Text and lights" }
-            ParamText { width: parent.width; text: "A note under some controls, dim, wrapping when it runs longer than the column is wide." }
-            ParamText { width: parent.width; tone: "normal"; text: "Saved." }
-            ParamText { width: parent.width; tone: "faint"; small: true; mono: true; elide: Text.ElideMiddle; wrapMode: Text.NoWrap; text: "C:/Users/someone/Documents/downstream/settings/a/very/long/path/app_settings.toml" }
-            Row {
-                spacing: Theme.s(10)
-                ParamText { caps: true; text: "sound" }
-                ParamText { caps: true; text: "plays" }
-                ParamText { caps: true; text: "level" }
             }
-            Row {
-                spacing: Theme.s(10)
-                ParamLight { on: true; anchors.verticalCenter: parent.verticalCenter }
-                ParamText { tone: "normal"; text: "playing" }
-                ParamLight { on: false; anchors.verticalCenter: parent.verticalCenter }
-                ParamText { text: "silent" }
-                ParamLight { on: true; enabled: false; anchors.verticalCenter: parent.verticalCenter }
-                ParamText { text: "disabled" }
+            ParamSection {
+                width: parent.width; title: "Text and lights"
+                ParamText { width: parent.width; text: "A note under some controls, dim, wrapping when it runs longer than the column is wide." }
+                ParamText { width: parent.width; tone: "normal"; text: "Saved." }
+                ParamText { width: parent.width; tone: "faint"; small: true; mono: true; elide: Text.ElideMiddle; wrapMode: Text.NoWrap; text: "C:/Users/someone/Documents/downstream/settings/a/very/long/path/app_settings.toml" }
+                Row {
+                    spacing: Theme.s(10)
+                    ParamText { caps: true; text: "sound" }
+                    ParamText { caps: true; text: "plays" }
+                    ParamText { caps: true; text: "level" }
+                }
+                Row {
+                    spacing: Theme.s(10)
+                    ParamLight { on: true; anchors.verticalCenter: parent.verticalCenter }
+                    ParamText { tone: "normal"; text: "playing" }
+                    ParamLight { on: false; anchors.verticalCenter: parent.verticalCenter }
+                    ParamText { text: "silent" }
+                    ParamLight { on: true; enabled: false; anchors.verticalCenter: parent.verticalCenter }
+                    ParamText { text: "disabled" }
+                }
+
             }
+            ParamSection {
+                width: parent.width; title: "Choices"
+                ParamChoice { width: parent.width; label: "overall preset"; model: ["1", "2"]; currentIndex: 0; cellHeight: Theme.s(44); cellMinWidth: Theme.s(44) }
+                ParamChoice { width: parent.width; label: "shader"; model: ["ring", "kaleidoscope", "flood", "explosion"]; currentIndex: 1 }
+                ParamChoice { width: parent.width; label: "many (wraps)"; model: ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]; currentIndex: 6 }
+                ParamCombo { width: parent.width; label: "blend mode"; model: ["normal", "add", "screen", "multiply", "overlay", "difference"]; currentIndex: 1 }
+                ParamCombo { width: parent.width; label: "a long list (scrolls)"; model: 40; currentIndex: 12 }
+                ParamCombo { width: parent.width; label: "disabled"; model: ["one", "two"]; enabled: false }
 
-            ParamHeading { width: parent.width; text: "Choices" }
-            ParamChoice { width: parent.width; label: "overall preset"; model: ["1", "2"]; currentIndex: 0; cellHeight: Theme.s(44); cellMinWidth: Theme.s(44) }
-            ParamChoice { width: parent.width; label: "shader"; model: ["ring", "kaleidoscope", "flood", "explosion"]; currentIndex: 1 }
-            ParamChoice { width: parent.width; label: "many (wraps)"; model: ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]; currentIndex: 6 }
-            ParamCombo { width: parent.width; label: "blend mode"; model: ["normal", "add", "screen", "multiply", "overlay", "difference"]; currentIndex: 1 }
-            ParamCombo { width: parent.width; label: "a long list (scrolls)"; model: 40; currentIndex: 12 }
-            ParamCombo { width: parent.width; label: "disabled"; model: ["one", "two"]; enabled: false }
-
-            ParamHeading { width: parent.width; text: "Text" }
-            ParamField { width: parent.width; label: "settings file"; mono: true; text: "C:/Users/someone/settings/MyApp/app_settings.toml" }
-            ParamField { width: parent.width; label: "preset name"; placeholder: "untitled preset" }
-
-            ParamHeading { width: parent.width; text: "Meters"; note: "read-only, for live values only" }
-            ParamMeter { width: parent.width; label: "meter: a live 0..1"; value: live.a }
-            ParamGrid {
-                width: parent.width
-                minColumnWidth: Theme.s(130)
-                ParamGauge { label: "gauge, warns at 85%"; value: live.load; unit: "%"; decimals: 0; to: 100; warnAt: 85 }
-                ParamGauge { label: "gauge, no warning"; value: live.a }
             }
-            Row {
-                spacing: Theme.s(10)
-                ParamLevel { label: "L"; value: live.l; warnAt: 0.8 }
-                ParamLevel { label: "R"; value: live.r; warnAt: 0.8 }
-                ParamLevel { label: "no warn"; value: live.a; segments: 10 }
+            ParamSection {
+                width: parent.width; title: "Text"
+                ParamField { width: parent.width; label: "settings file"; mono: true; text: "C:/Users/someone/settings/MyApp/app_settings.toml" }
+                ParamField { width: parent.width; label: "preset name"; placeholder: "untitled preset" }
+
+            }
+            ParamSection {
+                width: parent.width; title: "Meters"; note: "read-only, for live values only"
+                ParamMeter { width: parent.width; label: "meter: a live 0..1"; value: live.a }
+                ParamGrid {
+                    width: parent.width
+                    minColumnWidth: Theme.s(130)
+                    ParamGauge { label: "gauge, warns at 85%"; value: live.load; unit: "%"; decimals: 0; to: 100; warnAt: 85 }
+                    ParamGauge { label: "gauge, no warning"; value: live.a }
+                }
+                Row {
+                    spacing: Theme.s(10)
+                    ParamLevel { label: "L"; value: live.l; warnAt: 0.8 }
+                    ParamLevel { label: "R"; value: live.r; warnAt: 0.8 }
+                    ParamLevel { label: "no warn"; value: live.a; segments: 10 }
+                }
             }
         }
 

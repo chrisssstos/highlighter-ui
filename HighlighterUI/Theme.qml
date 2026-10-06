@@ -71,6 +71,7 @@ QtObject {
     property color danger:    "#e0664f"
     property color screen:    "#2b2f2e"   // a value box's LCD, the XY pad's scope, in the industrial look
     property color screwFace: "#8e9391"
+    property color rack:      "#1c1e1d"   // the inside of the rack, behind the modules (industrial)
 
     // --- size --------------------------------------------------------------
     // c(full, compact)
