@@ -33,14 +33,13 @@ QtObject {
     property color danger:    "#e0664f"
 
     // --- size --------------------------------------------------------------
-    // Sizes at scale 1, from the Figma slider (drawn at 2x).
-    property int trackHeight: s(78)
-    property int edgeLine:    s(6)    // the darker line along the fill's edge
+    property int trackHeight: s(44)
+    property int edgeLine:    s(4)    // the darker line along the fill's edge
     property int boxHeight:   s(22)
-    property int arrowW:      s(12)
-    property int arrowH:      s(15)
-    property int arrowGap:    s(5)    // between an arrow and the fill's edge
-    property int arrowPad:    s(6)    // an arrow's least distance from a bar end
+    property int arrowW:      s(10)
+    property int arrowH:      s(12)
+    property int arrowGap:    s(4)    // between an arrow and the fill's edge
+    property int arrowPad:    s(4)    // an arrow's least distance from a bar end
     property int rowGap:      s(8)    // label to control
     property int controlGap:  s(16)   // one control to the next
     property int radius:      0
