@@ -39,6 +39,7 @@ qt_add_qml_module(HighlighterUI
         ParamGauge.qml
         ParamLevel.qml
         ParamSwatches.qml
+        ParamXY.qml
         ParamText.qml
         ParamLight.qml
 )

@@ -68,6 +68,12 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   `minColumnWidth` (about 300), so they pair up on a wide panel and stack on
   a narrow one. Never put a long-labelled slider in a narrow column. Don't
   grid a mix of control types, and don't grid one or two controls.
+- **Positions.** When two settings are an element's x and y on a screen or
+  canvas (e.g. "left edge / top edge from centre"), offer a `ParamXY` with
+  the canvas's range (it takes its shape), `footprintWidth/Height` for the
+  element's size and `ghosts` for the other elements already placed. Keep
+  the two sliders too if the panel lists values to copy. A single position
+  value stays a slider.
 - **Meters.** `ParamMeter`, `ParamGauge` and `ParamLevel` are read-only and
   only for values the app reports live: the guess right now, load, fps, a
   sound's level. Never use one to show a setting that has its own slider or
@@ -95,7 +101,9 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 - `ParamArrow` (a Shape) must keep an explicit width and height; an implicit
   size collapses it in compiled builds.
 - Gallery screenshot flags (after `--`): `--shot=<png>`, `--scroll=<px>`,
-  `--scale=<n>`, `--compact`, `--accent=<#hex>`.
+  `--scale=<n>`, `--compact`, `--accent=<#hex>`, `--second` (also shoots the
+  second panel).
+- In qmltestrunner, a double-click is `mouseDoubleClickSequence`.
 - Colours, sizes and the font live in `Theme.qml` only; sizes that change in
   compact mode use `Theme.c(full, compact)`. Write `Theme.s(px)`
   for every size, so `scale` works.

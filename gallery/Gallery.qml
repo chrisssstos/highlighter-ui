@@ -209,6 +209,19 @@ Window {
                 ParamCheck { text: "a check with a label far too long to fit in its cell" }
             }
 
+            ParamHeading { width: parent.width; text: "XY pad"; note: "drag the dot; Shift fine, Ctrl snaps" }
+            ParamXY {
+                width: parent.width
+                label: "plain, −100..100"
+                xValue: 30; yValue: -40; defaultX: 0; defaultY: 0
+            }
+            ParamGrid {
+                width: parent.width
+                minColumnWidth: Theme.s(180)
+                ParamXY { label: "graph (y up), 0..1"; xFrom: 0; xTo: 1; yFrom: 0; yTo: 1; stepSize: 0.01; yDown: false; xValue: 0.7; yValue: 0.25 }
+                ParamXY { label: "disabled"; xValue: -20; yValue: 50; enabled: false }
+            }
+
             ParamHeading { width: parent.width; text: "Text and lights" }
             ParamText { width: parent.width; text: "A note under some controls, dim, wrapping when it runs longer than the column is wide." }
             ParamText { width: parent.width; tone: "normal"; text: "Saved." }
@@ -280,6 +293,15 @@ Window {
 
             ParamSection {
                 width: parent.width; title: "Signage card"
+                ParamXY {
+                    width: parent.width
+                    label: "card position on the screen, from centre"
+                    unit: " mm"
+                    xFrom: -960; xTo: 960; yFrom: -540; yTo: 540; gridStep: 120
+                    xValue: 201; yValue: -300; defaultX: 200; defaultY: -300
+                    footprintWidth: 431; footprintHeight: 160
+                    ghosts: [{ x: 0, y: 380, label: "call to action" }, { x: 0, y: 126, label: "start" }]
+                }
                 // Sliders only pair up when each still gets a full-width row's worth.
                 ParamGrid {
                     width: parent.width
