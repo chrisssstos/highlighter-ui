@@ -19,8 +19,8 @@ QtObject {
     function c(full, small) { return s(theme.compact ? small : full) }
     //! Slider sizes, [full, compact], for a slider minimised on its own.
     readonly property var sliderSizes: ({
-        track: [50, 12], edge: [4, 2], box: [24, 16], arrowW: [11, 5], arrowH: [14, 8],
-        gap: [5, 2], title: [17, 12], value: [16, 12], row: [9, 3]
+        track: [44, 12], edge: [4, 2], box: [22, 16], arrowW: [10, 5], arrowH: [12, 8],
+        gap: [4, 2], title: [16, 12], value: [15, 12], row: [8, 3]
     })
     function sliderSize(key, small) { return s(sliderSizes[key][small ? 1 : 0]) }
 

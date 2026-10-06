@@ -78,7 +78,7 @@ Item {
     readonly property real fillW: Math.abs(edgeX - originX)
 
     // --- where the arrows go -------------------------------------------------
-    // Always either side of the edge line: down on the fill, up on the well
+    // (Maximised only.) Always either side of the edge line: down on the fill, up on the well
     // (swapped sides for a fill growing left). An arrow with no room on its
     // side jumps out past the bar's end, clear of it. An arrow that can't step (the
     // value is at its limit) stays, greyed out.
@@ -246,7 +246,7 @@ Item {
             id: down
             objectName: "downArrow"
             direction: Qt.LeftArrow
-            visible: root.enabled
+            visible: root.enabled && !root.compact   // a minimised slider has no arrows
             opacity: root.canDown ? 1 : 0.3
             x: root.arrowX.down
             width: root.arrowW; height: root.arrowH
@@ -260,7 +260,7 @@ Item {
             id: up
             objectName: "upArrow"
             direction: Qt.RightArrow
-            visible: root.enabled
+            visible: root.enabled && !root.compact   // a minimised slider has no arrows
             opacity: root.canUp ? 1 : 0.3
             x: root.arrowX.up
             width: root.arrowW; height: root.arrowH
