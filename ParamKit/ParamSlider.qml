@@ -1,14 +1,14 @@
 import QtQuick
 import "ParamMath.js" as PM
 
-/// A labelled bar slider. The lime fill grows from origin to the value; at
-/// its edge sit two arrows: click one to step by one (Shift: by ten), hold
-/// it to repeat, or drag it to slide as usual. Click anywhere else on the
-/// bar to jump there and drag. The value sits in a box under the edge;
-/// click it to type a value. The bar spans from..to, but stepping and
-/// typing may go past it, up to limitFrom..limitTo (no limit by default),
-/// so a full bar can still be nudged. Double-click the bar, or the reset
-/// mark by the label, to go back to defaultValue.
+/// A labelled bar slider. The lime fill grows from origin to the value and
+/// ends in a darker line; beside the line sit two arrows: click one to step
+/// by one (Shift: by ten), hold it to repeat, or drag it to slide as usual.
+/// Click anywhere else on the bar to jump there and drag. The value sits in
+/// a box under the edge; press it to type a value. The bar spans from..to,
+/// but stepping and typing may go past it, up to limitFrom..limitTo (no
+/// limit by default), so a full bar can still be nudged. Double-click the
+/// bar, or the reset mark by the label, to go back to defaultValue.
 ///
 /// Like Qt's Slider: value is set by the user, moved() reports only user
 /// changes, so bind value to your setting and write it back in onMoved.
@@ -33,7 +33,7 @@ Item {
     readonly property bool pressed: ma.pressed
     readonly property bool editing: box.editing
 
-    implicitWidth: Theme.s(280)
+    implicitWidth: Theme.s(320)
     implicitHeight: head.height + track.height + box.height
     activeFocusOnTab: true
     opacity: enabled ? 1 : 0.4
@@ -50,12 +50,9 @@ Item {
     readonly property bool canUp: root.value < root.limitTo
     readonly property bool isDefault: isNaN(root.defaultValue) || Math.abs(root.value - root.defaultValue) < root.stepSize / 2
 
-    // The bar always leaves room on its right for an arrow that steps past
-    // its end, so bars line up whatever their limits. An arrow past the
-    // start draws in the margin to the left of the control.
-    readonly property real reach: Theme.arrowW + 2 * Theme.arrowGap
-    readonly property real gutterL: 0
-    readonly property real gutterR: reach
+    // The bar leaves room on its right for the value box and the up arrow
+    // to hang past a full bar, so every bar lines up whatever its limits.
+    readonly property real gutterR: Math.max(Theme.arrowW + 2 * Theme.arrowGap, Theme.s(46))
 
     // Drawn from an eased copy of the value, so steps glide and drags don't lag.
     property real shown: value
@@ -63,6 +60,29 @@ Item {
     function fraction(v) { return root.to === root.from ? 0 : PM.clamp((v - root.from) / (root.to - root.from), 0, 1) }
     readonly property real edgeX: track.width * fraction(root.shown)
     readonly property real originX: track.width * fraction(root.origin)
+    readonly property real fillX: Math.min(edgeX, originX)
+    readonly property real fillW: Math.abs(edgeX - originX)
+
+    // --- where the arrows go -------------------------------------------------
+    // Normally either side of the edge line: down on the fill, up on the
+    // well (swapped sides for a fill growing left). Where that would push an
+    // arrow off the bar, both go on the side with room. Past a full bar the
+    // up arrow sits outside it, in the gutter.
+    readonly property real lineW: Math.min(Theme.edgeLine, fillW)
+    readonly property bool growsRight: edgeX >= originX
+    readonly property var arrowX: {
+        const w = Theme.arrowW, g = Theme.arrowGap, e = edgeX, pad = Theme.arrowPad
+        const lineL = growsRight ? lineW : 0, lineR = growsRight ? 0 : lineW
+        let dx = e - lineL - g - w, ux = e + lineR + g
+        const atEnd = e >= track.width - 0.5
+        if (canDown && dx < pad) {
+            dx = e + lineR + g; ux = dx + w + g
+        } else if (canUp && !atEnd && ux + w > track.width - pad) {
+            ux = e - lineL - g - w; dx = ux - g - w
+        }
+        return { down: dx, up: ux }
+    }
+    function onFill(x) { const c = x + Theme.arrowW / 2; return c > fillX && c < fillX + fillW }
 
     // --- label row -----------------------------------------------------------
     Item {
@@ -73,20 +93,22 @@ Item {
 
         Text {
             id: title
-            width: parent.width - resetMark.width - Theme.s(6)
+            width: parent.width - resetMark.width - root.gutterR - Theme.s(6)
             text: root.label
             elide: Text.ElideRight
-            color: root.activeFocus ? Theme.text : Qt.darker(Theme.text, 1.04)
+            color: Theme.text
             font.family: Theme.family
-            font.pixelSize: Theme.labelSize
+            font.pixelSize: Theme.titleSize
         }
         Text {
             id: resetMark
             anchors.right: parent.right
             anchors.rightMargin: root.gutterR
+            anchors.baseline: title.baseline
             text: "↺"   // ↺
             color: resetHover.hovered ? Theme.accent : Theme.textFaint
-            font.pixelSize: Theme.labelSize
+            font.family: Theme.family
+            font.pixelSize: Theme.titleSize
             opacity: !root.isDefault && (hover.hovered || root.activeFocus) ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.ease } }
             HoverHandler { id: resetHover; cursorShape: Qt.PointingHandCursor }
@@ -97,9 +119,8 @@ Item {
     // --- the bar -------------------------------------------------------------
     Rectangle {
         id: track
-        x: root.gutterL
         y: head.height
-        width: root.width - root.gutterL - root.gutterR
+        width: root.width - root.gutterR
         height: Theme.trackHeight
         radius: Theme.radius
         color: hover.hovered && !ma.pressed ? Theme.wellHover : Theme.well
@@ -112,17 +133,25 @@ Item {
             color: "transparent"
             border.width: 1
             border.color: Theme.accent
-            opacity: root.activeFocus && !ma.focusedByMouse ? 0.6 : 0
+            opacity: root.activeFocus && !ma.focusedByMouse && !box.editing ? 0.6 : 0
             radius: Theme.radius
         }
 
         Rectangle {
             id: fill
-            x: Math.min(root.edgeX, root.originX)
-            width: Math.abs(root.edgeX - root.originX)
+            x: root.fillX
+            width: root.fillW
             height: parent.height
             color: Theme.accent
             radius: Theme.radius
+        }
+        // the darker line along the fill's moving edge
+        Rectangle {
+            visible: root.lineW > 0
+            x: root.growsRight ? root.edgeX - root.lineW : root.edgeX
+            width: root.lineW
+            height: parent.height
+            color: Theme.accentEdge
         }
 
         // the origin of a centred range
@@ -131,41 +160,30 @@ Item {
             x: Math.round(root.originX)
             width: 1
             height: parent.height
-            color: root.edgeX === root.originX ? Theme.accent : Theme.page
+            color: root.fillW < 1 ? Theme.accent : Theme.page
             opacity: 0.7
-        }
-
-        // value past the bar's ends: a notch on the end it went past
-        Rectangle {
-            visible: root.value > root.to || root.value < root.from
-            x: root.value > root.to ? parent.width - width : 0
-            width: Theme.s(3); height: parent.height
-            color: Theme.accentInk
-            opacity: 0.55
         }
 
         ParamArrow {
             id: down
             direction: Qt.LeftArrow
             visible: root.canDown && root.enabled
-            x: root.edgeX - Theme.arrowGap - width
+            x: root.arrowX.down
             anchors.verticalCenter: parent.verticalCenter
-            readonly property bool onFill: root.edgeX > root.originX && x >= 0
             readonly property bool hot: ma.hoverZone === -1 || (ma.pressed && ma.pressZone === -1)
-            color: onFill ? (hot ? Theme.accentInk : Theme.accentDim)
-                          : (hot ? Theme.arrowHot : Theme.arrow)
+            color: root.onFill(x) ? (hot ? Theme.accentInk : Theme.accentDim)
+                                  : (hot ? Theme.arrowHot : Theme.arrow)
             scale: ma.pressed && ma.pressZone === -1 && !ma.dragging ? 0.85 : 1
         }
         ParamArrow {
             id: up
             direction: Qt.RightArrow
             visible: root.canUp && root.enabled
-            x: root.edgeX + Theme.arrowGap
+            x: root.arrowX.up
             anchors.verticalCenter: parent.verticalCenter
-            readonly property bool onFill: root.edgeX < root.originX
             readonly property bool hot: ma.hoverZone === 1 || (ma.pressed && ma.pressZone === 1)
-            color: onFill ? (hot ? Theme.accentInk : Theme.accentDim)
-                          : (hot ? Theme.arrowHot : Theme.arrow)
+            color: root.onFill(x) ? (hot ? Theme.accentInk : Theme.accentDim)
+                                  : (hot ? Theme.arrowHot : Theme.arrow)
             scale: ma.pressed && ma.pressZone === 1 && !ma.dragging ? 0.85 : 1
         }
     }
@@ -174,8 +192,8 @@ Item {
 
     MouseArea {
         id: ma
-        x: -root.reach; y: track.y
-        width: root.width + root.reach; height: track.height
+        y: track.y
+        width: root.width; height: track.height
         enabled: root.enabled
         hoverEnabled: true
         preventStealing: true
@@ -195,16 +213,23 @@ Item {
                    : Qt.ArrowCursor
 
         //! -1 over the down arrow, +1 over the up arrow, 0 over the bar.
+        //! Each arrow's zone is generous; where they meet, it splits halfway.
         function zoneAt(mx) {
-            mx += ma.x
-            const ex = track.x + root.edgeX
-            const r = root.reach + Theme.s(3)
-            if (down.visible && mx >= ex - r && mx < ex) return -1
-            if (up.visible && mx >= ex && mx <= ex + r) return 1
+            const w = Theme.arrowW, r = Theme.s(6)
+            const d = root.arrowX.down, u = root.arrowX.up
+            const dVis = down.visible, uVis = up.visible
+            let dLo = d - r, dHi = d + w + r, uLo = u - r, uHi = u + w + r
+            if (dVis && uVis) {
+                const mid = d < u ? (d + w + u) / 2 : (u + w + d) / 2
+                if (d < u) { dHi = Math.min(dHi, mid); uLo = Math.max(uLo, mid) }
+                else { uHi = Math.min(uHi, mid); dLo = Math.max(dLo, mid) }
+            }
+            if (dVis && mx >= dLo && mx < dHi) return -1
+            if (uVis && mx >= uLo && mx <= uHi) return 1
             return 0
         }
         function valueAt(mx) {
-            return root.from + PM.clamp((mx + ma.x - track.x) / track.width, 0, 1) * (root.to - root.from)
+            return root.from + PM.clamp(mx / track.width, 0, 1) * (root.to - root.from)
         }
         function rebase(mx) { startX = mx; startValue = root.value }
 
@@ -270,15 +295,22 @@ Item {
     }
 
     // --- the value -----------------------------------------------------------
+    // Under the edge, starting at it; flipped to end at it when it would run
+    // off the right.
     ParamValueBox {
         id: box
         y: track.y + track.height
-        x: PM.clamp(track.x + root.edgeX, 0, Math.max(0, root.width - width))
+        x: {
+            const e = track.x + root.edgeX
+            return e + width <= root.width ? e : Math.max(0, Math.min(e, root.width) - width)
+        }
         value: root.value
         decimals: root.decimals
         unit: root.unit
         interactive: root.enabled
         onSubmitted: v => root.setValue(v)
         onStepped: (direction, big) => root.step(direction, big)
+        // Give the keyboard back to the slider, without a focus ring.
+        onFinished: { ma.focusedByMouse = true; root.forceActiveFocus(Qt.MouseFocusReason) }
     }
 }

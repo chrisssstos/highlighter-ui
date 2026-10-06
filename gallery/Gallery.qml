@@ -87,7 +87,9 @@ Window {
 
             ParamHeading { width: parent.width; text: "The mockup"; note: "0..46, no lower than 0, may go past 46" }
             ParamSlider { width: parent.width; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 0; defaultValue: 16 }
+            ParamSlider { width: parent.width; label: "Text size (1: no room left of the edge)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 1; defaultValue: 16 }
             ParamSlider { width: parent.width; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 23; defaultValue: 16 }
+            ParamSlider { width: parent.width; label: "Text size (45: no room right of the edge)"; unit: "px"; from: 0; to: 46; limitFrom: 0; limitTo: 46; value: 45; defaultValue: 16 }
             ParamSlider { width: parent.width; label: "Text size"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 46; defaultValue: 16 }
             ParamSlider { width: parent.width; label: "Text size (past the end)"; unit: "px"; from: 0; to: 46; limitFrom: 0; value: 47; defaultValue: 16 }
 
@@ -101,7 +103,7 @@ Window {
 
             ParamHeading { width: parent.width; text: "Limits" }
             ParamSlider { width: parent.width; label: "hard 0..10: no arrow past either end"; from: 0; to: 10; limitFrom: 0; limitTo: 10; value: 10 }
-            ParamSlider { width: parent.width; label: "may go under 0 (arrow left of the bar)"; from: 0; to: 20; value: -3 }
+            ParamSlider { width: parent.width; label: "may go under 0"; from: 0; to: 20; value: -3 }
             ParamSlider { width: parent.width; label: "1 of 0..1000: arrow wider than the fill"; from: 0; to: 1000; limitFrom: 0; value: 1 }
             ParamSlider { width: parent.width; label: "from = to (a range of nothing)"; from: 5; to: 5; value: 5 }
 

@@ -33,7 +33,5 @@ qt_add_qml_module(ParamKit
         ParamCode.qml
         ParamPage.qml
         ParamScrollBar.qml
-    RESOURCES
-        fonts/Inter.ttf
 )
 target_link_libraries(ParamKit PRIVATE Qt6::Quick Qt6::QuickControls2)

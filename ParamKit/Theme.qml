@@ -21,6 +21,7 @@ QtObject {
     property color line:      "#6a6f6d"   // quiet outlines and dividers
     property color accent:    "#b8de52"   // the lime: fills, values, focus
     property color accentDim: "#7d9a2e"   // an arrow drawn on the lime
+    property color accentEdge: "#84a334"  // the line along the fill's edge
     property color accentInk: "#2c3410"   // text drawn on the lime
     property color arrow:     "#b9c0c4"   // an arrow drawn on the well
     property color arrowHot:  "#e6ecef"
@@ -32,21 +33,25 @@ QtObject {
     property color danger:    "#e0664f"
 
     // --- size --------------------------------------------------------------
-    property int trackHeight: s(26)
-    property int boxHeight:   s(20)
-    property int arrowW:      s(9)
-    property int arrowH:      s(12)
-    property int arrowGap:    s(3)    // between an arrow and the fill's edge
-    property int rowGap:      s(4)    // label to control
-    property int controlGap:  s(14)   // one control to the next
+    // Sizes at scale 1, from the Figma slider (drawn at 2x).
+    property int trackHeight: s(78)
+    property int edgeLine:    s(6)    // the darker line along the fill's edge
+    property int boxHeight:   s(22)
+    property int arrowW:      s(12)
+    property int arrowH:      s(15)
+    property int arrowGap:    s(5)    // between an arrow and the fill's edge
+    property int arrowPad:    s(6)    // an arrow's least distance from a bar end
+    property int rowGap:      s(8)    // label to control
+    property int controlGap:  s(16)   // one control to the next
     property int radius:      0
 
     // --- type --------------------------------------------------------------
-    readonly property FontLoader inter: FontLoader { source: "fonts/Inter.ttf" }
-    property string family: inter.status === FontLoader.Ready ? inter.name : "Segoe UI"
-    property string mono: "Cascadia Mono"
-    property int labelSize: s(13)
-    property int valueSize: s(13)
+    // Fonts every Windows PC has.
+    property string family: "Segoe UI"
+    property string mono: "Consolas"
+    property int titleSize: s(16)   // a slider's or knob's label
+    property int labelSize: s(14)
+    property int valueSize: s(15)
     property int smallSize: s(11)
 
     // --- motion ------------------------------------------------------------
