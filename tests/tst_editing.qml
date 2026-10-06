@@ -9,6 +9,8 @@ Item {
     ParamSlider { id: s; x: 20; y: 20; width: 400; from: 0; to: 46; limitFrom: 0; value: 23; unit: "px"; label: "Text size" }
     // 1 unit per pixel along the bar (400 wide, less the 46px gutter)
     ParamSlider { id: d; x: 20; y: 120; width: 400; from: 0; to: 354; value: 100; key: "test.d" }
+    // 200 x 200 px for -100..100 both ways: one unit per pixel, y down
+    ParamXY { id: xy; x: 440; y: 20; width: 200; xValue: 0; yValue: 0 }
     Rectangle { id: elsewhere; x: 20; y: 300; width: 100; height: 50 }
 
     TestCase {
@@ -73,6 +75,29 @@ Item {
             verify(!findChild(d, "upArrow").visible && !findChild(d, "downArrow").visible)
             d.compact = false
             verify(findChild(d, "upArrow").visible && findChild(d, "downArrow").visible)
+        }
+        function test_xyDragKeysTypeReset() {
+            xy.xValue = 0; xy.yValue = 0; xy.defaultX = 10; xy.defaultY = 20
+            const pad = findChild(xy, "pad")
+            compare(pad.width, 200); compare(pad.height, 200)
+            mousePress(pad, 150, 50); mouseRelease(pad, 150, 50)
+            compare(xy.xValue, 50, "click puts the dot there (x)")
+            compare(xy.yValue, -50, "and y grows down the pad")
+            mousePress(pad, 150, 50); mouseMove(pad, 60, 170); mouseRelease(pad, 60, 170)
+            compare(xy.xValue, -40, "drag follows (x)"); compare(xy.yValue, 70, "drag follows (y)")
+            keyClick(Qt.Key_Right); compare(xy.xValue, -39)
+            keyClick(Qt.Key_Up); compare(xy.yValue, 69, "Up moves the dot up the screen")
+            keyClick(Qt.Key_Left, Qt.ShiftModifier); compare(xy.xValue, -49)
+            const box = findChild(xy, "yBox")
+            mousePress(box, 5, 5); mouseRelease(box, 5, 5)
+            type("-12"); keyClick(Qt.Key_Return)
+            compare(xy.yValue, -12, "typed y")
+            mouseDoubleClickSequence(pad, 20, 20)
+            compare(xy.xValue, 10); compare(xy.yValue, 20, "double-click resets to the default")
+            xy.yDown = false
+            mousePress(pad, 100, 20); mouseRelease(pad, 100, 20)
+            compare(xy.yValue, 80, "graph mode: y grows up the pad")
+            xy.yDown = true
         }
         function test_saveDefault() {
             s.defaultValue = 10
