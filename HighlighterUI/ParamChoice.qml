@@ -62,6 +62,9 @@ Item {
                 Behavior on color { ColorAnimation { duration: Theme.quick } }
                 border.width: on && root.activeFocus && !ca.focusedByMouse ? 1 : 0
                 border.color: Theme.text
+                // classic: raised buttons, the chosen one pressed in
+                Rectangle { anchors.fill: parent; visible: Theme.classic; color: "transparent"; border.width: 1; border.color: Qt.rgba(0, 0, 0, 0.65) }
+                ParamBevel { anchors.fill: parent; anchors.margins: 1; visible: Theme.classic; inset: cell.on; light: 0.2; dark: 0.4 }
                 Text {
                     id: t
                     anchors.centerIn: parent

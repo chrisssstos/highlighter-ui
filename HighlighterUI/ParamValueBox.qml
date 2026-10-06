@@ -68,11 +68,11 @@ Item {
         radius: Theme.radius
         color: box.editing ? Theme.editFill
              : hover.hovered && box.interactive ? Qt.rgba(box.tint.r, box.tint.g, box.tint.b, 0.16)
-             : Theme.industrial ? Theme.screen   // a little LCD
+             : Theme.industrial || Theme.classic ? Theme.screen   // a little LCD
              : Qt.rgba(Theme.page.r, Theme.page.g, Theme.page.b, 0.85)
         border.width: 1
         border.color: box.bad ? Theme.danger : box.tint
-        ParamBevel { anchors.fill: parent; anchors.margins: 1; visible: Theme.industrial && !box.editing; inset: true; dark: 0.5; light: 0.08 }
+        ParamBevel { anchors.fill: parent; anchors.margins: 1; visible: (Theme.industrial || Theme.classic) && !box.editing; inset: true; dark: 0.5; light: 0.08 }
     }
 
     Text {

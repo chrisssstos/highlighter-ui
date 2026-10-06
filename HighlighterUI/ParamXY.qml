@@ -268,7 +268,7 @@ Item {
             source: "textures/vignette.png"
             smooth: true
         }
-        ParamBevel { anchors.fill: parent; visible: Theme.industrial; inset: true; dark: 0.55; light: 0.1 }
+        ParamBevel { anchors.fill: parent; visible: Theme.industrial || Theme.classic; inset: true; dark: 0.55; light: 0.12 }
 
         // keyboard focus
         Rectangle {
