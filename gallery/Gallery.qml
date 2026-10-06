@@ -300,15 +300,13 @@ Window {
                     unit: " mm"
                     xFrom: -960; xTo: 960; yFrom: -540; yTo: 540; gridStep: 120
                     xValue: 201; yValue: -300; defaultX: 200; defaultY: -300
-                    footprintWidth: 431; footprintHeight: 160
+                    footprintWidth: 431; footprintHeight: 160; footprintFromCorner: true
                     ghosts: [{ x: 0, y: 380, label: "call to action" }, { x: 0, y: 126, label: "start" }]
                 }
                 // Sliders only pair up when each still gets a full-width row's worth.
                 ParamGrid {
                     width: parent.width
                     minColumnWidth: Theme.s(300)
-                    ParamSlider { label: "left edge from centre"; unit: " mm"; from: -400; to: 400; origin: 0; value: 201; defaultValue: 200 }
-                    ParamSlider { label: "top edge from centre"; unit: " mm"; from: -400; to: 400; origin: 0; value: -300; defaultValue: -300 }
                     ParamSlider { label: "width"; unit: " mm"; from: 100; to: 800; value: 431; defaultValue: 430 }
                     ParamSlider { label: "name size"; unit: " mm"; from: 10; to: 150; value: 70; defaultValue: 70 }
                 }

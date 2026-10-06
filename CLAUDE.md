@@ -71,10 +71,11 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 - **Positions.** When two settings are an element's x and y on a screen or
   canvas (e.g. "left edge / top edge from centre"), offer a `ParamXY` with
   the canvas's range (it takes its shape), `footprintWidth/Height` for the
-  element's size and `ghosts` for the other elements already placed, and a
-  `key` (it minimises to a thumbnail of itself and remembers being maximised). Keep
-  the two sliders too if the panel lists values to copy. A single position
-  value stays a slider.
+  element's size (`footprintFromCorner` when x / y are its left and top
+  edges), `ghosts` for the other elements already placed, and a
+  `key` (it minimises to a thumbnail of itself and remembers being maximised).
+  The pad replaces the two sliders, never sits beside them: its x / y boxes
+  take typed values. A single position value stays a slider.
 - **Meters.** `ParamMeter`, `ParamGauge` and `ParamLevel` are read-only and
   only for values the app reports live: the guess right now, load, fps, a
   sound's level. Never use one to show a setting that has its own slider or
