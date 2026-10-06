@@ -22,6 +22,7 @@ qt_add_qml_module(HighlighterUI
         ParamScrew.qml
         ParamPlate.qml
         ParamBevel.qml
+        ParamRail.qml
         ParamSizeMark.qml
         ParamValueBox.qml
         ParamSlider.qml
@@ -47,8 +48,7 @@ qt_add_qml_module(HighlighterUI
         ParamText.qml
         ParamLight.qml
     RESOURCES
-        textures/brushed.png
-        textures/grain.png
+        textures/powder.png
         textures/scanlines.png
         textures/knob.png
         textures/screw.png
