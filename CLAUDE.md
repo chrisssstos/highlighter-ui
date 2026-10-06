@@ -6,11 +6,16 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 
 ## Applying it to a project
 
+0. Get it into the project. The repo is private on GitHub
+   (https://github.com/chrisssstos/highlighter-ui). Personal projects: add
+   it as a submodule (`git submodule add <url> external/highlighter-ui`).
+   Client projects: ask before adding a submodule, since the
+   client's build would need access to this private repo; the default there
+   is to copy `HighlighterUI/` in.
 1. Link the module. In the app's CMakeLists.txt:
    `add_subdirectory(<path>/highlighter-ui/HighlighterUI ${CMAKE_BINARY_DIR}/HighlighterUI)`
-   and `target_link_libraries(<app> PRIVATE HighlighterUIplugin)`. If the project
-   should not depend on this folder's location, copy `HighlighterUI/` into the
-   project instead (ask which they want).
+   and `target_link_libraries(<app> PRIVATE HighlighterUIplugin)`, with the
+   path to wherever step 0 put it.
 2. In the panel's QML, `import HighlighterUI`. Swap stock controls for kit ones:
    - `Slider` + label + value text → `ParamSlider`
    - `CheckBox` → `ParamCheck` (or `ParamToggle`)
