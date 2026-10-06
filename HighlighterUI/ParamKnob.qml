@@ -111,7 +111,7 @@ Item {
             ShapePath {   // the face
                 strokeColor: root.activeFocus && !drag.focusedByMouse ? root.tint : "transparent"
                 strokeWidth: 1
-                fillColor: face.hot ? Theme.sunkenHover : Theme.sunken
+                fillColor: Theme.industrial ? "transparent" : face.hot ? Theme.sunkenHover : Theme.sunken
                 PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.fr; radiusY: face.fr; startAngle: 0; sweepAngle: 360 }
             }
             // industrial: a knurled rim, a lighter cap catching the light, a pointer line
@@ -125,21 +125,21 @@ Item {
                 }
                 return out
             }
-            ShapePath {   // knurling
-                strokeColor: Theme.industrial ? Qt.rgba(0, 0, 0, 0.55) : "transparent"; strokeWidth: 1; fillColor: "transparent"
+            ShapePath {   // knurling (unused: the rendered cap has its own)
+                strokeColor: "transparent"; strokeWidth: 1; fillColor: "transparent"
                 PathMultiline { paths: face.knurl }
             }
             ShapePath {   // the cap
                 strokeColor: "transparent"
-                fillColor: Theme.industrial ? Qt.lighter(face.hot ? Theme.sunkenHover : Theme.sunken, 1.3) : "transparent"
+                fillColor: "transparent"
                 PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.cap; radiusY: face.cap; startAngle: 0; sweepAngle: 360 }
             }
             ShapePath {   // light on the cap's upper left
-                strokeColor: Theme.industrial ? Qt.rgba(1, 1, 1, 0.22) : "transparent"; strokeWidth: 1; fillColor: "transparent"; capStyle: ShapePath.FlatCap
+                strokeColor: "transparent"; strokeWidth: 1; fillColor: "transparent"; capStyle: ShapePath.FlatCap
                 PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.cap - 0.5; radiusY: face.cap - 0.5; startAngle: 185; sweepAngle: 100 }
             }
-            ShapePath {   // the pointer line, industrial
-                strokeColor: Theme.industrial ? root.tint : "transparent"; strokeWidth: Theme.s(2); fillColor: "transparent"; capStyle: ShapePath.FlatCap
+            ShapePath {   // the pointer line, industrial: drawn over the rendered cap (below)
+                strokeColor: "transparent"; strokeWidth: Theme.s(2); fillColor: "transparent"; capStyle: ShapePath.FlatCap
                 startX: face.cx + Math.cos(face.rad(face.fv)) * face.cap * 0.3
                 startY: face.cy + Math.sin(face.rad(face.fv)) * face.cap * 0.3
                 PathLine { x: face.cx + Math.cos(face.rad(face.fv)) * (face.cap - 1); y: face.cy + Math.sin(face.rad(face.fv)) * (face.cap - 1) }
@@ -162,6 +162,37 @@ Item {
                     centerY: face.cy + Math.sin(a) * (face.outer + Theme.s(6))
                     radiusX: Theme.s(3); radiusY: Theme.s(3); startAngle: 0; sweepAngle: 360
                 }
+            }
+        }
+
+        // industrial: the rendered knob (tools/render_assets.py), its skirt the
+        // face's size, with the pointer drawn over it so it turns while the
+        // light stays put
+        Image {
+            id: capImage
+            visible: Theme.industrial
+            readonly property real skirt: face.fr        // the sprite's skirt is 0.90 of its half-width
+            width: Math.round(2 * skirt / 0.90); height: width
+            x: Math.round(face.cx - width / 2); y: Math.round(face.cy - height / 2)
+            source: "textures/knob.png"
+            sourceSize: Qt.size(256, 256)
+            smooth: true
+            mipmap: true
+            opacity: face.hot ? 1 : 0.94
+        }
+        Shape {
+            id: pointer
+            anchors.fill: face
+            visible: Theme.industrial
+            preferredRendererType: Theme.smooth ? Shape.CurveRenderer : Shape.GeometryRenderer
+            antialiasing: Theme.smooth
+            readonly property real capR: capImage.width / 2 * 0.62
+            readonly property real a: face.rad(face.fv)
+            ShapePath {   // the pointer: an accent line across the cap, from near its middle to its rim
+                strokeColor: root.tint; strokeWidth: Math.max(2, Theme.s(2.5)); fillColor: "transparent"; capStyle: ShapePath.FlatCap
+                startX: face.cx + Math.cos(pointer.a) * pointer.capR * 0.25
+                startY: face.cy + Math.sin(pointer.a) * pointer.capR * 0.25
+                PathLine { x: face.cx + Math.cos(pointer.a) * (pointer.capR - 1); y: face.cy + Math.sin(pointer.a) * (pointer.capR - 1) }
             }
         }
 

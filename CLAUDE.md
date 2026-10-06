@@ -112,6 +112,9 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   `ParamPlate` for a raised surface, `ParamBevel` (inset for sunk things)
   and `ParamScrew`; textures are in `HighlighterUI/textures` (RESOURCES in
   CMake), tiled with `smooth: false`. Gallery: `--flat` to shoot it flat.
+  Surfaces come from CC0 scans and sprites are rendered by
+  `tools/render_assets.py`; never take graphics from commercial plugins.
+  Any new asset: CC0 / own render, listed in `textures/CREDITS.txt`.
 - Colours, sizes and the font live in `Theme.qml` only; sizes that change in
   compact mode use `Theme.c(full, compact)`. Write `Theme.s(px)`
   for every size, so `scale` works.

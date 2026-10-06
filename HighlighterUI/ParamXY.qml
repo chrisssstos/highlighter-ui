@@ -262,6 +262,12 @@ Item {
             fillMode: Image.Tile
             smooth: false
         }
+        Image {
+            anchors.fill: parent
+            visible: Theme.industrial
+            source: "textures/vignette.png"
+            smooth: true
+        }
         ParamBevel { anchors.fill: parent; visible: Theme.industrial; inset: true; dark: 0.55; light: 0.1 }
 
         // keyboard focus

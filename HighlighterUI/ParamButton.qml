@@ -64,6 +64,14 @@ Item {
             smooth: false
             opacity: root.accent ? 0.35 : 0.7
         }
+        Image {   // a convex sheen, turned over when it is pressed in
+            anchors.fill: parent
+            visible: Theme.industrial
+            source: "textures/sheen.png"
+            smooth: true
+            opacity: root.accent ? 0.45 : 0.32
+            rotation: area.pressed || root.checked ? 180 : 0
+        }
         // bevel: light top, dark bottom, swapped when pressed (all four edges when industrial)
         Rectangle { visible: !Theme.industrial; width: parent.width; height: 1; color: area.pressed ? Qt.rgba(0, 0, 0, 0.25) : Qt.rgba(1, 1, 1, root.accent ? 0.25 : 0.07) }
         Rectangle { visible: !Theme.industrial; y: parent.height - 1; width: parent.width; height: 1; color: area.pressed ? Qt.rgba(1, 1, 1, 0.05) : Qt.rgba(0, 0, 0, 0.3) }

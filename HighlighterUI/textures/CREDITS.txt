@@ -1,0 +1,7 @@
+Industrial-look assets for HighlighterUI.
+
+brushed.png and grain.png are derived from ambientCG scans Metal009 and Metal011
+(https://ambientcg.com), released under CC0 1.0 (public domain).
+
+knob.png, screw.png, sheen.png, vignette.png and scanlines.png are rendered by
+tools/render_assets.py and the kit itself.
