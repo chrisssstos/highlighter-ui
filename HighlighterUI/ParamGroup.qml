@@ -4,7 +4,8 @@ import QtQuick
 /// a body held in a lime bracket. Industrial: a synth module, its own
 /// faceplate bolted to a pair of rack rails, its name printed across the
 /// top, a power LED lit while it is open, and folded down to a slim blank
-/// panel. For "one open at a time", bind open to your own state and set it
+/// panel. Classic: a 2006 plugin window, a gradient title bar with its name
+/// and a fold button over a raised, bevelled body. For "one open at a time", bind open to your own state and set it
 /// in onToggled. Give its children width: parent.width.
 Item {
     id: root
@@ -32,6 +33,7 @@ Item {
     }
 
     readonly property bool module: Theme.industrial
+    readonly property bool window: Theme.classic
     //! Inside another group: a recessed sub-panel, not a module on rails of its own.
     property bool nested: false
     Component.onCompleted: {
@@ -68,15 +70,71 @@ Item {
     }
     ParamBevel { anchors.fill: parent; visible: root.module && root.nested; inset: true; dark: 0.5; light: 0.1 }
 
+    // --- classic: a window's outline, its title bar and its body ------------
+    Rectangle {
+        visible: root.window
+        x: Theme.s(1); y: Theme.s(2); width: parent.width; height: parent.height
+        color: Qt.rgba(0, 0, 0, 0.35)
+    }
+    Rectangle {
+        visible: root.window
+        width: parent.width; height: header.height
+        gradient: Gradient {
+            GradientStop { position: 0; color: Qt.lighter(Theme.titleBar, root.nested ? 0.95 : 1.12) }
+            GradientStop { position: 0.5; color: Theme.titleBar }
+            GradientStop { position: 1; color: Theme.titleBarEnd }
+        }
+        ParamBevel { anchors.fill: parent; light: 0.22; dark: 0.5 }
+    }
+    Rectangle {
+        visible: root.window && root.open
+        y: header.height; width: parent.width; height: frame.height
+        color: root.nested ? Qt.darker(Theme.raised, 1.12) : Theme.raised
+        ParamBevel { anchors.fill: parent; light: 0.14; dark: 0.5; inset: root.nested }
+    }
+    Rectangle {
+        visible: root.window
+        anchors.fill: parent
+        color: "transparent"
+        border.width: 1; border.color: Qt.rgba(0, 0, 0, 0.7)
+    }
+
     Item {
         id: header
         width: parent.width
-        height: root.module ? Theme.s(36) : Theme.s(30)
+        height: root.module ? Theme.s(36) : root.window ? Theme.s(20) : Theme.s(30)
+
+        // classic: a grip at the left, like a window's icon
+        Column {
+            visible: root.window
+            x: Theme.s(6); anchors.verticalCenter: parent.verticalCenter
+            spacing: Theme.s(2)
+            Repeater {
+                model: 3
+                Rectangle { width: Theme.s(8); height: 1; color: Qt.rgba(1, 1, 1, 0.35)
+                    Rectangle { y: 1; width: parent.width; height: 1; color: Qt.rgba(0, 0, 0, 0.45) } }
+            }
+        }
+        // classic: the fold button at the right, a little raised box
+        Rectangle {
+            visible: root.window && root.collapsible
+            width: Theme.s(14); height: Theme.s(12)
+            x: parent.width - width - Theme.s(5); anchors.verticalCenter: parent.verticalCenter
+            color: headArea.containsMouse ? Qt.lighter(Theme.sunken, 1.25) : Theme.sunken
+            border.width: 1; border.color: Qt.rgba(0, 0, 0, 0.6)
+            ParamBevel { anchors.fill: parent; anchors.margins: 1; light: 0.25; dark: 0.35; inset: headArea.pressed }
+            ParamArrow {
+                anchors.centerIn: parent
+                direction: root.open ? Qt.DownArrow : Qt.RightArrow
+                width: Theme.s(root.open ? 7 : 5); height: Theme.s(root.open ? 5 : 7)
+                color: Theme.text
+            }
+        }
 
         // flat: chevron and title at the left
         ParamArrow {
             id: chevron
-            visible: root.collapsible
+            visible: root.collapsible && !root.window
             x: root.module ? Theme.s(22) : Theme.s(2)
             anchors.verticalCenter: parent.verticalCenter
             direction: Qt.RightArrow
@@ -88,18 +146,20 @@ Item {
         Row {
             id: titleRow
             // industrial: printed across the top, centred; flat: after the chevron
-            x: root.module ? Math.round((parent.width - width) / 2) : (root.collapsible ? Theme.s(16) : 0)
+            x: root.module ? Math.round((parent.width - width) / 2) : root.window ? Theme.s(20) : (root.collapsible ? Theme.s(16) : 0)
             anchors.verticalCenter: parent.verticalCenter
             spacing: Theme.s(8)
             Text {
                 id: titleText
-                text: root.title.toUpperCase()
-                color: root.open || headArea.containsMouse ? Theme.text : Theme.textDim
+                text: root.title
+                color: root.open || headArea.containsMouse || root.window ? Theme.text : Theme.textDim
                 font.family: Theme.family
                 font.pixelSize: Theme.labelSize
                 font.weight: Font.Bold
-                font.letterSpacing: root.module ? Theme.s(2) : Theme.s(0.5)
-                style: Theme.titleStyle; styleColor: Theme.titleStyleColor
+                font.letterSpacing: root.module ? Theme.s(2) : root.window ? 0 : Theme.s(0.5)
+                font.capitalization: root.window ? Font.MixedCase : Font.AllUppercase
+                style: root.window ? Text.Raised : Theme.titleStyle
+                styleColor: root.window ? Qt.rgba(0, 0, 0, 0.55) : Theme.titleStyleColor
             }
             Text {
                 visible: root.note.length > 0
@@ -150,7 +210,7 @@ Item {
         id: frame
         y: header.height
         width: parent.width
-        readonly property int pad: Theme.s(12)
+        readonly property int pad: root.window ? Theme.s(9) : Theme.s(12)
         // industrial: room at the foot for the screws and the maker's mark
         readonly property int foot: root.module && !root.nested ? Theme.s(20) : 0
         height: root.open ? body.implicitHeight + 2 * pad + foot : 0
@@ -158,10 +218,10 @@ Item {
         Behavior on height { NumberAnimation { duration: Theme.ease; easing.type: Easing.OutCubic } }
 
         // flat: the raised body and, on a group that folds, the bracket
-        Rectangle { anchors.fill: parent; visible: !root.module; color: Theme.raised }
+        Rectangle { anchors.fill: parent; visible: !root.module && !root.window; color: Theme.raised }
         Item {
             anchors.fill: parent
-            visible: root.collapsible && !root.module
+            visible: root.collapsible && !root.module && !root.window
             Rectangle { width: Theme.s(4); height: parent.height; color: root.tint }
             Rectangle { width: Theme.s(10); height: Theme.s(3); color: root.tint }
             Rectangle { y: parent.height - height; width: Theme.s(10); height: Theme.s(3); color: root.tint }
@@ -170,9 +230,9 @@ Item {
         Column {
             id: body
             // flat: past the bracket, or the same margin both sides; industrial: in from the plate's edges
-            x: root.module ? Theme.s(18) : root.collapsible ? Theme.groupInset : Theme.sectionInset
+            x: root.module ? Theme.s(18) : root.window ? Theme.s(10) : root.collapsible ? Theme.groupInset : Theme.sectionInset
             y: frame.pad
-            width: parent.width - x - (root.module ? Theme.s(18) : Theme.groupInsetEnd)
+            width: parent.width - x - (root.module ? Theme.s(18) : root.window ? Theme.s(10) : Theme.groupInsetEnd)
             spacing: Theme.controlGap
             opacity: root.open ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.ease } }

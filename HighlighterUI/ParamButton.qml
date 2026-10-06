@@ -32,7 +32,7 @@ Item {
                  + (glyph.visible && label.visible ? content.spacing : 0)
                  + (label.visible ? label.implicitWidth : 0)
                  + 2 * horizontalPadding
-                 + (Theme.industrial && checkable ? Theme.s(12) : 0)   // the LED
+                 + ((Theme.industrial || Theme.classic) && checkable ? Theme.s(12) : 0)   // the LED
     activeFocusOnTab: true
     opacity: enabled ? 1 : 0.4
 
@@ -44,7 +44,7 @@ Item {
     readonly property color ink: root.accent ? Theme.inkOf(root.tint)
                               : root.danger ? Theme.danger
                               : root.checked ? root.tint
-                              : root.tint
+                              : Theme.classic ? Theme.text : root.tint
 
     Rectangle {
         id: slab
@@ -54,6 +54,21 @@ Item {
              : root.checked ? (area.pressed ? Theme.sunken : Theme.sunkenHover)
              : (area.pressed ? Qt.darker(Theme.sunken, 1.15) : area.containsMouse ? Theme.sunkenHover : Theme.sunken)
         Behavior on color { ColorAnimation { duration: Theme.quick } }
+        // classic: lighter at the top, a raised bevel, sunk when pressed
+        gradient: Theme.classic ? classicFace : null
+        Gradient {
+            id: classicFace
+            GradientStop { position: 0; color: Qt.lighter(slab.color, area.pressed || root.checked ? 0.92 : 1.28) }
+            GradientStop { position: 1; color: Qt.darker(slab.color, area.pressed || root.checked ? 0.95 : 1.08) }
+        }
+        Rectangle { anchors.fill: parent; visible: Theme.classic; color: "transparent"; border.width: 1; border.color: Qt.rgba(0, 0, 0, 0.7) }
+        ParamBevel {
+            anchors.fill: parent; anchors.margins: 1
+            visible: Theme.classic
+            inset: area.pressed || root.checked
+            light: root.accent ? 0.35 : 0.22
+            dark: 0.4
+        }
 
         // brushed, in the industrial look
         Image {
@@ -72,8 +87,8 @@ Item {
             rotation: area.pressed || root.checked ? 180 : 0
         }
         // bevel: light top, dark bottom, swapped when pressed (all four edges when industrial)
-        Rectangle { visible: !Theme.industrial; width: parent.width; height: 1; color: area.pressed ? Qt.rgba(0, 0, 0, 0.25) : Qt.rgba(1, 1, 1, root.accent ? 0.25 : 0.07) }
-        Rectangle { visible: !Theme.industrial; y: parent.height - 1; width: parent.width; height: 1; color: area.pressed ? Qt.rgba(1, 1, 1, 0.05) : Qt.rgba(0, 0, 0, 0.3) }
+        Rectangle { visible: !Theme.industrial && !Theme.classic; width: parent.width; height: 1; color: area.pressed ? Qt.rgba(0, 0, 0, 0.25) : Qt.rgba(1, 1, 1, root.accent ? 0.25 : 0.07) }
+        Rectangle { visible: !Theme.industrial && !Theme.classic; y: parent.height - 1; width: parent.width; height: 1; color: area.pressed ? Qt.rgba(1, 1, 1, 0.05) : Qt.rgba(0, 0, 0, 0.3) }
         ParamBevel {
             anchors.fill: parent
             visible: Theme.industrial
@@ -85,7 +100,7 @@ Item {
         // checked, industrial: an LED, lit when down
         Item {
             id: led
-            visible: Theme.industrial && root.checkable
+            visible: (Theme.industrial || Theme.classic) && root.checkable
             x: Theme.s(8); anchors.verticalCenter: parent.verticalCenter
             width: Theme.s(6); height: width
             Rectangle {   // its glow
@@ -102,7 +117,7 @@ Item {
 
         // checked, flat: a lime bar on the left
         Rectangle {
-            visible: root.checkable && !Theme.industrial
+            visible: root.checkable && !Theme.industrial && !Theme.classic
             width: Theme.s(3); height: parent.height
             color: root.checked ? root.tint : Theme.line
         }

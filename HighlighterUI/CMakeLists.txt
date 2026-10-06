@@ -51,6 +51,7 @@ qt_add_qml_module(HighlighterUI
         textures/powder.png
         textures/scanlines.png
         textures/knob.png
+        textures/knob_classic.png
         textures/screw.png
         textures/sheen.png
         textures/vignette.png

@@ -106,18 +106,21 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   `--scale=<n>`, `--compact`, `--accent=<#hex>`, `--second` (also shoots the
   second panel).
 - In qmltestrunner, a double-click is `mouseDoubleClickSequence`.
-- The industrial look (`Theme.industrial`) is drawn on top of the flat one:
-  every industrial touch is a `visible: Theme.industrial` layer (or a colour
-  choice), so switching it off must give the flat look back unchanged. Use
+- Skins (`Theme.skin`: "classic" default, "modular", "flat") are drawn on
+  top of the flat look: every skin touch is a `visible: Theme.industrial`
+  (modular) or `visible: Theme.classic` layer, or a Theme colour that follows
+  the skin, so "flat" must stay the plain look unchanged. A new control needs
+  its classic and modular touches (bevels, LCD, sheen) like its neighbours. Use
   `ParamPlate` for a raised surface, `ParamBevel` (inset for sunk things)
   and `ParamScrew`; textures are in `HighlighterUI/textures` (RESOURCES in
-  CMake), tiled with `smooth: false`. Gallery: `--flat` to shoot it flat.
+  CMake), tiled with `smooth: false`. Gallery: `--skin=<flat|modular|classic>`
+  (or `--flat`) to shoot a skin.
   Assets are rendered by `tools/render_assets.py`; never take graphics
   from commercial plugins. Any new asset: own render (or CC0), listed in
   `textures/CREDITS.txt`.
-- Industrial = modular synth: in a panel, every run of controls belongs in a
-  `ParamSection` or `ParamGroup` (each is a module on rails); loose controls
-  on the page sit on the dark rack, which looks wrong. Headings go between
+- Modular / classic: in a panel, every run of controls belongs in a
+  `ParamSection` or `ParamGroup` (a module on rails, or a plugin window);
+  loose controls on the bare page look wrong. Headings go between
   modules only (e.g. over a set of folding groups).
 - Colours, sizes and the font live in `Theme.qml` only; sizes that change in
   compact mode use `Theme.c(full, compact)`. Write `Theme.s(px)`

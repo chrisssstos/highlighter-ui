@@ -111,7 +111,7 @@ Item {
             ShapePath {   // the face
                 strokeColor: root.activeFocus && !drag.focusedByMouse ? root.tint : "transparent"
                 strokeWidth: 1
-                fillColor: Theme.industrial ? "transparent" : face.hot ? Theme.sunkenHover : Theme.sunken
+                fillColor: Theme.industrial || Theme.classic ? "transparent" : face.hot ? Theme.sunkenHover : Theme.sunken
                 PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.fr; radiusY: face.fr; startAngle: 0; sweepAngle: 360 }
             }
             // industrial: a knurled rim, a lighter cap catching the light, a pointer line
@@ -170,11 +170,13 @@ Item {
         // light stays put
         Image {
             id: capImage
-            visible: Theme.industrial
-            readonly property real skirt: face.fr        // the sprite's skirt is 0.90 of its half-width
-            width: Math.round(2 * skirt / 0.90); height: width
+            visible: Theme.industrial || Theme.classic
+            // the sprite's edge is 0.90 (rendered cap) or 0.86 (classic dome) of its half-width
+            readonly property real edge: Theme.classic ? 0.86 : 0.90
+            readonly property real skirt: face.fr
+            width: Math.round(2 * skirt / edge); height: width
             x: Math.round(face.cx - width / 2); y: Math.round(face.cy - height / 2)
-            source: "textures/knob.png"
+            source: Theme.classic ? "textures/knob_classic.png" : "textures/knob.png"
             sourceSize: Qt.size(256, 256)
             smooth: true
             mipmap: true
@@ -183,13 +185,15 @@ Item {
         Shape {
             id: pointer
             anchors.fill: face
-            visible: Theme.industrial
+            visible: Theme.industrial || Theme.classic
             preferredRendererType: Theme.smooth ? Shape.CurveRenderer : Shape.GeometryRenderer
             antialiasing: Theme.smooth
-            readonly property real capR: capImage.width / 2 * 0.62
+            // the rendered cap's top is 0.62 of the sprite; the classic dome's, 0.80
+            readonly property real capR: capImage.width / 2 * (Theme.classic ? 0.80 : 0.62)
             readonly property real a: face.rad(face.fv)
             ShapePath {   // the pointer: an accent line across the cap, from near its middle to its rim
-                strokeColor: root.tint; strokeWidth: Math.max(2, Theme.s(2.5)); fillColor: "transparent"; capStyle: ShapePath.FlatCap
+                strokeColor: Theme.classic ? "#f2f6f8" : root.tint   // classic: a white line, as on the era's knobs
+                strokeWidth: Math.max(2, Theme.s(Theme.classic ? 2 : 2.5)); fillColor: "transparent"; capStyle: ShapePath.FlatCap
                 startX: face.cx + Math.cos(pointer.a) * pointer.capR * 0.25
                 startY: face.cy + Math.sin(pointer.a) * pointer.capR * 0.25
                 PathLine { x: face.cx + Math.cos(pointer.a) * (pointer.capR - 1); y: face.cy + Math.sin(pointer.a) * (pointer.capR - 1) }

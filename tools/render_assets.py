@@ -105,6 +105,42 @@ def knob_cap(n=256, ss=4):
     return img.resize((n, n), Image.LANCZOS)
 
 
+def knob_glossy(n=256, ss=4):
+    """The classic skin's knob: a glossy dark plastic dome with a bright rim
+    and a soft highlight up and to the left, its pointer drawn by the kit."""
+    N = n * ss
+    x, y = grid(N)
+    r = np.hypot(x, y)
+    th = np.arctan2(y, x)
+    R = 0.86
+    sh = np.hypot(x - 0.04, y - 0.07)
+    shadow = np.clip((0.95 - sh) / 0.09, 0, 1) * 0.5
+    body = r <= R
+    # a dome: normals tilt out towards the edge
+    nz = np.sqrt(np.clip(1 - (r / (R * 1.02)) ** 2, 0, 1))
+    nx, ny = x / (R * 1.02), y / (R * 1.02)
+    diffuse = lit(nx, ny, nz)
+    l = 0.10 + 0.32 * diffuse
+    # a specular blob up and to the left
+    hx, hy = x + 0.30, y + 0.36
+    spec = np.exp(-(hx ** 2 + hy ** 2) / 0.06) * 0.55
+    # a bright rim, strongest where it faces the light
+    rim = np.clip(1 - np.abs(r - (R - 0.04)) / 0.035, 0, 1) * (0.25 + 0.45 * np.clip(-(x + y) / 1.2, 0, 1))
+    l = l + spec + rim
+    col = np.array([0.70, 0.78, 0.84])                          # a cool, bluish plastic
+    rgb = np.zeros((N, N, 3), np.float32)
+    rgb[body] = np.clip(l[body], 0, 1)[:, None] * col
+    edge = body & (r > R - 0.012)
+    rgb[edge] *= 0.35
+    alpha = body.astype(np.float32)
+    a = alpha + shadow * (1 - alpha)
+    out = np.zeros((N, N, 4), np.float32)
+    out[..., :3] = rgb * alpha[..., None] / np.maximum(a, 1e-6)[..., None]
+    out[..., 3] = a
+    img = Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8), "RGBA")
+    return img.resize((n, n), Image.LANCZOS)
+
+
 def screw(n=64, ss=4):
     """A domed Phillips head in a countersunk hole."""
     N = n * ss
@@ -153,6 +189,7 @@ if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     powder().save(os.path.join(OUT, "powder.png"))
     knob_cap().save(os.path.join(OUT, "knob.png"))
+    knob_glossy().save(os.path.join(OUT, "knob_classic.png"))
     screw().save(os.path.join(OUT, "screw.png"))
     sheen().save(os.path.join(OUT, "sheen.png"))
     vignette().save(os.path.join(OUT, "vignette.png"))

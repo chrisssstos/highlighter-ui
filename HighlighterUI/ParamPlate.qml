@@ -28,7 +28,12 @@ Item {
         anchors.fill: parent
         color: plate.color
         // satin: a little light at the top, falling off down the plate
-        gradient: Theme.industrial ? sheen : null
+        gradient: Theme.industrial ? sheen : Theme.classic ? classicFace : null
+        Gradient {
+            id: classicFace
+            GradientStop { position: 0; color: Qt.lighter(plate.color, 1.22) }
+            GradientStop { position: 1; color: Qt.darker(plate.color, 1.05) }
+        }
         Gradient {
             id: sheen
             GradientStop { position: 0; color: Qt.lighter(plate.color, 1.16) }
@@ -51,6 +56,8 @@ Item {
         border.width: 1; border.color: Qt.rgba(0, 0, 0, 0.6)
     }
     ParamBevel { anchors.fill: parent; anchors.margins: 1; visible: Theme.industrial; light: 0.14; dark: 0.18 }
+    Rectangle { anchors.fill: parent; visible: Theme.classic; color: "transparent"; border.width: 1; border.color: Qt.rgba(0, 0, 0, 0.7) }
+    ParamBevel { anchors.fill: parent; anchors.margins: 1; visible: Theme.classic; light: 0.2; dark: 0.4 }
 
     Repeater {
         readonly property bool slim: plate.height < Theme.s(56)

@@ -72,17 +72,22 @@ value box sits between its step arrows.
 
 `Theme.compact` shrinks knobs and spacing; `Theme.slidersStartMinimised`
 (on) is whether sliders the user hasn't maximised start thin.
-`Theme.industrial` (on) is the modular-synth look: the page is the inside
-of a rack, and every section and group is a module, its own satin
-powder-coated faceplate bolted to a pair of rack rails, its name printed
-across the top, a maker's mark at the foot, screws in the corners. A group
-that folds has a power LED (lit while open) and folds to a slim blank panel;
-a group inside another is a recessed sub-panel. Sliders sit in grooves, value
-boxes are LCDs, the XY pad is a scope, knobs are rendered aluminium caps,
-buttons have a sheen and an LED when they stay down. Off gives the flat look.
-`ParamPlate`, `ParamRail`, `ParamScrew` and `ParamBevel` are the pieces. All
-the assets are rendered for the kit (`tools/render_assets.py`); see
-`HighlighterUI/textures/CREDITS.txt`.
+`Theme.skin` picks the look:
+
+- **"classic"** (the default): a 2006 DAW. Slate-blue plugin windows with a
+  gradient title bar, a grip and a fold button over a raised, bevelled body;
+  small Tahoma type; glossy dark plastic knobs with a white pointer; raised
+  gradient buttons with an LED when they stay down; dark inset channels for
+  the bars, LCD value boxes, a dark grid for the XY pad, raised preset cells.
+- **"modular"**: a synth rack. Every section and group is a module, its own
+  satin powder-coated faceplate bolted to a pair of rack rails, its name
+  printed across the top, screws in the corners; folding groups get a power
+  LED and fold to a slim blank panel. Rendered aluminium knobs, LCDs, a scope.
+- **"flat"**: plain grey, hard-edged.
+
+`Theme.industrial` is true for "modular". `ParamPlate`, `ParamRail`,
+`ParamScrew` and `ParamBevel` are the pieces. All the assets are rendered for
+the kit (`tools/render_assets.py`); see `HighlighterUI/textures/CREDITS.txt`.
 `Theme.smooth` (off) turns antialiasing back on for arrows, knobs, gauges and
 round shapes; off gives the kit its hard, nearest-neighbour edges.
 `Theme.accent` recolours everything; the darker shades follow it, and
