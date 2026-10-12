@@ -19,8 +19,6 @@ Item {
     //! The value's frame draws in ink, the others in dim; segments that are
     //! off are printed faint, in ghost.
     property color ink: Theme.accent
-    //! Set on the copy a glow is drawn from: only the segments that are on show.
-    property bool litOnly: false
     readonly property color dim: "#56636a"
     readonly property color ghost: "#141a1d"
 }
