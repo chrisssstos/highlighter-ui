@@ -36,8 +36,15 @@ Item {
 
     signal picked(real t)
 
-    readonly property color ghost: "#141a1d"
-    readonly property color dim: "#56636a"
+    // A grey-green LCD, as on a meter: the glass, its rim, the segments printed
+    // on it (barely darker than the glass), the pictures (pale) and the lit
+    // frame and readout (warm yellow, not the panel's accent).
+    readonly property color glass: "#6f7965"
+    readonly property color rim: "#5d6655"
+    readonly property color rimLight: "#838d78"
+    readonly property color ghost: "#677160"
+    readonly property color dim: "#a9b6a4"
+    readonly property color lit: "#fbf27a"
     readonly property int current: Math.round(PM.clamp(root.position, 0, 1) * (root.frames - 1))
 
     // --- layout --------------------------------------------------------------
@@ -76,27 +83,17 @@ Item {
     // --- the glass -------------------------------------------------------------
     Rectangle {   // bezel
         anchors.fill: parent
-        color: "#030405"
-        radius: Theme.s(3)
+        color: root.rim
+        radius: Theme.s(2)
     }
     Rectangle {   // the pane
         id: pane
         anchors.fill: parent
         anchors.margins: root.bezel
         radius: Theme.s(2)
-        color: "#080b0d"
+        color: root.glass
         border.width: 1
-        border.color: "#171d21"
-        // a soft light from above
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: 1
-            radius: parent.radius
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0.045) }
-                GradientStop { position: 0.45; color: Qt.rgba(1, 1, 1, 0.0) }
-            }
-        }
+        border.color: root.rimLight
     }
 
     // --- the frames, in their own field ---------------------------------------------
@@ -138,14 +135,14 @@ Item {
                             y: r * root.seg
                             width: Math.max(1, root.seg - (root.seg > 3 ? 1 : 0))
                             height: width
-                            color: !on ? root.ghost : cell.lit ? root.tint : root.dim
+                            color: !on ? root.ghost : cell.lit ? root.lit : root.dim
                             antialiasing: false
                         }
                     }
                     Loader { id: custom; anchors.fill: parent; sourceComponent: root.illustration }
                     Binding { target: custom.item; property: "t"; value: cell.t; when: custom.status === Loader.Ready }
                     Binding { target: custom.item; property: "lit"; value: cell.lit; when: custom.status === Loader.Ready }
-                    Binding { target: custom.item; property: "ink"; value: root.tint; when: custom.status === Loader.Ready }
+                    Binding { target: custom.item; property: "ink"; value: root.lit; when: custom.status === Loader.Ready }
                     Binding { target: custom.item; property: "width"; value: cell.width; when: custom.status === Loader.Ready }
                     Binding { target: custom.item; property: "height"; value: cell.height; when: custom.status === Loader.Ready }
                 }
@@ -154,7 +151,7 @@ Item {
                     x: (cell.width - width) / 2
                     y: cell.height + Theme.s(4)
                     width: Theme.s(12); height: Math.max(2, Theme.s(2))
-                    color: cell.lit ? root.tint : root.ghost
+                    color: cell.lit ? root.lit : root.ghost
                 }
 
                 MouseArea {
@@ -177,7 +174,7 @@ Item {
         digitHeight: root.digitH
         digits: root.readoutDigits
         text: root.readout
-        ink: root.tint
+        ink: root.lit
         ghost: root.ghost
     }
     Text {
