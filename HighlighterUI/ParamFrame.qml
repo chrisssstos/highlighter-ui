@@ -18,7 +18,7 @@ Item {
     property bool lit: false
     //! The value's frame draws in ink, the others in dim; segments that are
     //! off are printed faint, in ghost.
-    property color ink: Theme.accent
-    readonly property color dim: "#56636a"
-    readonly property color ghost: "#141a1d"
+    property color ink: "#fbf27a"
+    readonly property color dim: "#a9b6a4"
+    readonly property color ghost: "#677160"
 }
