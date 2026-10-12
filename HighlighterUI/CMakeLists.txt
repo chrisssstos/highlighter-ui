@@ -24,6 +24,7 @@ qt_add_qml_module(HighlighterUI
         ParamSizeMark.qml
         ParamValueBox.qml
         ParamSlider.qml
+        ParamSegments.qml
         ParamKnob.qml
         ParamButton.qml
         ParamToggle.qml

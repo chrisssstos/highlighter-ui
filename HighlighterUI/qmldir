@@ -28,3 +28,4 @@ ParamSwatches 1.0 ParamSwatches.qml
 ParamText 1.0 ParamText.qml
 ParamLight 1.0 ParamLight.qml
 ParamXY 1.0 ParamXY.qml
+ParamSegments 1.0 ParamSegments.qml
