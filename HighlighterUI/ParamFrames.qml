@@ -45,9 +45,15 @@ Item {
     readonly property int bezel: Theme.s(3)
     readonly property int pad: Theme.s(8)
     readonly property int tickH: Theme.s(5)
-    // the readout's room on the right
-    readonly property real readoutW: root.readout === "" ? 0 : sevenSeg.width + Theme.s(22) + (unitText.visible ? unitText.width + Theme.s(4) : 0)
-    readonly property real fieldW: width - 2 * (bezel + pad) - readoutW
+    // Laid out as a real display is: every segment has its own place. The
+    // readout's slot comes first, sized from the display's width alone; the
+    // frames get what is left, in a field of their own they cannot draw past.
+    readonly property real digitH: Math.round(Math.max(Theme.s(16), Math.min(Theme.s(30), (width - 2 * (bezel + pad)) * 0.035)))
+    readonly property real unitW: root.unit === "" ? 0 : unitMetrics.advanceWidth + Theme.s(5)
+    readonly property real readoutW: root.readout === "" ? 0
+        : root.readoutDigits * (Math.round(digitH * 0.56) + Math.round(digitH * 0.18)) + Math.round(digitH * 0.12) + unitW
+    readonly property real readoutGap: root.readout === "" ? 0 : Theme.s(18)
+    readonly property real fieldW: width - 2 * (bezel + pad) - readoutW - readoutGap
     // dot matrix: one dot field, frames a dot apart
     readonly property int seg: Math.max(1, Math.floor(fieldW / (root.frames * root.cols + root.frames - 1)))
     readonly property bool dots: !root.illustration && !!root.pattern
@@ -56,7 +62,17 @@ Item {
     readonly property real frameH: dots ? seg * root.rows : Math.round(frameW / root.aspect)
 
     implicitWidth: Theme.s(320)
-    implicitHeight: frameH + 2 * (bezel + pad) + tickH + Theme.s(4)
+    readonly property real contentH: Math.max(frameH + tickH + Theme.s(4), root.readout === "" ? 0 : digitH)
+    implicitHeight: contentH + 2 * (bezel + pad)
+
+    TextMetrics {
+        id: unitMetrics
+        text: root.unit.toUpperCase()
+        font.family: Theme.family
+        font.pixelSize: Theme.s(10)
+        font.weight: Font.Bold
+        font.letterSpacing: Theme.s(1)
+    }
 
     // --- the glass -------------------------------------------------------------
     Rectangle {   // bezel
@@ -84,10 +100,17 @@ Item {
         }
     }
 
-    // --- the frames --------------------------------------------------------------
+    // --- the frames, in their own field ---------------------------------------------
+    Item {
+        id: field
+        x: root.bezel
+        y: root.bezel
+        width: root.pad + root.fieldW + root.readoutGap / 2
+        height: root.height - 2 * root.bezel
+        clip: true
     Row {
-        x: root.bezel + root.pad
-        y: root.bezel + root.pad
+        x: root.pad
+        y: root.pad + (root.contentH - root.frameH - root.tickH - Theme.s(4)) / 2
         spacing: root.frameGap
         Repeater {
             model: root.frames
@@ -181,13 +204,15 @@ Item {
         }
     }
 
-    // --- the readout -----------------------------------------------------------------
+    }
+
+    // --- the readout, in its slot ------------------------------------------------------
     ParamSevenSeg {
         id: sevenSeg
         visible: root.readout !== ""
-        x: root.width - root.bezel - root.pad - width - (unitText.visible ? unitText.width + Theme.s(4) : 0)
-        y: root.bezel + root.pad + (root.frameH - height) / 2
-        digitHeight: Math.max(Theme.s(14), Math.min(Theme.s(34), root.frameH * 0.55))
+        x: root.width - root.bezel - root.pad - root.readoutW
+        y: root.bezel + root.pad + (root.contentH - height) / 2
+        digitHeight: root.digitH
         digits: root.readoutDigits
         text: root.readout
         ink: root.tint
@@ -196,7 +221,7 @@ Item {
     Text {
         id: unitText
         visible: root.readout !== "" && root.unit !== ""
-        x: root.width - root.bezel - root.pad - width
+        x: root.width - root.bezel - root.pad - root.unitW + Theme.s(5)
         y: sevenSeg.y + sevenSeg.height - height
         text: root.unit.toUpperCase()
         color: root.dim
