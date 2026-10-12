@@ -80,7 +80,10 @@ Item {
     readonly property bool isDefault: isNaN(root.defaultValue) || Math.abs(root.value - root.defaultValue) < root.stepSize / 2
 
     // This slider's sizes, minimised or not.
-    function sz(key) { return Theme.sliderSize(key, root.compact) }
+    // With its display showing, the bar is thin (its picture does the
+    // explaining); the label and value keep their size.
+    readonly property var barKeys: ["track", "edge", "arrowW", "arrowH", "gap"]
+    function sz(key) { return Theme.sliderSize(key, root.compact || (root.illustrated && root.barKeys.indexOf(key) >= 0)) }
     readonly property int arrowW: sz("arrowW")
     readonly property int arrowH: sz("arrowH")
     readonly property int gap: sz("gap")
