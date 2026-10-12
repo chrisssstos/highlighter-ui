@@ -20,6 +20,12 @@ Window {
         // maximised, so the illustrations show (a minimised slider is a thin bar)
         Theme.slidersStartMinimised = false
         if (Qt.application.arguments.indexOf("--classic") >= 0) Theme.skin = "classic"
+        const wid = Qt.application.arguments.find(a => a.startsWith("--width="))
+        if (wid) win.width = Number(wid.substring(8))
+        const sp = Qt.application.arguments.find(a => a.startsWith("--spread="))
+        if (sp) v.spread = Number(sp.substring(9))
+        const tu = Qt.application.arguments.find(a => a.startsWith("--turbulence="))
+        if (tu) v.turbulence = Number(tu.substring(13))
         const sca = Qt.application.arguments.find(a => a.startsWith("--scale="))
         if (sca) Theme.scale = Number(sca.substring(8))
     }
