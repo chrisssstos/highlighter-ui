@@ -36,14 +36,14 @@ Item {
 
     signal picked(real t)
 
-    // A grey-green LCD, as on a meter: the glass, its rim, the segments printed
+    // A grey LCD with a hint of green, as on a meter: the glass, its rim, the segments printed
     // on it (barely darker than the glass), the pictures (pale) and the lit
     // frame and readout (warm yellow, not the panel's accent).
-    readonly property color glass: "#6f7965"
-    readonly property color rim: "#5d6655"
-    readonly property color rimLight: "#838d78"
-    readonly property color ghost: "#677160"
-    readonly property color dim: "#a9b6a4"
+    readonly property color glass: "#74776f"
+    readonly property color rim: "#63665f"
+    readonly property color rimLight: "#878a82"
+    readonly property color ghost: "#6c6f68"
+    readonly property color dim: "#b1b6ac"
     readonly property color lit: "#fbf27a"
     readonly property int current: Math.round(PM.clamp(root.position, 0, 1) * (root.frames - 1))
 
