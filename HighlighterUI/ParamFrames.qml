@@ -29,7 +29,7 @@ Item {
     property int cols: 20
     property int rows: 12
     //! A custom frame's shape, width over height (a dot matrix's is cols / rows).
-    property real aspect: 2.4
+    property real aspect: 2.0
     //! The readout: the value as text ("" for none), its places and the unit printed beside it.
     property string readout: ""
     property int readoutDigits: 4
@@ -55,14 +55,15 @@ Item {
     // Laid out as a real display is: every segment has its own place. The
     // readout's slot comes first, sized from the display's width alone; the
     // frames get what is left, in a field of their own they cannot draw past.
-    readonly property real digitH: Math.round(Math.max(Theme.s(16), Math.min(Theme.s(30), (width - 2 * (bezel + pad)) * 0.035)))
+    readonly property real digitH: Math.round(Math.max(Theme.s(18), Math.min(Theme.s(24), (width - 2 * (bezel + pad)) * 0.028)))
     readonly property real unitW: root.unit === "" ? 0 : unitMetrics.advanceWidth + Theme.s(5)
     readonly property real readoutW: root.readout === "" ? 0
         : root.readoutDigits * (Math.round(digitH * 0.56) + Math.round(digitH * 0.18)) + Math.round(digitH * 0.12) + unitW
     readonly property real readoutGap: root.readout === "" ? 0 : Theme.s(18)
     readonly property real fieldW: width - 2 * (bezel + pad) - readoutW - readoutGap
-    // dot matrix: one dot field, frames a dot apart
-    readonly property int seg: Math.max(1, Math.floor(fieldW / (root.frames * root.cols + root.frames - 1)))
+    // dot matrix: one dot field across the whole width, frames a dot apart
+    // (a dot's pitch need not be whole pixels, so the field always fills it)
+    readonly property real seg: Math.max(1, fieldW / (root.frames * root.cols + root.frames - 1))
     readonly property bool dots: !root.illustration && !!root.pattern
     readonly property real frameW: dots ? seg * root.cols : (fieldW - (root.frames - 1) * Theme.s(6)) / root.frames
     readonly property real frameGap: dots ? seg : Theme.s(6)
@@ -116,7 +117,7 @@ Item {
                 required property int index
                 readonly property real t: root.frames > 1 ? index / (root.frames - 1) : 0
                 readonly property bool lit: index === root.current
-                width: Math.floor(root.frameW)
+                width: root.frameW
                 height: root.frameH
                 // a picture stays in its own frame (the tick under it is drawn past it)
                 Item { id: clipBox; anchors.fill: parent; clip: true }
@@ -134,7 +135,7 @@ Item {
                             readonly property bool on: root.pattern(c, r, cell.t)
                             x: c * root.seg
                             y: r * root.seg
-                            width: Math.max(1, root.seg - (root.seg > 3 ? 1 : 0))
+                            width: Math.max(1, root.seg * 0.82)
                             height: width
                             color: !on ? root.ghost : cell.lit ? root.lit : root.dim
                             antialiasing: false
@@ -168,7 +169,7 @@ Item {
                             readonly property int r: Math.floor(index / root.cols)
                             x: c * root.seg
                             y: r * root.seg
-                            width: Math.max(1, root.seg - (root.seg > 3 ? 1 : 0))
+                            width: Math.max(1, root.seg * 0.82)
                             height: width
                             visible: root.pattern(c, r, cell.t)
                             color: root.tint
