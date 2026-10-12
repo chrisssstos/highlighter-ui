@@ -156,10 +156,9 @@ Item {
                     layer.enabled: cell.lit
                     layer.effect: MultiEffect {
                         blurEnabled: true
-                        blur: 0.6
-                        blurMax: 24
-                        brightness: 0.1
-                        opacity: 0.7
+                        blur: 0.45
+                        blurMax: 16
+                        opacity: 0.35
                     }
                     Repeater {
                         model: root.dots && cell.lit ? root.cols * root.rows : 0
