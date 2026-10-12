@@ -33,10 +33,10 @@ QtObject {
     }
 
     // --- skin --------------------------------------------------------------
-    //! The look: "classic" (old FL Studio: slate-blue plugin windows with
-    //! gradient title bars, raised bevels, small type, glossy knobs) or "flat"
-    //! (plain grey). The colours below follow it.
-    property string skin: "classic"
+    //! The look: "flat" (plain grey, the default) or "classic" (old FL
+    //! Studio: slate-blue plugin windows with gradient title bars, raised
+    //! bevels, small type, glossy knobs). The colours below follow it.
+    property string skin: "flat"
     readonly property bool classic: skin === "classic"
 
     // --- colour ------------------------------------------------------------
