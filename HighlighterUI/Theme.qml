@@ -49,7 +49,7 @@ QtObject {
     property color line:      classic ? "#5f6c73" : "#6a6f6d"   // quiet outlines and dividers
     property color titleBar:  "#5b6870"   // classic: a window's title bar, top of its gradient
     property color titleBarEnd: "#38434a" // and its foot
-    property color accent:    "#b8de52"   // the lime: fills, values, focus
+    property color accent:    "#def243"   // the highlighter yellow-lime: fills, values, focus
     // Shades of the accent, so any accent works.
     property color accentDim:  dimOf(accent)   // an arrow drawn on the accent
     property color accentEdge: edgeOf(accent)  // the line along the fill's edge
@@ -63,7 +63,7 @@ QtObject {
 
     //! Accents that read well on the grey, for a swatch row.
     readonly property var accents: [
-        { name: "highlighter", color: "#b8de52" },
+        { name: "highlighter", color: "#def243" },
         { name: "yellow",      color: "#f0e442" },
         { name: "amber",       color: "#ffbe3d" },
         { name: "orange",      color: "#ff8a3d" },
