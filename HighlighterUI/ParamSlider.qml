@@ -38,7 +38,11 @@ Item {
     property bool sizeToggle: true
     //! Minimised: a thin bar. Sliders start minimised, unless the user
     //! maximised this one before; the min / max button by the label flips it.
-    property bool compact: Theme.slidersStartMinimised && !PanelMemory.isMaximised(key)
+    //! An illustrated slider starts maximised, so its picture shows; the
+    //! user's own choice either way is remembered.
+    property bool compact: PanelMemory.isMinimised(key) ? true
+                         : PanelMemory.isMaximised(key) ? false
+                         : Theme.slidersStartMinimised && root.pattern === null && root.illustration === null
 
     //! An illustration above the bar, shown when maximised, for settings a
     //! picture explains (see ParamFrames): a dot matrix, pattern(col, row, t),
