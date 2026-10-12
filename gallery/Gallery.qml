@@ -144,6 +144,33 @@ Window {
 
             }
             ParamSection {
+                width: parent.width; title: "Illustrated"; note: "a display above the bar when maximised (see run-segments.bat)"
+                // a dot matrix: a bar of dots growing; at the ends of the range
+                ParamSlider {
+                    width: parent.width; key: "illus.dots"; label: "Dot matrix"; unit: "%"; from: 0; to: 100; value: 40; defaultValue: 50
+                    pattern: (c, r, t) => r >= 4 && r <= 7 && c < 2 + Math.round(t * 17)
+                }
+                ParamSlider {
+                    width: parent.width; key: "illus.dotsEnd"; label: "Dot matrix (at its end, a long unit)"; unit: "px/s"; from: 0; to: 800; value: 800; defaultValue: 220
+                    pattern: (c, r, t) => r >= 4 && r <= 7 && c < 2 + Math.round(t * 17)
+                }
+                // custom segments: an arrow turning
+                ParamSlider {
+                    width: parent.width; key: "illus.custom"; label: "Custom segments"; unit: "°"; from: 0; to: 360; value: 90; defaultValue: 0
+                    illustration: Component {
+                        ParamFrame {
+                            id: f
+                            ParamSegment {
+                                width: Math.min(f.width, f.height) * 0.8; height: width * 0.5
+                                x: (f.width - width) / 2; y: (f.height - height) / 2
+                                rotation: f.t * 360; on: true
+                                path: "M0 36 L56 36 L56 6 L100 50 L56 94 L56 64 L0 64 Z"
+                            }
+                        }
+                    }
+                }
+            }
+            ParamSection {
                 width: parent.width; title: "Ranges"
                 ParamSlider { width: parent.width; label: "top edge from centre (fills from 0)"; unit: " mm"; from: -400; to: 400; origin: 0; value: -300; defaultValue: 0 }
                 ParamSlider { width: parent.width; label: "left edge from centre"; unit: " mm"; from: -400; to: 400; origin: 0; value: 201; defaultValue: 0 }
