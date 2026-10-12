@@ -38,13 +38,13 @@ Item {
 
     // A grey LCD with a hint of green, as on a meter: the glass, its rim, the segments printed
     // on it (barely darker than the glass), the pictures (pale) and the lit
-    // frame and readout (warm yellow, not the panel's accent).
+    // frame and readout (the panel's accent).
     readonly property color glass: "#74776f"
     readonly property color rim: "#63665f"
     readonly property color rimLight: "#878a82"
     readonly property color ghost: "#6c6f68"
     readonly property color dim: "#b1b6ac"
-    readonly property color lit: "#fbf27a"
+    readonly property color lit: root.tint
     readonly property int current: Math.round(PM.clamp(root.position, 0, 1) * (root.frames - 1))
 
     // --- layout --------------------------------------------------------------
