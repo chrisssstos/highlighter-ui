@@ -97,6 +97,10 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   `tests/build-check.bat` proves the CMake module compiles.
 - Every new control goes in `HighlighterUI/qmldir`, `HighlighterUI/CMakeLists.txt` and
   the gallery, with its awkward states shown.
+- A slider can carry an illustration (ParamFrames above its bar, maximised
+  only): `pattern` for a dot matrix, or `illustration`, a ParamFrame Component
+  of ParamSegments (blocks, dots or SVG paths, faint when off, lit when on).
+  Only where a picture explains the setting; timing and plain numbers stay bare.
 - Draw with Shapes (GeometryRenderer when `!Theme.smooth`), not Canvas: a
   Canvas always antialiases, and the kit's look is hard-edged.
 - QML property names can't start with a capital, and `z` is taken (Item.z).
@@ -106,14 +110,16 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   `--scale=<n>`, `--compact`, `--accent=<#hex>`, `--second` (also shoots the
   second panel).
 - In qmltestrunner, a double-click is `mouseDoubleClickSequence`.
-- Skins (`Theme.skin`: "classic" default, shown as "old FL studio"; "flat")
+- Skins (`Theme.skin`: "flat", the default and the one Christos uses;
+  "classic", shown as "old FL studio", only when asked for)
   are drawn on top of the flat look: every classic touch is a
   `visible: Theme.classic` layer or a Theme colour that follows the skin, so
   "flat" must stay the plain look unchanged. A new control needs its classic
   touches (outline, bevel, LCD, gradient) like its neighbours. Use
   `ParamPlate` for a raised surface and `ParamBevel` (inset for sunk things);
   textures are in `HighlighterUI/textures` (RESOURCES in CMake). Gallery:
-  `--skin=<flat|classic>` (or `--flat`) to shoot a skin.
+  `--skin=<flat|classic>` to shoot a skin (`--flat` still works). Build and
+  shoot new work in flat.
   Assets are rendered by `tools/render_assets.py`; never take graphics
   from commercial plugins. Any new asset: own render (or CC0), listed in
   `textures/CREDITS.txt`.

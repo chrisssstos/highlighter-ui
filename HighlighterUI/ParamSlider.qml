@@ -40,13 +40,24 @@ Item {
     //! maximised this one before; the min / max button by the label flips it.
     property bool compact: Theme.slidersStartMinimised && !PanelMemory.isMaximised(key)
 
+    //! An illustration above the bar, shown when maximised, for settings a
+    //! picture explains (see ParamFrames): a dot matrix, pattern(col, row, t),
+    //! or a custom drawing, illustration (a ParamFrame Component). frames
+    //! pictures across the range; click one to jump to it.
+    property var pattern: null
+    property Component illustration: null
+    property int frames: 5
+    property int cols: 20
+    property int rows: 12
+    readonly property bool illustrated: (root.pattern !== null || root.illustration !== null) && !root.compact
+
     signal moved(real value)
 
     readonly property bool pressed: ma.pressed
     readonly property bool editing: box.editing
 
     implicitWidth: Theme.s(320)
-    implicitHeight: head.height + track.height + box.height
+    implicitHeight: head.height + pictures.height + track.height + box.height
     activeFocusOnTab: true
     opacity: enabled ? 1 : 0.4
 
@@ -150,10 +161,30 @@ Item {
         }
     }
 
+    // --- the illustration, maximised only -------------------------------------
+    Item {
+        id: pictures
+        y: head.height
+        width: root.width - root.gutterR
+        height: root.illustrated ? strip.height + Theme.s(4) : 0
+        visible: root.illustrated
+        ParamFrames {
+            id: strip
+            width: parent.width
+            frames: root.frames
+            position: root.fraction(root.shown)
+            pattern: root.pattern
+            illustration: root.illustration
+            cols: root.cols
+            rows: root.rows
+            onPicked: t => { root.forceActiveFocus(); root.setValue(root.from + t * (root.to - root.from)) }
+        }
+    }
+
     // --- the bar -------------------------------------------------------------
     Rectangle {
         id: track
-        y: head.height
+        y: head.height + pictures.height
         width: root.width - root.gutterR
         height: root.sz("track")
         radius: Theme.radius
