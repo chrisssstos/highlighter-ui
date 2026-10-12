@@ -1,13 +1,12 @@
 import QtQuick
-import QtQuick.Effects
 import "ParamMath.js" as PM
 
 /// A setting's illustration, as one hardware display: a pane of dark glass with
 /// a frame per step of the setting's range printed across it, and a
 /// seven-segment readout of the value at its right. Every segment is printed,
 /// faint; each frame's picture is lit dimly, so the whole range reads at a
-/// glance; the frame nearest the value is lit bright and glows, and a tick under
-/// it lights. Click a frame to jump to it (picked(t)).
+/// glance; the frame nearest the value is lit bright, and a tick under it
+/// lights. Click a frame to jump to it (picked(t)).
 ///
 /// A frame's picture is either a dot matrix, pattern(col, row, t) -> true for
 /// a lit dot of a cols x rows frame (one dot field across the whole pane), or a
@@ -150,43 +149,6 @@ Item {
                     Binding { target: custom.item; property: "width"; value: cell.width; when: custom.status === Loader.Ready }
                     Binding { target: custom.item; property: "height"; value: cell.height; when: custom.status === Loader.Ready }
                 }
-                // and the value's frame glowing, as lit LCD segments do: a
-                // copy of its lit segments alone, blurred under the light
-                Item {
-                    parent: cell
-                    anchors.fill: parent
-                    visible: cell.lit
-                    layer.enabled: cell.lit
-                    layer.effect: MultiEffect {
-                        blurEnabled: true
-                        blur: 0.6
-                        blurMax: 24
-                        brightness: 0.1
-                        opacity: 0.7
-                    }
-                    Repeater {
-                        model: root.dots && cell.lit ? root.cols * root.rows : 0
-                        Rectangle {
-                            required property int index
-                            readonly property int c: index % root.cols
-                            readonly property int r: Math.floor(index / root.cols)
-                            x: c * root.seg
-                            y: r * root.seg
-                            width: Math.max(1, root.seg - (root.seg > 3 ? 1 : 0))
-                            height: width
-                            visible: root.pattern(c, r, cell.t)
-                            color: root.tint
-                        }
-                    }
-                    Loader { id: glowCustom; anchors.fill: parent; sourceComponent: cell.lit ? root.illustration : null }
-                    Binding { target: glowCustom.item; property: "t"; value: cell.t; when: glowCustom.status === Loader.Ready }
-                    Binding { target: glowCustom.item; property: "lit"; value: true; when: glowCustom.status === Loader.Ready }
-                    Binding { target: glowCustom.item; property: "litOnly"; value: true; when: glowCustom.status === Loader.Ready }
-                    Binding { target: glowCustom.item; property: "ink"; value: root.tint; when: glowCustom.status === Loader.Ready }
-                    Binding { target: glowCustom.item; property: "width"; value: cell.width; when: glowCustom.status === Loader.Ready }
-                    Binding { target: glowCustom.item; property: "height"; value: cell.height; when: glowCustom.status === Loader.Ready }
-                }
-
                 // its tick, printed under it
                 Rectangle {
                     x: (cell.width - width) / 2
