@@ -177,6 +177,12 @@ Item {
             illustration: root.illustration
             cols: root.cols
             rows: root.rows
+            // the value on the display, as many places as the range needs
+            readout: root.value.toFixed(root.decimals)
+            readoutDigits: Math.max(String(Math.abs(root.from).toFixed(root.decimals)).replace(".", "").length,
+                                    String(Math.abs(root.to).toFixed(root.decimals)).replace(".", "").length,
+                                    String(Math.abs(root.value).toFixed(root.decimals)).replace(".", "").length) + (root.from < 0 ? 1 : 0)
+            unit: root.unit
             onPicked: t => { root.forceActiveFocus(); root.setValue(root.from + t * (root.to - root.from)) }
         }
     }

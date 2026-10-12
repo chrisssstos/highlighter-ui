@@ -31,3 +31,4 @@ ParamXY 1.0 ParamXY.qml
 ParamFrames 1.0 ParamFrames.qml
 ParamFrame 1.0 ParamFrame.qml
 ParamSegment 1.0 ParamSegment.qml
+ParamSevenSeg 1.0 ParamSevenSeg.qml

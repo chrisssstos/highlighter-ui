@@ -18,6 +18,9 @@ Item {
     property real stroke: 0
     property Item frame: parent
 
+    // the copy a glow is drawn from shows only lit segments
+    visible: seg.on || !(seg.frame?.litOnly ?? false)
+
     readonly property color color: !seg.on ? (seg.frame?.ghost ?? "#151a1d")
                                   : seg.frame?.lit ? (seg.frame?.ink ?? Theme.accent)
                                   : (seg.frame?.dim ?? "#59656b")
