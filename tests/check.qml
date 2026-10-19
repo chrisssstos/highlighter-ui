@@ -10,6 +10,8 @@ Item {
     QtObject { id: state; property int pick: 0; property bool on: false; property string open: "" }
     ParamChoice { id: c; model: ["1", "2"]; currentIndex: state.pick; onActivated: i => state.pick = i }
     ParamCheck { id: ch; checked: state.on; onToggled: v => state.on = v }
+    ParamButton { id: btn; checkable: true; checked: state.on; onToggled: v => state.on = v }
+    ParamButton { id: freeBtn; checkable: true }
     ParamGroup { id: g; title: "A"; open: state.open === "A"; onToggled: o => state.open = o ? "A" : "" }
     ParamGroup { id: free; title: "B"; open: false }
     ParamCode { id: code; text: "a\nb\nc" }
@@ -26,6 +28,8 @@ Item {
         k.step(+1, true); out.push("knob +10 steps=" + k.value)
         c.choose(1); state.pick = 0; out.push("choice still bound=" + (c.currentIndex === 0))
         ch.flip(); state.on = false; out.push("check still bound=" + (ch.checked === false))
+        btn.activate(); const down = btn.checked; state.on = false; out.push("button down=" + down + " still bound=" + (btn.checked === false))
+        freeBtn.activate(); out.push("unbound button stays down=" + freeBtn.checked)
         g.flip(); const opened = g.open; state.open = ""; out.push("group opened=" + opened + " still bound=" + (g.open === false))
         free.flip(); out.push("unbound group folds itself=" + free.open)
         out.push("code starts folded=" + !code.open + " lines=" + code.lines); code.flip(); out.push("code opens=" + code.open)
