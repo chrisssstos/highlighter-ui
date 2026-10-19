@@ -5,8 +5,8 @@ import QtQuick.Controls.Basic as B
 B.ScrollBar {
     id: bar
 
-    //! The accent it draws in: its window's own, if that declares one (see Theme).
-    readonly property color tint: Theme.accentIn(Window.window)
+    //! The accent it draws in: the nearest one declared around it (see Theme).
+    readonly property color tint: Theme.accentAt(bar, Window.window)
     policy: B.ScrollBar.AsNeeded
     padding: Theme.s(3)
     contentItem: Rectangle {

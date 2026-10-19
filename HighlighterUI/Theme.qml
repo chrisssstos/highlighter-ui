@@ -4,9 +4,10 @@ import QtQuick
 /// Colours, sizes and the font every HighlighterUI control draws with. Change
 /// scale to grow or shrink the whole panel (a window on a high DPI screen,
 /// say), compact for smaller sliders and knobs that fit more on screen, and
-/// accent to recolour it: the darker shades follow the accent. A window
-/// that declares its own `property color accent` draws in that colour
-/// instead, so two panels can tell themselves apart.
+/// accent to recolour it: the darker shades follow the accent. A window, or
+/// any item (a section, a deck's panel), that declares its own
+/// `property color accent` draws its controls in that colour instead, so two
+/// panels can tell themselves apart, even in one window.
 QtObject {
     id: theme
 
@@ -60,6 +61,15 @@ QtObject {
     //! The accent a control in this window draws with: the window's own
     //! accent if it declares one, the kit's otherwise.
     function accentIn(win) { return win && win.accent !== undefined ? win.accent : theme.accent }
+    //! The accent a control draws with: the nearest item from it up (itself
+    //! included) that declares a `property color accent`, else its window's
+    //! (accentIn). A bool `accent` (ParamButton's "the action that matters")
+    //! is not a colour and is passed over.
+    function accentAt(item, win) {
+        for (let p = item; p; p = p.parent)
+            if (p.accent !== undefined && typeof p.accent !== "boolean") return p.accent
+        return accentIn(win)
+    }
 
     //! Accents that read well on the grey, for a swatch row.
     readonly property var accents: [
@@ -102,9 +112,10 @@ QtObject {
     property int radius:      0
 
     // --- type --------------------------------------------------------------
-    // Fonts every Windows PC has.
-    property string family: classic ? "Tahoma" : "Segoe UI"
-    property string mono: "Consolas"
+    // Fonts every Windows PC (or Mac) has.
+    readonly property bool mac: Qt.platform.os === "osx"
+    property string family: classic ? "Tahoma" : mac ? "Helvetica Neue" : "Segoe UI"
+    property string mono: mac ? "Menlo" : "Consolas"
     property int titleSize: s(classic ? 11 : 13)   // every control's label: sliders, knobs, gauges
     property int labelSize: s(classic ? 11 : 14)
     property int valueSize: s(classic ? 11 : 13)

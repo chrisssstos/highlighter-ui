@@ -55,7 +55,7 @@ Item {
 
     signal moved(real x, real y)
 
-    readonly property color tint: Theme.accentIn(Window.window)
+    readonly property color tint: Theme.accentAt(root, Window.window)
     readonly property bool pressed: ma.pressed
 
     implicitWidth: Theme.s(300)

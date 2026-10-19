@@ -19,7 +19,7 @@ import "ParamMath.js" as PM
 Item {
     id: root
 
-    readonly property color tint: Theme.accentIn(Window.window)
+    readonly property color tint: Theme.accentAt(root, Window.window)
 
     property int frames: 5
     //! Where the value sits along the range, 0..1.

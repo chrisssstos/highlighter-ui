@@ -4,8 +4,8 @@ import QtQuick
 Item {
     id: root
 
-    //! The accent it draws in: its window's own, if that declares one (see Theme).
-    readonly property color tint: Theme.accentIn(Window.window)
+    //! The accent it draws in: the nearest one declared around it (see Theme).
+    readonly property color tint: Theme.accentAt(root, Window.window)
 
     property string text: ""
     property bool checked: false
