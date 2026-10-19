@@ -9,8 +9,8 @@ import "ParamMath.js" as PM
 Item {
     id: root
 
-    //! The accent it draws in: its window's own, if that declares one (see Theme).
-    readonly property color tint: Theme.accentIn(Window.window)
+    //! The accent it draws in: the nearest one declared around it (see Theme).
+    readonly property color tint: Theme.accentAt(root, Window.window)
 
     property string label: ""
     property real value: 0
@@ -252,7 +252,7 @@ Item {
             anchors.centerIn: parent
             direction: sa.direction
             opacity: sa.active && root.enabled ? 1 : 0.3
-            color: area.pressed ? Theme.accentIn(Window.window) : area.containsMouse ? Theme.arrowHot : Theme.arrow
+            color: area.pressed ? root.tint : area.containsMouse ? Theme.arrowHot : Theme.arrow
             scale: area.pressed ? 0.85 : 1
         }
         MouseArea {

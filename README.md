@@ -87,9 +87,10 @@ knob sprite is rendered for the kit (`tools/render_assets.py`); see
 `Theme.smooth` (off) turns antialiasing back on for arrows, knobs, gauges and
 round shapes; off gives the kit its hard, nearest-neighbour edges.
 `Theme.accent` recolours everything; the darker shades follow it, and
-`Theme.accents` lists ones that read well on the grey. A window that declares
-its own `property color accent` draws its controls in that colour instead, so
-two panels in one app can look apart:
+`Theme.accents` lists ones that read well on the grey. A window, or any item
+inside one (a section, a deck's panel), that declares its own
+`property color accent` draws its controls in that colour instead, so two
+panels in one app, even in one window, can look apart:
 
 ```qml
 Window { property color accent: "#ff79c6"   // this panel in pink
@@ -132,5 +133,5 @@ target_link_libraries(<app> PRIVATE HighlighterUIplugin)
 Then `import HighlighterUI` in QML. `tests/build-check.bat` builds the gallery as
 a compiled app this way, to prove the module works.
 
-It uses Segoe UI and Consolas, which every Windows PC has, so nothing needs
-bundling.
+It uses Segoe UI and Consolas, which every Windows PC has (Helvetica Neue and
+Menlo on a Mac), so nothing needs bundling.

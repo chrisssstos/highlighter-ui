@@ -14,6 +14,8 @@ Item {
     ParamGroup { id: free; title: "B"; open: false }
     ParamCode { id: code; text: "a\nb\nc" }
     Window { id: pink; property color accent: "#ff79c6"; ParamCheck { id: inPink } }
+    Item { property color accent: "#b794ff"; Item { ParamCheck { id: inPanel } } }
+    ParamSection { id: ownSection; property color accent: "#5cc8ff" }
     Component.onCompleted: {
         const out = []
         out.push("parse 46px=" + PM.parse("46px", "px"), "40+6=" + PM.parse("40+6", ""), "−3=" + PM.parse("−3", ""), "junk=" + PM.parse("alert(1)", ""), "1/3=" + PM.parse("1/3", ""))
@@ -27,7 +29,9 @@ Item {
         g.flip(); const opened = g.open; state.open = ""; out.push("group opened=" + opened + " still bound=" + (g.open === false))
         free.flip(); out.push("unbound group folds itself=" + free.open)
         out.push("code starts folded=" + !code.open + " lines=" + code.lines); code.flip(); out.push("code opens=" + code.open)
-        out.push("window accent=" + (inPink.tint.toString() === "#ff79c6") + " kit accent=" + (ch.tint === Theme.accent))
+        out.push("window accent=" + (inPink.tint.toString() === "#ff79c6") + " kit accent=" + (ch.tint === Theme.accent)
+                 + " panel accent=" + (inPanel.tint.toString() === "#b794ff")
+                 + " section's own=" + (ownSection.tint.toString() === "#5cc8ff"))
         console.warn(out.join(" | "))
         Qt.quit()
     }

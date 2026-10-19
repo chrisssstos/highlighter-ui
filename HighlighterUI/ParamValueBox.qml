@@ -10,8 +10,8 @@ import "ParamMath.js" as PM
 Item {
     id: box
 
-    //! The accent it draws in: its window's own, if that declares one (see Theme).
-    readonly property color tint: Theme.accentIn(Window.window)
+    //! The accent it draws in: the nearest one declared around it (see Theme).
+    readonly property color tint: Theme.accentAt(box, Window.window)
 
     property real value: 0
     property int decimals: 0

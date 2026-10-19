@@ -260,6 +260,19 @@ Window {
 
             }
             ParamSection {
+                // Any item can declare its own accent: everything inside draws in it.
+                property color accent: "#b794ff"
+                width: parent.width; title: "Own accent"; note: "property color accent on the section"
+                ParamSlider { width: parent.width; key: "gallery.ownAccent"; label: "deck B volume"; unit: " %"; from: 0; to: 100; value: 70; compact: false }
+                Flow {
+                    width: parent.width
+                    spacing: Theme.s(6)
+                    ParamButton { text: "Play"; accent: true }
+                    ParamButton { text: "Sync"; checkable: true; checked: true }
+                    ParamToggle { text: "Loop"; checked: true }
+                }
+            }
+            ParamSection {
                 width: parent.width; title: "XY pad"; note: "drag the dot; Shift fine, Ctrl snaps"
                 ParamXY {
                     width: parent.width

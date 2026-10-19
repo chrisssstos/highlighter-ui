@@ -46,8 +46,9 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
    clears.
 6. Accent and size: set `Theme.accent` once if the project wants a colour
    other than the lime, and `Theme.compact = true` for a dense panel.
-   Two panels that should look apart: give one window its own
-   `property color accent` (Theme.accentIn). Don't recolour controls one by one.
+   Two panels that should look apart: give one window, or the item holding
+   one panel's controls, its own `property color accent` (Theme.accentAt).
+   Don't recolour controls one by one.
 7. Scale: if the window scales itself for DPI (an app's own `ui` scale), set
    `Theme.scale` to it once instead of multiplying sizes.
 8. Every kit control needs `width: parent.width` inside a Column, ParamPage
