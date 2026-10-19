@@ -37,7 +37,12 @@ Item {
     opacity: enabled ? 1 : 0.4
 
     function activate() {
-        if (root.checkable) { root.checked = !root.checked; root.toggled(root.checked) }
+        // Tells you first, like ParamCheck, so checked bound to your state stays bound.
+        if (root.checkable) {
+            const want = !root.checked
+            root.toggled(want)
+            if (root.checked !== want) root.checked = want
+        }
         root.clicked()
     }
 

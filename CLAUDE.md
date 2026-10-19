@@ -28,8 +28,8 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
    - see "What goes where" below for sections, grids and meters
 3. Keep the project's own setting plumbing. Value controls mirror Qt's
    Slider: bind `value`, write back in `onMoved: v => ...`. Watch for
-   settings reloads the same way the old code did. Checks, toggles, choices
-   and groups tell you first and only change themselves if you didn't, so
+   settings reloads the same way the old code did. Checks, toggles, checkable
+   buttons, choices and groups tell you first and only change themselves if you didn't, so
    `checked` / `currentIndex` / `open` bound to your state stay bound: bind
    them and set your state in the handler, no re-syncing needed.
    Anything a panel needs that the kit lacks goes into the kit (with the
