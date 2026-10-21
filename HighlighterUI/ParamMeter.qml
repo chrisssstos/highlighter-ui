@@ -56,7 +56,11 @@ Item {
         width: parent.width
         height: Theme.s(6)
         color: Theme.sunken
-        Rectangle { width: parent.width * root.fraction(root.value); height: parent.height; color: root.tint }
+        Rectangle {
+            width: parent.width * root.fraction(root.value); height: parent.height
+            color: Theme.litOf(root.tint)
+            ParamGlow { anchors.fill: parent; z: -1; color: root.tint; strength: parent.width > 0 && root.enabled ? 0.6 : 0 }
+        }
         Rectangle {
             visible: root.showPeak && root.peak > 0
             x: Math.min(parent.width - width, parent.width * root.peak)

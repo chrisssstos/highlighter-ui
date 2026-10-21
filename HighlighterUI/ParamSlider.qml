@@ -223,7 +223,7 @@ Item {
             x: root.fillX
             width: root.fillW
             height: parent.height
-            color: root.tint
+            color: Theme.litOf(root.tint)
             radius: Theme.radius
             // hardware: lit, like a backlit bar
             ParamGlow { anchors.fill: parent; z: -1; color: root.tint; strength: root.fillW > 0 && root.enabled ? 0.5 : 0 }

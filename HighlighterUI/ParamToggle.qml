@@ -30,8 +30,9 @@ Item {
         width: Theme.s(36); height: Theme.s(18)
         radius: height / 2
         antialiasing: Theme.smooth
-        color: root.checked ? root.tint : (area.containsMouse ? Theme.wellHover : Theme.well)
+        color: root.checked ? Theme.litOf(root.tint) : (area.containsMouse ? Theme.wellHover : Theme.well)
         Behavior on color { ColorAnimation { duration: Theme.ease } }
+        ParamGlow { anchors.fill: parent; z: -1; radius: parent.radius; color: root.tint; strength: root.checked && root.enabled ? 0.8 : 0 }
         border.width: root.activeFocus && !area.focusedByMouse ? 1 : 0
         border.color: Theme.text
 

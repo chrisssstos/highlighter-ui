@@ -58,7 +58,7 @@ Item {
                 width: Math.max(root.cellMinWidth, t.implicitWidth + Theme.s(18))
                 height: root.cellHeight
                 radius: Theme.radius
-                color: on ? root.tint : (ca.containsMouse ? Theme.sunkenHover : Theme.sunken)
+                color: on ? Theme.litOf(root.tint) : (ca.containsMouse ? Theme.sunkenHover : Theme.sunken)
                 Behavior on color { ColorAnimation { duration: Theme.quick } }
                 // hardware: the chosen one glows
                 ParamGlow { anchors.fill: parent; z: -1; color: root.tint; strength: cell.on && root.enabled ? 0.8 : 0 }

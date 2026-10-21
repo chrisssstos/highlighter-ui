@@ -249,7 +249,7 @@ Item {
             x: Math.round(root.px(root.xValue)) - Math.floor(side / 2)
             y: Math.round(root.py(root.yValue)) - Math.floor(side / 2)
             width: side; height: side
-            color: root.tint
+            color: Theme.litOf(root.tint)
             border.width: 1; border.color: Theme.page
             ParamGlow { anchors.fill: parent; z: -1; color: root.tint; strength: root.enabled ? 1 : 0 }
         }

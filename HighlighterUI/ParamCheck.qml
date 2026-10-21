@@ -36,8 +36,9 @@ Item {
         Rectangle {
             anchors.fill: parent
             anchors.margins: Theme.s(3)
-            color: root.tint
+            color: Theme.litOf(root.tint)
             scale: root.checked ? 1 : 0
+            ParamGlow { anchors.fill: parent; z: -1; color: root.tint; strength: root.checked && root.enabled ? 0.8 : 0 }
             Behavior on scale { NumberAnimation { duration: Theme.quick; easing.type: Easing.OutBack } }
         }
     }

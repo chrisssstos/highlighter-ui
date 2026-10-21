@@ -48,9 +48,9 @@ Item {
                 readonly property bool isPeak: Math.abs(root.peak - level) < 0.5 / root.segments
                 width: bar.width
                 height: bar.cell
-                color: lit || isPeak ? (hot ? Theme.danger : root.tint) : Theme.sunken
+                color: lit || isPeak ? Theme.litOf(hot ? Theme.danger : root.tint) : Theme.sunken
                 opacity: isPeak && !lit ? 0.7 : 1
-                ParamGlow { anchors.fill: parent; z: -1; color: parent.color; strength: parent.lit ? 0.45 : 0 }
+                ParamGlow { anchors.fill: parent; z: -1; color: parent.hot ? Theme.danger : root.tint; strength: parent.lit ? 0.5 : 0 }
             }
         }
     }
