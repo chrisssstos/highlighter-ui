@@ -17,10 +17,10 @@ Item {
     RectangularShadow {
         anchors.fill: parent
         color: glow.color
-        blur: Theme.s(14)
-        spread: Theme.s(1)
+        blur: Theme.s(16)
+        spread: Theme.s(2)
         radius: glow.radius
-        opacity: 0.7 * glow.strength
+        opacity: 0.85 * glow.strength
         cached: true
     }
 }

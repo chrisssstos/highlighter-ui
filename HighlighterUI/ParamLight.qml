@@ -13,7 +13,7 @@ Rectangle {
     implicitWidth: Theme.s(10)
     implicitHeight: implicitWidth
     radius: Theme.radius
-    color: root.on ? root.tint : Theme.sunken
+    color: root.on ? Theme.litOf(root.tint) : Theme.sunken
     ParamGlow { anchors.fill: parent; z: -1; color: root.tint; strength: root.on && root.enabled ? 1 : 0 }
     opacity: enabled ? 1 : 0.4
 }

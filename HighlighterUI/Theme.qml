@@ -61,6 +61,11 @@ QtObject {
     function dimOf(c)  { return Qt.darker(c, 1.48) }
     function edgeOf(c) { return Qt.darker(c, 1.36) }
     function inkOf(c)  { return Qt.darker(c, 4.2) }
+    //! Hardware: something lit is almost white, its colour in the glow round
+    //! it (a neon tube, a backlit legend): the colour washed toward warm white.
+    function hotOf(c)  { return Qt.tint(c, Qt.rgba(1, 0.96, 0.93, 0.74)) }
+    //! What a lit thing is drawn in: hot in the hardware skin, the colour otherwise.
+    function litOf(c)  { return theme.hardware ? hotOf(c) : c }
     //! The accent a control in this window draws with: the window's own
     //! accent if it declares one, the kit's otherwise.
     function accentIn(win) { return win && win.accent !== undefined ? win.accent : theme.accent }

@@ -48,7 +48,7 @@ Item {
 
     readonly property color ink: root.accent ? Theme.inkOf(root.tint)
                               : root.danger ? Theme.danger
-                              : root.checked ? (Theme.hardware ? Qt.lighter(root.tint, 1.15) : root.tint)
+                              : root.checked ? Theme.litOf(root.tint)
                               : Theme.classic || Theme.hardware ? Theme.text : root.tint
     //! Hardware: lit (the accent one, or checked) glows.
     readonly property bool lit: root.enabled && (root.accent || root.checked)
@@ -63,7 +63,7 @@ Item {
         id: slab
         anchors.fill: parent
         radius: Theme.radius
-        color: root.accent ? (area.pressed ? Qt.darker(root.tint, 1.18) : area.containsMouse ? Qt.lighter(root.tint, 1.07) : root.tint)
+        color: root.accent ? (area.pressed ? Qt.darker(Theme.litOf(root.tint), 1.18) : area.containsMouse ? Qt.lighter(Theme.litOf(root.tint), 1.04) : Theme.litOf(root.tint))
              : root.checked && Theme.hardware ? Qt.tint(Theme.sunken, Qt.rgba(root.tint.r, root.tint.g, root.tint.b, area.pressed ? 0.16 : 0.26))
              : root.checked ? (area.pressed ? Theme.sunken : Theme.sunkenHover)
              : (area.pressed ? Qt.darker(Theme.sunken, 1.15) : area.containsMouse ? Theme.sunkenHover : Theme.sunken)
