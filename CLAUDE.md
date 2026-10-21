@@ -111,8 +111,9 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   `--scale=<n>`, `--compact`, `--accent=<#hex>`, `--second` (also shoots the
   second panel).
 - In qmltestrunner, a double-click is `mouseDoubleClickSequence`.
-- Skins (`Theme.skin`: "flat", the default and the one Christos uses;
-  "classic", shown as "old FL studio", only when asked for)
+- Skins (`Theme.skin`: "flat", the default; "classic", shown as "old FL
+  studio", only when asked for; "hardware", the look beater uses: faceplate,
+  dark screens, glow on what's lit, reflective LCDs via ParamLCD)
   are drawn on top of the flat look: every classic touch is a
   `visible: Theme.classic` layer or a Theme colour that follows the skin, so
   "flat" must stay the plain look unchanged. A new control needs its classic

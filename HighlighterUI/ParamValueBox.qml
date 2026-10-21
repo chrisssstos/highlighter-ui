@@ -69,6 +69,7 @@ Item {
         color: box.editing ? Theme.editFill
              : hover.hovered && box.interactive ? Qt.rgba(box.tint.r, box.tint.g, box.tint.b, 0.16)
              : Theme.classic ? Theme.screen   // a little LCD
+             : Theme.hardware ? Theme.well    // a little dark screen
              : Qt.rgba(Theme.page.r, Theme.page.g, Theme.page.b, 0.85)
         border.width: 1
         border.color: box.bad ? Theme.danger : box.tint

@@ -101,10 +101,10 @@ Window {
                 }
             }
             ParamChoice {
-                width: Theme.s(210)
-                model: ["flat", "old FL studio"]
-                currentIndex: ["flat", "classic"].indexOf(Theme.skin)
-                onActivated: i => Theme.skin = ["flat", "classic"][i]
+                width: Theme.s(300)
+                model: ["flat", "old FL studio", "hardware"]
+                currentIndex: ["flat", "classic", "hardware"].indexOf(Theme.skin)
+                onActivated: i => Theme.skin = ["flat", "classic", "hardware"][i]
             }
             ParamToggle {
                 id: allOff
@@ -403,6 +403,18 @@ Window {
                     }
                 }
                 ParamMeter { width: parent.width; label: "the guess the visuals follow"; value: live.a }
+                // a reflective LCD (any skin; it's at home in hardware)
+                Row {
+                    spacing: Theme.s(8)
+                    ParamLCD {
+                        label: "load"
+                        ParamSevenSeg { text: Math.round(live.load) + ""; digits: 3; digitHeight: Theme.s(26); ink: Theme.lcdInk; ghost: Theme.lcdGhost }
+                    }
+                    ParamLCD {
+                        label: "time"
+                        ParamSevenSeg { text: "10.36"; digits: 4; digitHeight: Theme.s(26); ink: Theme.lcdInk; ghost: Theme.lcdGhost }
+                    }
+                }
             }
 
             ParamHeading { width: parent.width; text: "Failure factor visuals"; note: "one open at a time" }

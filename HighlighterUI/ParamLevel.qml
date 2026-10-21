@@ -50,6 +50,7 @@ Item {
                 height: bar.cell
                 color: lit || isPeak ? (hot ? Theme.danger : root.tint) : Theme.sunken
                 opacity: isPeak && !lit ? 0.7 : 1
+                ParamGlow { anchors.fill: parent; z: -1; color: parent.color; strength: parent.lit ? 0.45 : 0 }
             }
         }
     }

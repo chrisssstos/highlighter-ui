@@ -225,6 +225,8 @@ Item {
             height: parent.height
             color: root.tint
             radius: Theme.radius
+            // hardware: lit, like a backlit bar
+            ParamGlow { anchors.fill: parent; z: -1; color: root.tint; strength: root.fillW > 0 && root.enabled ? 0.5 : 0 }
         }
         // the darker line along the fill's moving edge
         Rectangle {
