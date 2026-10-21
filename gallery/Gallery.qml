@@ -284,6 +284,7 @@ Window {
                     minColumnWidth: Theme.s(180)
                     ParamXY { label: "graph (y up), 0..1"; xFrom: 0; xTo: 1; yFrom: 0; yTo: 1; stepSize: 0.01; yDown: false; xValue: 0.7; yValue: 0.25 }
                     ParamXY { label: "disabled"; xValue: -20; yValue: 50; enabled: false }
+                    ParamXY { label: "pad only"; showValues: false; aspect: 0.5; xFrom: -1; xTo: 1; yFrom: -1; yTo: 1; stepSize: 0.01; xValue: 0; yValue: -0.4 }
                 }
 
             }
