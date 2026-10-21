@@ -1,8 +1,10 @@
 import QtQuick
+import QtQuick.Effects
 
 /// The glow round something lit in the hardware skin, as on a backlit
-/// display: a few soft halos in its colour, fading out. Put it behind the
-/// lit thing (z below it), the same size. Cheap: no blur, no layer.
+/// display: a smooth halo in its colour, fading out (a RectangularShadow:
+/// one quad, the falloff drawn in the shader, so no banding). Put it behind
+/// the lit thing (z below it), the same size.
 Item {
     id: glow
     property color color: Theme.accent
@@ -12,16 +14,13 @@ Item {
     property real radius: Theme.radius
     visible: Theme.hardware && strength > 0
 
-    Repeater {
-        model: [{ out: 2, a: 0.32 }, { out: 5, a: 0.14 }, { out: 9, a: 0.06 }]
-        Rectangle {
-            required property var modelData
-            anchors.fill: parent
-            anchors.margins: -Theme.s(modelData.out)
-            radius: glow.radius + Theme.s(modelData.out)
-            antialiasing: true
-            color: glow.color
-            opacity: modelData.a * glow.strength
-        }
+    RectangularShadow {
+        anchors.fill: parent
+        color: glow.color
+        blur: Theme.s(14)
+        spread: Theme.s(1)
+        radius: glow.radius
+        opacity: 0.7 * glow.strength
+        cached: true
     }
 }

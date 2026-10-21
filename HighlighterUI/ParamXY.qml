@@ -50,6 +50,8 @@ Item {
     property var ghosts: []
     //! What the panel remembers it by; the label if not given.
     property string key: label
+    //! The x / y value boxes (off: the pad alone, e.g. a narrow crossfader).
+    property bool showValues: true
     //! Minimised: a thumbnail of the grid, the boxes beside it.
     property bool compact: Theme.slidersStartMinimised && !PanelMemory.isMaximised(key)
 
@@ -59,8 +61,9 @@ Item {
     readonly property bool pressed: ma.pressed
 
     implicitWidth: Theme.s(300)
-    implicitHeight: head.height + (root.compact ? Math.max(pad.height, boxes.height)
-                                                : pad.height + Theme.s(6) + boxes.height)
+    implicitHeight: head.height + (!root.showValues ? pad.height
+                                   : root.compact ? Math.max(pad.height, boxes.height)
+                                   : pad.height + Theme.s(6) + boxes.height)
     //! The thumbnail's width: the canvas's shape, no taller than 48px.
     readonly property real thumbWidth: Math.min(Theme.s(72), Theme.s(48) * root.aspect)
     activeFocusOnTab: true
@@ -326,6 +329,7 @@ Item {
     // --- the values ----------------------------------------------------------
     Row {
         id: boxes
+        visible: root.showValues
         // beside the thumbnail, or under the full grid
         x: root.compact ? pad.width + Theme.s(12) : 0
         y: root.compact ? pad.y + Math.round((pad.height - height) / 2) : pad.y + pad.height + Theme.s(6)
