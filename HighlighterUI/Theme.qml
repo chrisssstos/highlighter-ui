@@ -34,20 +34,23 @@ QtObject {
     }
 
     // --- skin --------------------------------------------------------------
-    //! The look: "flat" (plain grey, the default) or "classic" (old FL
+    //! The look: "flat" (plain grey, the default), "classic" (old FL
     //! Studio: slate-blue plugin windows with gradient title bars, raised
-    //! bevels, small type, glossy knobs). The colours below follow it.
+    //! bevels, small type, glossy knobs) or "hardware" (a warm grey faceplate
+    //! with bevelled panels, dark screens and keys, and whatever is on glows
+    //! like a backlit display). The colours below follow it.
     property string skin: "flat"
     readonly property bool classic: skin === "classic"
+    readonly property bool hardware: skin === "hardware"
 
     // --- colour ------------------------------------------------------------
-    property color page:      classic ? "#2c3338" : "#4b4d4c"   // the window behind everything
-    property color well:      classic ? "#1f2529" : "#5d6260"   // a slider's empty track, a field's fill
-    property color wellHover: classic ? "#283035" : "#666b69"
-    property color raised:    classic ? "#4a555c" : "#545756"   // a group's body
-    property color sunken:    classic ? "#3a444a" : "#3f4241"   // buttons, code, the knob's face
-    property color sunkenHover: classic ? "#455058" : "#464948"
-    property color line:      classic ? "#5f6c73" : "#6a6f6d"   // quiet outlines and dividers
+    property color page:      classic ? "#2c3338" : hardware ? "#454543" : "#4b4d4c"   // the window behind everything
+    property color well:      classic ? "#1f2529" : hardware ? "#1a1b1c" : "#5d6260"   // a slider's empty track, a field's fill (hardware: a dark screen)
+    property color wellHover: classic ? "#283035" : hardware ? "#222325" : "#666b69"
+    property color raised:    classic ? "#4a555c" : hardware ? "#52524f" : "#545756"   // a group's body (hardware: the faceplate)
+    property color sunken:    classic ? "#3a444a" : hardware ? "#2d2e2f" : "#3f4241"   // buttons, code, the knob's face (hardware: dark keys)
+    property color sunkenHover: classic ? "#455058" : hardware ? "#363739" : "#464948"
+    property color line:      classic ? "#5f6c73" : hardware ? "#686763" : "#6a6f6d"   // quiet outlines and dividers
     property color titleBar:  "#5b6870"   // classic: a window's title bar, top of its gradient
     property color titleBarEnd: "#38434a" // and its foot
     property color accent:    "#def243"   // the highlighter yellow-lime: fills, values, focus
@@ -87,13 +90,17 @@ QtObject {
     ]
     property color arrow:     "#b9c0c4"   // an arrow drawn on the well
     property color arrowHot:  "#e6ecef"
-    property color text:      classic ? "#e2e9ed" : "#f0f1ee"
-    property color textDim:   classic ? "#a7b4bb" : "#b3b8b5"
-    property color textFaint: classic ? "#7f8c93" : "#8c918f"
+    property color text:      classic ? "#e2e9ed" : hardware ? "#ece8df" : "#f0f1ee"
+    property color textDim:   classic ? "#a7b4bb" : hardware ? "#b0aca3" : "#b3b8b5"
+    property color textFaint: classic ? "#7f8c93" : hardware ? "#85827b" : "#8c918f"
     property color editFill:  "#a8abae"   // a value box while it is typed in
     property color editText:  "#4a25c9"
     property color danger:    "#e0664f"
     property color screen:    "#14191c"   // classic: a value box's LCD
+    // hardware: a reflective LCD (ParamLCD): pale grey-green, dark segments
+    property color lcd:       "#a9b19e"
+    property color lcdInk:    "#1c211b"
+    property color lcdGhost:  "#9aa290"
 
     // --- size --------------------------------------------------------------
     // c(full, compact)

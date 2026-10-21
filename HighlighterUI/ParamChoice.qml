@@ -60,6 +60,8 @@ Item {
                 radius: Theme.radius
                 color: on ? root.tint : (ca.containsMouse ? Theme.sunkenHover : Theme.sunken)
                 Behavior on color { ColorAnimation { duration: Theme.quick } }
+                // hardware: the chosen one glows
+                ParamGlow { anchors.fill: parent; z: -1; color: root.tint; strength: cell.on && root.enabled ? 0.8 : 0 }
                 border.width: on && root.activeFocus && !ca.focusedByMouse ? 1 : 0
                 border.color: Theme.text
                 // classic: raised buttons, the chosen one pressed in

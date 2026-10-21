@@ -80,6 +80,11 @@ value box sits between its step arrows.
   pointer; raised gradient buttons with an LED when they stay down; dark inset
   channels for the bars, LCD value boxes, raised preset cells.
 - **"flat"**: plain grey, hard-edged.
+- **"hardware"**: a warm grey faceplate with bevelled panels, dark screens (slider
+  tracks, value boxes, the XY pad) and dark keys with light labels; whatever is on
+  glows like a backlit display (`ParamGlow`: lit buttons, the chosen option, a slider's
+  fill, lit meter segments, lights, the XY dot). `ParamLCD` is a reflective LCD to put
+  readouts in (a `ParamSevenSeg` with `ink: Theme.lcdInk`, `ghost: Theme.lcdGhost`).
 
 `ParamPlate` and `ParamBevel` are the pieces for a panel's own surfaces. The
 knob sprite is rendered for the kit (`tools/render_assets.py`); see

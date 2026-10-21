@@ -248,6 +248,7 @@ Item {
             width: side; height: side
             color: root.tint
             border.width: 1; border.color: Theme.page
+            ParamGlow { anchors.fill: parent; z: -1; color: root.tint; strength: root.enabled ? 1 : 0 }
         }
 
         // an inset edge, in the classic skin

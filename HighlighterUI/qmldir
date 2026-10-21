@@ -32,3 +32,5 @@ ParamFrames 1.0 ParamFrames.qml
 ParamFrame 1.0 ParamFrame.qml
 ParamSegment 1.0 ParamSegment.qml
 ParamSevenSeg 1.0 ParamSevenSeg.qml
+ParamGlow 1.0 ParamGlow.qml
+ParamLCD 1.0 ParamLCD.qml

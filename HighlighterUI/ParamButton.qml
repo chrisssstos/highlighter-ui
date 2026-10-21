@@ -48,14 +48,23 @@ Item {
 
     readonly property color ink: root.accent ? Theme.inkOf(root.tint)
                               : root.danger ? Theme.danger
-                              : root.checked ? root.tint
-                              : Theme.classic ? Theme.text : root.tint
+                              : root.checked ? (Theme.hardware ? Qt.lighter(root.tint, 1.15) : root.tint)
+                              : Theme.classic || Theme.hardware ? Theme.text : root.tint
+    //! Hardware: lit (the accent one, or checked) glows.
+    readonly property bool lit: root.enabled && (root.accent || root.checked)
+
+    ParamGlow {
+        anchors.fill: parent
+        color: root.tint
+        strength: root.lit ? (root.accent ? 1 : 0.55) : 0
+    }
 
     Rectangle {
         id: slab
         anchors.fill: parent
         radius: Theme.radius
         color: root.accent ? (area.pressed ? Qt.darker(root.tint, 1.18) : area.containsMouse ? Qt.lighter(root.tint, 1.07) : root.tint)
+             : root.checked && Theme.hardware ? Qt.tint(Theme.sunken, Qt.rgba(root.tint.r, root.tint.g, root.tint.b, area.pressed ? 0.16 : 0.26))
              : root.checked ? (area.pressed ? Theme.sunken : Theme.sunkenHover)
              : (area.pressed ? Qt.darker(Theme.sunken, 1.15) : area.containsMouse ? Theme.sunkenHover : Theme.sunken)
         Behavior on color { ColorAnimation { duration: Theme.quick } }
@@ -97,9 +106,9 @@ Item {
             }
         }
 
-        // checked, flat: a lime bar on the left
+        // checked, flat: a lime bar on the left (hardware: the key lights up instead)
         Rectangle {
-            visible: root.checkable && !Theme.classic
+            visible: root.checkable && !Theme.classic && !Theme.hardware
             width: Theme.s(3); height: parent.height
             color: root.checked ? root.tint : Theme.line
         }
