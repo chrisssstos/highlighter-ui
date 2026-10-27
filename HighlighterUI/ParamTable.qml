@@ -18,7 +18,9 @@ Item {
     //! over 1 is pixels (scaled), up to 1 a share of the table; columns with
     //! none split what's left. align: "left" (the default) or "right" (numbers).
     property var columns: []
-    //! The rows, each a list of cells in column order.
+    //! The rows, each a list of cells in column order. A cell is text, or
+    //! { text, tone } to colour it: "good" (the accent), "ok" (Theme.caution),
+    //! "bad" (Theme.danger), "dim" (faint) — a rating, a status.
     property var rows: []
     //! The picked row, or -1.
     property int currentRow: -1
@@ -177,9 +179,12 @@ Item {
                         height: row.height
                         verticalAlignment: Text.AlignVCenter
                         horizontalAlignment: root.alignOf(index)
-                        text: cell === undefined || cell === null ? "" : String(cell)
+                        readonly property bool rich: cell !== null && typeof cell === "object"
+                        readonly property string tone: rich ? (cell.tone ?? "") : ""
+                        text: cell === undefined || cell === null ? "" : rich ? String(cell.text ?? "") : String(cell)
                         elide: Text.ElideRight
-                        color: row.on ? root.tint : Theme.text
+                        color: tone === "good" ? root.tint : tone === "ok" ? Theme.caution : tone === "bad" ? Theme.danger
+                             : tone === "dim" ? Theme.textFaint : row.on ? root.tint : Theme.text
                         font.family: root.mono ? Theme.mono : Theme.family
                         font.pixelSize: Theme.valueSize
                         font.features: { "tnum": 1 }

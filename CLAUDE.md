@@ -80,7 +80,8 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   devices, files, a log), picked with `currentRow` / `onActivated` and opened
   with `onOpened`. Not for a setting with a few named options (that's a
   `ParamChoice` or `ParamCombo`). Right-align number columns
-  (`align: "right"`).
+  (`align: "right"`). A cell can be `{ text, tone }` to colour a rating or a
+  status: "good", "ok", "bad", "dim".
 - **Meters.** `ParamMeter`, `ParamGauge` and `ParamLevel` are read-only and
   only for values the app reports live: the guess right now, load, fps, a
   sound's level. Never use one to show a setting that has its own slider or
