@@ -7,7 +7,11 @@ import "ParamMath.js" as PM
 /// value now in a readout, then the last `keep` readings as a line over a
 /// translucent fill on a fine grid, the scale on the left and the time along
 /// the bottom. An optional dashed guide marks a budget (`mark`); past `warnAt`
-/// the readout turns red. Feed it with add(v), once per `interval` seconds.
+/// the readout turns red. A reading that jumps away from the last few (by
+/// `jumpAt` of the scale) colours the line and the readout for a moment: blue
+/// if it jumped the good way, red the bad way (`better` says which is which),
+/// so a change made elsewhere shows which graphs it moved, and how. Steady,
+/// it draws in the accent. Feed it with add(v), once per `interval` seconds.
 /// For a value the user sets, use a slider or knob instead.
 Item {
     id: root
@@ -34,10 +38,35 @@ Item {
     property real interval: 1
     //! The plot's height.
     property real plotHeight: Theme.s(80)
+    //! A reading this far (a share of the scale) from the last few's average
+    //! flashes the graph (Theme.jump, fading over flashMs); NaN never does.
+    property real jumpAt: 0.15
+    property int flashMs: 1500
+    //! Which way is good: 1 higher (fps), -1 lower (load, time, memory), 0
+    //! either (a jump then flashes in Theme.jump).
+    property int better: 0
+    //! The colour of the last jump: Theme.jump (good) or Theme.jumpBad.
+    property color flashColor: Theme.jump
+
+    //! 1 just after a jump, falling to 0.
+    property real flash: 0
+    NumberAnimation { id: flashFade; target: root; property: "flash"; from: 1; to: 0; duration: root.flashMs; easing.type: Easing.InQuad }
+    function mix(a, b, t) { return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1) }
+    //! What it draws in now: the accent, or the jump colour for a moment.
+    readonly property color ink: mix(root.tint, root.flashColor, root.flash)
 
     //! The readings, oldest first.
     property var points: []
     function add(v) {
+        const before = root.points.slice(-5)
+        if (!isNaN(root.jumpAt) && before.length >= 3 && root.to !== root.from) {
+            const mean = before.reduce((a, x) => a + x, 0) / before.length
+            if (Math.abs(v - mean) >= root.jumpAt * Math.abs(root.to - root.from)) {
+                const up = v > mean
+                root.flashColor = root.better === 0 || (up === (root.better > 0)) ? Theme.jump : Theme.jumpBad
+                flashFade.restart()
+            }
+        }
         root.value = v
         const p = root.points.concat([v])
         root.points = p.length > root.keep ? p.slice(p.length - root.keep) : p
@@ -47,6 +76,9 @@ Item {
     function fraction(v) { return root.to === root.from ? 0 : PM.clamp((v - root.from) / (root.to - root.from), 0, 1) }
     function timeText(s) { return s >= 60 ? "-" + PM.format(s / 60, s % 60 ? 1 : 0) + " min" : "-" + Math.round(s) + " s" }
     readonly property bool warning: !isNaN(root.warnAt) && root.value >= root.warnAt
+    //! Small (in a grid of several): a smaller readout, only the scale's ends
+    //! and the time's ends.
+    readonly property bool narrow: width < Theme.s(260)
 
     implicitWidth: Theme.s(320)
     implicitHeight: bar.height + plot.height + axis.height + Theme.s(22)
@@ -91,17 +123,16 @@ Item {
         Rectangle {
             id: readout
             anchors.right: parent.right
-            width: Math.max(Theme.s(72), reading.implicitWidth + Theme.s(16))
+            width: Math.max(Theme.s(root.narrow ? 40 : 72), reading.implicitWidth + Theme.s(12))
             height: reading.implicitHeight + Theme.s(4)
             color: Theme.sunken
             ParamBevel { anchors.fill: parent; visible: Theme.classic; inset: true; light: 0.12; dark: 0.45 }
-            Rectangle { width: Theme.s(3); height: parent.height; color: root.warning ? Theme.danger : root.tint }
             Text {
                 id: reading
                 anchors.right: parent.right; anchors.rightMargin: Theme.s(6)
                 anchors.verticalCenter: parent.verticalCenter
                 text: root.valueText !== "" ? root.valueText : PM.format(root.value, root.decimals) + root.unit
-                color: root.warning ? Theme.danger : root.tint
+                color: root.warning ? Theme.danger : root.ink
                 font.family: Theme.family
                 font.pixelSize: Theme.valueSize
                 font.features: { "tnum": 1 }
@@ -113,10 +144,10 @@ Item {
     Item {
         id: scale
         x: Theme.s(10); y: plot.y
-        width: Math.max(top.implicitWidth, mid.implicitWidth, bottom.implicitWidth)
+        width: Math.max(top.implicitWidth, root.narrow ? 0 : mid.implicitWidth, bottom.implicitWidth)
         height: plot.height
         Text { id: top; anchors.right: parent.right; y: -implicitHeight / 2; text: PM.format(root.to, root.decimals) + root.unit; color: Theme.textFaint; font.family: Theme.family; font.pixelSize: Theme.smallSize }
-        Text { id: mid; anchors.right: parent.right; y: parent.height / 2 - implicitHeight / 2; text: PM.format((root.from + root.to) / 2, root.decimals) + root.unit; color: Theme.textFaint; font.family: Theme.family; font.pixelSize: Theme.smallSize }
+        Text { id: mid; visible: !root.narrow; anchors.right: parent.right; y: parent.height / 2 - implicitHeight / 2; text: PM.format((root.from + root.to) / 2, root.decimals) + root.unit; color: Theme.textFaint; font.family: Theme.family; font.pixelSize: Theme.smallSize }
         Text { id: bottom; anchors.right: parent.right; y: parent.height - implicitHeight / 2; text: PM.format(root.from, root.decimals) + root.unit; color: Theme.textFaint; font.family: Theme.family; font.pixelSize: Theme.smallSize }
     }
 
@@ -159,7 +190,7 @@ Item {
             // the fill under the line
             ShapePath {
                 strokeColor: "transparent"
-                fillColor: Qt.rgba(root.tint.r, root.tint.g, root.tint.b, 0.22)
+                fillColor: Qt.rgba(root.ink.r, root.ink.g, root.ink.b, 0.22 + 0.12 * root.flash)
                 PathPolyline {
                     path: plot.line.length > 1
                           ? [Qt.point(plot.line[0].x, plot.height)].concat(plot.line).concat([Qt.point(plot.line[plot.line.length - 1].x, plot.height)])
@@ -168,7 +199,7 @@ Item {
             }
             // the line
             ShapePath {
-                strokeColor: root.tint
+                strokeColor: root.ink
                 strokeWidth: Theme.s(1.5)
                 fillColor: "transparent"
                 joinStyle: ShapePath.MiterJoin
@@ -199,7 +230,7 @@ Item {
         height: first.implicitHeight
         readonly property real span: root.keep * root.interval
         Text { id: first; text: root.timeText(axis.span); color: Theme.textFaint; font.family: Theme.family; font.pixelSize: Theme.smallSize }
-        Text { anchors.horizontalCenter: parent.horizontalCenter; text: root.timeText(axis.span / 2); color: Theme.textFaint; font.family: Theme.family; font.pixelSize: Theme.smallSize }
+        Text { visible: !root.narrow; anchors.horizontalCenter: parent.horizontalCenter; text: root.timeText(axis.span / 2); color: Theme.textFaint; font.family: Theme.family; font.pixelSize: Theme.smallSize }
         Text { anchors.right: parent.right; text: "now"; color: Theme.textFaint; font.family: Theme.family; font.pixelSize: Theme.smallSize }
     }
 }
