@@ -47,6 +47,8 @@ QtObject {
     property color sunken:    classic ? "#3a444a" : "#3f4241"   // buttons, code, the knob's face
     property color sunkenHover: classic ? "#455058" : "#464948"
     property color line:      classic ? "#5f6c73" : "#6a6f6d"   // quiet outlines and dividers
+    property color panelBar:  classic ? "#5b6870" : "#636866"   // a graph panel's title bar
+    property color panelEdge: "#3b3e3d"   // flat: the thin outline round a graph panel
     property color titleBar:  "#5b6870"   // classic: a window's title bar, top of its gradient
     property color titleBarEnd: "#38434a" // and its foot
     property color accent:    "#def243"   // the highlighter yellow-lime: fills, values, focus

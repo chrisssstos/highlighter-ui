@@ -15,6 +15,7 @@ ParamChoice 1.0 ParamChoice.qml
 ParamCombo 1.0 ParamCombo.qml
 ParamField 1.0 ParamField.qml
 ParamMeter 1.0 ParamMeter.qml
+ParamGraph 1.0 ParamGraph.qml
 ParamHeading 1.0 ParamHeading.qml
 ParamGroup 1.0 ParamGroup.qml
 ParamCode 1.0 ParamCode.qml
