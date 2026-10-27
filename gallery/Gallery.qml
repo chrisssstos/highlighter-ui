@@ -356,6 +356,15 @@ Window {
                     mark: 85; warnAt: 85
                     interval: 0.25
                 }
+                // narrow, in a grid: a smaller readout, only the ends of the scale and the time
+                ParamGrid {
+                    width: parent.width
+                    minColumnWidth: Theme.s(150); maxColumns: 3
+                    columnSpacing: Theme.s(8)
+                    ParamGraph { id: smallA; label: "narrow: load"; unit: "%"; decimals: 0; to: 100; plotHeight: Theme.s(40); interval: 0.25 }
+                    ParamGraph { id: smallB; label: "narrow: a 0..1"; to: 1; plotHeight: Theme.s(40); interval: 0.25 }
+                    ParamGraph { label: "narrow, empty"; unit: " fps"; decimals: 0; to: 120; mark: 60; plotHeight: Theme.s(40) }
+                }
                 ParamGraph { width: parent.width; label: "graph, no readings yet"; unit: " fps"; decimals: 0; to: 120; mark: 60 }
                 ParamGraph {
                     id: overGraph
@@ -364,9 +373,20 @@ Window {
                     valueText: "past the scale"
                     to: 0.5; decimals: 2; plotHeight: Theme.s(50); interval: 0.25
                 }
+                ParamGraph {
+                    id: stepGraph
+                    width: parent.width
+                    label: "graph, a jump flashes it: up red, down blue (lower is better)"
+                    unit: " ms"; decimals: 0; to: 40; mark: 16.7; interval: 0.25; better: -1
+                }
                 Timer {
                     interval: 250; running: true; repeat: true
-                    onTriggered: { loadGraph.add(live.load); overGraph.add(live.a) }
+                    property int n: 0
+                    onTriggered: {
+                        loadGraph.add(live.load); overGraph.add(live.a); smallA.add(live.load); smallB.add(live.a)
+                        n++
+                        stepGraph.add((Math.floor(n / 16) % 2 ? 28 : 8) + Math.random() * 2)
+                    }
                 }
             }
         }

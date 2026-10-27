@@ -88,7 +88,11 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   (`warnAt`); a level for sound or signal; a plain meter for everything
   else. Use a `ParamGraph` for a live value whose history matters (fps,
   frame time, load, memory over the last minutes): feed it with `add(v)` on
-  a timer, give it a `mark` for a budget and `warnAt` for too much. Gather
+  a timer, give it a `mark` for a budget and `warnAt` for too much. A
+  reading that jumps (by `jumpAt` of the scale) flashes it for a moment,
+  blue the good way and red the bad way: set `better` (1 higher is better,
+  like fps; -1 lower, like load or frame time), so a setting changed
+  elsewhere shows which graphs it moved and whether for the better. Gather
   live readouts into one section (e.g. "Running") rather than
   scattering them, unless one belongs to a section's own visual (the guess
   inside the factor it drives).
