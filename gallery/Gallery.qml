@@ -313,6 +313,27 @@ Window {
 
             }
             ParamSection {
+                width: parent.width; title: "Tables"; note: "read-only rows; click or Up / Down to pick"
+                ParamTable {
+                    width: parent.width
+                    label: "presets (a picked row, numbers right-aligned)"
+                    columns: ["name", { title: "reach", width: 70, align: "right" }, { title: "speed", width: 70, align: "right" }, { title: "saved", width: 0.28 }]
+                    rows: [["calm", "0.20", "0.10", "today 09:12"], ["default", "0.68", "0.30", "installed"], ["festival", "0.92", "0.85", "2 days ago"],
+                           ["night", "0.45", "0.22", "last week"], ["a preset whose name runs past its column", "1.00", "1.00", "last month"]]
+                    currentRow: 1
+                    visibleRows: 5
+                }
+                ParamTable {
+                    width: parent.width
+                    label: "a long log (scrolls under the header), mono"
+                    mono: true
+                    columns: [{ title: "time", width: 80 }, { title: "level", width: 60 }, "message"]
+                    rows: Array.from({ length: 40 }, (_, i) => ["15:" + String(10 + Math.floor(i / 2)).padStart(2, "0") + ":" + String((i * 7) % 60).padStart(2, "0"), i % 9 === 4 ? "warn" : "info", "frame " + (1200 + i * 30) + " rendered in " + (11 + (i * 3) % 7) + " ms"])
+                }
+                ParamTable { width: parent.width; label: "no rows yet"; columns: ["device", "port", "status"]; visibleRows: 3; placeholder: "no devices found" }
+                ParamTable { width: parent.width; label: "disabled"; columns: ["a", "b"]; rows: [["one", "1"], ["two", "2"]]; visibleRows: 2; currentRow: 0; enabled: false }
+            }
+            ParamSection {
                 width: parent.width; title: "Meters"; note: "read-only, for live values only"
                 ParamMeter { width: parent.width; label: "meter: a live 0..1"; value: live.a }
                 ParamGrid {

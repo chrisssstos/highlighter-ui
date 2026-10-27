@@ -13,6 +13,7 @@ ParamToggle 1.0 ParamToggle.qml
 ParamCheck 1.0 ParamCheck.qml
 ParamChoice 1.0 ParamChoice.qml
 ParamCombo 1.0 ParamCombo.qml
+ParamTable 1.0 ParamTable.qml
 ParamField 1.0 ParamField.qml
 ParamMeter 1.0 ParamMeter.qml
 ParamGraph 1.0 ParamGraph.qml
