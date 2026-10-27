@@ -76,6 +76,11 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   `key` (it minimises to a thumbnail of itself and remembers being maximised).
   The pad replaces the two sliders, never sits beside them: its x / y boxes
   take typed values. A single position value stays a slider.
+- **Tables.** Use `ParamTable` for read-only rows the app lists (presets,
+  devices, files, a log), picked with `currentRow` / `onActivated` and opened
+  with `onOpened`. Not for a setting with a few named options (that's a
+  `ParamChoice` or `ParamCombo`). Right-align number columns
+  (`align: "right"`).
 - **Meters.** `ParamMeter`, `ParamGauge` and `ParamLevel` are read-only and
   only for values the app reports live: the guess right now, load, fps, a
   sound's level. Never use one to show a setting that has its own slider or
