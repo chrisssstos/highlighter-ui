@@ -85,6 +85,7 @@ QtObject {
     property color editFill:  "#a8abae"   // a value box while it is typed in
     property color editText:  "#4a25c9"
     property color danger:    "#e0664f"
+    property color caution:   "#f0b44a"   // between fine and danger: a rating that's only OK
     property color jump:      "#5cc8ff"   // a graph for a moment after its value jumps the good way
     property color jumpBad:   "#e0664f"   // and the bad way
     property color screen:    "#14191c"   // classic: a value box's LCD

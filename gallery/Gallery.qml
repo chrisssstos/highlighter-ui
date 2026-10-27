@@ -330,6 +330,17 @@ Window {
                     columns: [{ title: "time", width: 80 }, { title: "level", width: 60 }, "message"]
                     rows: Array.from({ length: 40 }, (_, i) => ["15:" + String(10 + Math.floor(i / 2)).padStart(2, "0") + ":" + String((i * 7) % 60).padStart(2, "0"), i % 9 === 4 ? "warn" : "info", "frame " + (1200 + i * 30) + " rendered in " + (11 + (i * 3) % 7) + " ms"])
                 }
+                ParamTable {
+                    width: parent.width
+                    label: "a rated listing (cells with a tone), not pickable"
+                    selectable: false
+                    columns: ["metric", { title: "now", width: 70, align: "right" }, { title: "ideal", width: 0.3 }, { title: "rating", width: 70 }]
+                    rows: [["frame rate", "60 fps", "60 fps", { text: "good", tone: "good" }],
+                           ["slow frames", "8 a min", "3 a min or fewer", { text: "OK", tone: "ok" }],
+                           ["GPU memory", "19 GB", "under 60%", { text: "poor", tone: "bad" }],
+                           ["sensor", "-", "connected", { text: "n/a", tone: "dim" }]]
+                    visibleRows: 4
+                }
                 ParamTable { width: parent.width; label: "no rows yet"; columns: ["device", "port", "status"]; visibleRows: 3; placeholder: "no devices found" }
                 ParamTable { width: parent.width; label: "disabled"; columns: ["a", "b"]; rows: [["one", "1"], ["two", "2"]]; visibleRows: 2; currentRow: 0; enabled: false }
             }
