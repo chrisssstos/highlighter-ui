@@ -81,7 +81,10 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   sound's level. Never use one to show a setting that has its own slider or
   knob. Use a gauge only when there's a safe range and a "too much"
   (`warnAt`); a level for sound or signal; a plain meter for everything
-  else. Gather live readouts into one section (e.g. "Running") rather than
+  else. Use a `ParamGraph` for a live value whose history matters (fps,
+  frame time, load, memory over the last minutes): feed it with `add(v)` on
+  a timer, give it a `mark` for a budget and `warnAt` for too much. Gather
+  live readouts into one section (e.g. "Running") rather than
   scattering them, unless one belongs to a section's own visual (the guess
   inside the factor it drives).
 

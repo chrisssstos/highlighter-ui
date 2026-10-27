@@ -327,6 +327,26 @@ Window {
                     ParamLevel { label: "R"; value: live.r; warnAt: 0.8 }
                     ParamLevel { label: "no warn"; value: live.a; segments: 10 }
                 }
+                ParamGraph {
+                    id: loadGraph
+                    width: parent.width
+                    label: "graph: the load, a reading every 0.25 s"
+                    unit: "%"; decimals: 0; to: 100
+                    mark: 85; warnAt: 85
+                    interval: 0.25
+                }
+                ParamGraph { width: parent.width; label: "graph, no readings yet"; unit: " fps"; decimals: 0; to: 120; mark: 60 }
+                ParamGraph {
+                    id: overGraph
+                    width: parent.width
+                    label: "graph, readings past its top (they stay at the top)"
+                    valueText: "past the scale"
+                    to: 0.5; decimals: 2; plotHeight: Theme.s(50); interval: 0.25
+                }
+                Timer {
+                    interval: 250; running: true; repeat: true
+                    onTriggered: { loadGraph.add(live.load); overGraph.add(live.a) }
+                }
             }
         }
 

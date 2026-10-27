@@ -36,6 +36,7 @@ qt_add_qml_module(HighlighterUI
         ParamCombo.qml
         ParamField.qml
         ParamMeter.qml
+        ParamGraph.qml
         ParamHeading.qml
         ParamGroup.qml
         ParamCode.qml
