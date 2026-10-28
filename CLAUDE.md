@@ -93,7 +93,12 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   reading that jumps (by `jumpAt` of the scale) flashes it for a moment,
   blue the good way and red the bad way: set `better` (1 higher is better,
   like fps; -1 lower, like load or frame time), so a setting changed
-  elsewhere shows which graphs it moved and whether for the better. Gather
+  elsewhere shows which graphs it moved and whether for the better. When
+  there is nothing to read for a while (a video's rate with no video on
+  show), `add(NaN)`: the line breaks there and the readout shows
+  `noValueText` (a dash), rather than a 0 that would read as a collapse.
+  Beside a `ParamTable` of results, bind each graph's `highlighted` to its
+  row being the table's `currentRow`, so a picked row shows its graph. Gather
   live readouts into one section (e.g. "Running") rather than
   scattering them, unless one belongs to a section's own visual (the guess
   inside the factor it drives).

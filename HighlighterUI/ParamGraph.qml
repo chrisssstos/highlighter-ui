@@ -11,7 +11,11 @@ import "ParamMath.js" as PM
 /// `jumpAt` of the scale) colours the line and the readout for a moment: blue
 /// if it jumped the good way, red the bad way (`better` says which is which),
 /// so a change made elsewhere shows which graphs it moved, and how. Steady,
-/// it draws in the accent. Feed it with add(v), once per `interval` seconds.
+/// it draws in the accent. Feed it with add(v), once per `interval` seconds;
+/// add(NaN) when there is nothing to read (a video's rate with none on show):
+/// the line breaks there, and the readout shows `noValueText`. `highlighted`
+/// marks it as the one picked elsewhere (its row in a ParamTable of results),
+/// in the table's own way: the accent over its title bar, and an accent outline.
 /// For a value the user sets, use a slider or knob instead.
 Item {
     id: root
@@ -26,6 +30,10 @@ Item {
     property string unit: ""
     //! What the readout shows instead of value + unit ("1.2 of 24 cores"), if set.
     property string valueText: ""
+    //! Picked elsewhere (its row in a table of results): tinted and outlined.
+    property bool highlighted: false
+    //! What the readout shows while there is no reading (add(NaN)).
+    property string noValueText: "-"
     //! The scale; a reading past `to` stays at the top.
     property real from: 0
     property real to: 1
@@ -58,8 +66,8 @@ Item {
     //! The readings, oldest first.
     property var points: []
     function add(v) {
-        const before = root.points.slice(-5)
-        if (!isNaN(root.jumpAt) && before.length >= 3 && root.to !== root.from) {
+        const before = root.points.slice(-5).filter(x => !isNaN(x))
+        if (!isNaN(v) && !isNaN(root.jumpAt) && before.length >= 3 && root.to !== root.from) {
             const mean = before.reduce((a, x) => a + x, 0) / before.length
             if (Math.abs(v - mean) >= root.jumpAt * Math.abs(root.to - root.from)) {
                 const up = v > mean
@@ -98,11 +106,19 @@ Item {
             GradientStop { position: 0.5; color: Theme.titleBar }
             GradientStop { position: 1; color: Theme.titleBarEnd }
         }
+        // picked: the accent over it, as a ParamTable's picked row
+        Rectangle { anchors.fill: parent; visible: root.highlighted; color: Qt.rgba(root.tint.r, root.tint.g, root.tint.b, 0.22) }
         // a dark line under it, against the body
         Rectangle { y: parent.height - 1; width: parent.width; height: 1; color: Qt.rgba(0, 0, 0, 0.3) }
     }
-    // a thin outline round the whole panel
-    Rectangle { anchors.fill: parent; color: "transparent"; border.width: 1; border.color: Theme.panelEdge; visible: !Theme.classic }
+    // a thin outline round the whole panel; in the accent while picked
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent"
+        border.width: root.highlighted ? Theme.s(2) : 1
+        border.color: root.highlighted ? root.tint : Theme.panelEdge
+        visible: root.highlighted || !Theme.classic
+    }
 
     Item {
         id: head
@@ -131,7 +147,7 @@ Item {
                 id: reading
                 anchors.right: parent.right; anchors.rightMargin: Theme.s(6)
                 anchors.verticalCenter: parent.verticalCenter
-                text: root.valueText !== "" ? root.valueText : PM.format(root.value, root.decimals) + root.unit
+                text: isNaN(root.value) ? root.noValueText : root.valueText !== "" ? root.valueText : PM.format(root.value, root.decimals) + root.unit
                 color: root.warning ? Theme.danger : root.ink
                 font.family: Theme.family
                 font.pixelSize: Theme.valueSize
@@ -175,26 +191,41 @@ Item {
         // the readings: the newest at the right edge, one step apart
         readonly property real step: plot.width / Math.max(1, root.keep - 1)
         function yOf(v) { return plot.height - 1 - root.fraction(v) * (plot.height - 2) }
-        readonly property var line: {
+        // the line in runs, broken where there was no reading (NaN)
+        readonly property var runs: {
             const p = root.points, out = []
             const x0 = plot.width - (p.length - 1) * plot.step
-            for (let i = 0; i < p.length; i++) out.push(Qt.point(x0 + i * plot.step, plot.yOf(p[i])))
+            let run = []
+            for (let i = 0; i < p.length; i++) {
+                if (isNaN(p[i])) { if (run.length) out.push(run); run = []; continue }
+                run.push(Qt.point(x0 + i * plot.step, plot.yOf(p[i])))
+            }
+            if (run.length) out.push(run)
             return out
+        }
+        // a lone reading between gaps, as a dot
+        Repeater {
+            model: plot.runs.filter(r => r.length === 1)
+            Rectangle {
+                required property var modelData
+                x: modelData[0].x - width / 2; y: modelData[0].y - height / 2
+                width: Theme.s(3); height: width; radius: width / 2
+                color: root.ink
+            }
         }
 
         Shape {
             anchors.fill: parent
-            visible: root.points.length > 1
+            visible: plot.runs.some(r => r.length > 1)
             preferredRendererType: Theme.smooth ? Shape.CurveRenderer : Shape.GeometryRenderer
             antialiasing: Theme.smooth
             // the fill under the line
             ShapePath {
                 strokeColor: "transparent"
                 fillColor: Qt.rgba(root.ink.r, root.ink.g, root.ink.b, 0.22 + 0.12 * root.flash)
-                PathPolyline {
-                    path: plot.line.length > 1
-                          ? [Qt.point(plot.line[0].x, plot.height)].concat(plot.line).concat([Qt.point(plot.line[plot.line.length - 1].x, plot.height)])
-                          : []
+                PathMultiline {
+                    paths: plot.runs.filter(r => r.length > 1).map(r =>
+                        [Qt.point(r[0].x, plot.height)].concat(r).concat([Qt.point(r[r.length - 1].x, plot.height)]))
                 }
             }
             // the line
@@ -203,7 +234,7 @@ Item {
                 strokeWidth: Theme.s(1.5)
                 fillColor: "transparent"
                 joinStyle: ShapePath.MiterJoin
-                PathPolyline { path: plot.line }
+                PathMultiline { paths: plot.runs.filter(r => r.length > 1) }
             }
         }
         // the guide, dashed

@@ -373,7 +373,7 @@ Window {
                     minColumnWidth: Theme.s(150); maxColumns: 3
                     columnSpacing: Theme.s(8)
                     ParamGraph { id: smallA; label: "narrow: load"; unit: "%"; decimals: 0; to: 100; plotHeight: Theme.s(40); interval: 0.25 }
-                    ParamGraph { id: smallB; label: "narrow: a 0..1"; to: 1; plotHeight: Theme.s(40); interval: 0.25 }
+                    ParamGraph { id: smallB; label: "narrow: a 0..1, highlighted"; highlighted: true; to: 1; plotHeight: Theme.s(40); interval: 0.25 }
                     ParamGraph { label: "narrow, empty"; unit: " fps"; decimals: 0; to: 120; mark: 60; plotHeight: Theme.s(40) }
                 }
                 ParamGraph { width: parent.width; label: "graph, no readings yet"; unit: " fps"; decimals: 0; to: 120; mark: 60 }
@@ -390,6 +390,12 @@ Window {
                     label: "graph, a jump flashes it: up red, down blue (lower is better)"
                     unit: " ms"; decimals: 0; to: 40; mark: 16.7; interval: 0.25; better: -1
                 }
+                ParamGraph {
+                    id: gapGraph
+                    width: parent.width
+                    label: "graph with gaps: add(NaN) when there is nothing to read"
+                    unit: "%"; decimals: 0; to: 100; mark: 90; interval: 0.25; better: 1
+                }
                 Timer {
                     interval: 250; running: true; repeat: true
                     property int n: 0
@@ -397,6 +403,8 @@ Window {
                         loadGraph.add(live.load); overGraph.add(live.a); smallA.add(live.load); smallB.add(live.a)
                         n++
                         stepGraph.add((Math.floor(n / 16) % 2 ? 28 : 8) + Math.random() * 2)
+                        // readings for 5 s, then none for 3 s; a lone one now and then
+                        gapGraph.add(n % 32 < 20 ? 92 + Math.random() * 8 : n % 32 === 26 ? 70 : NaN)
                     }
                 }
             }
