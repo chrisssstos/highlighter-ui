@@ -13,6 +13,9 @@ Item {
     property int currentIndex: 0
     property int cellHeight: Theme.s(26)
     property int cellMinWidth: Theme.s(30)
+    //! Indices of options drawn faint (e.g. empty preset slots): still
+    //! clickable, so one can be picked and filled.
+    property var faint: []
     signal activated(int index)
 
     readonly property string currentText: currentIndex >= 0 && currentIndex < model.length ? model[currentIndex] : ""
@@ -55,6 +58,7 @@ Item {
                 required property int index
                 required property var modelData
                 readonly property bool on: index === root.currentIndex
+                readonly property bool isFaint: (root.faint ?? []).indexOf(index) >= 0
                 width: Math.max(root.cellMinWidth, t.implicitWidth + Theme.s(18))
                 height: root.cellHeight
                 radius: Theme.radius
@@ -69,7 +73,8 @@ Item {
                     id: t
                     anchors.centerIn: parent
                     text: cell.modelData
-                    color: cell.on ? Theme.inkOf(root.tint) : Theme.textDim
+                    color: cell.on ? Theme.inkOf(root.tint) : cell.isFaint ? Theme.textFaint : Theme.textDim
+                    opacity: cell.isFaint && !cell.on ? 0.55 : 1
                     font.family: Theme.family
                     font.pixelSize: root.cellHeight > Theme.s(34) ? Math.round(root.cellHeight * 0.55) : Theme.labelSize
                     font.weight: cell.on ? Font.DemiBold : Font.Normal

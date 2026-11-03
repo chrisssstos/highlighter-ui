@@ -220,6 +220,10 @@ Window {
 
             }
             ParamSection {
+                width: parent.width; title: "Preset slots"; note: "faint: empty slots, still pickable"
+                ParamChoice { width: parent.width; model: ["1", "2", "3", "4", "5", "6", "7", "8"]; currentIndex: 1; faint: [3, 5, 6, 7] }
+            }
+            ParamSection {
                 width: parent.width; title: "Buttons"
                 Flow {
                     width: parent.width
