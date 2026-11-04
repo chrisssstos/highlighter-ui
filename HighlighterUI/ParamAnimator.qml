@@ -19,7 +19,7 @@ Item {
     id: root
 
     //! The accent it draws in: its window's own, if that declares one (see Theme).
-    readonly property color tint: Theme.accentIn(Window.window)
+    readonly property color tint: Theme.accentAt(root, Window.window)
 
     //! The control's scale, for lining the strip up with its bar.
     property real from: 0

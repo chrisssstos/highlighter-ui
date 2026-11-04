@@ -5,8 +5,8 @@ import QtQuick
 Item {
     id: root
 
-    //! The accent it draws in: its window's own, if that declares one (see Theme).
-    readonly property color tint: Theme.accentIn(Window.window)
+    //! The accent it draws in: the nearest one declared around it (see Theme).
+    readonly property color tint: Theme.accentAt(root, Window.window)
 
     property string label: ""
     property var model: []
@@ -65,7 +65,7 @@ Item {
                 width: Math.max(root.cellMinWidth, t.implicitWidth + Theme.s(18))
                 height: root.cellHeight
                 radius: Theme.radius
-                color: lit ? root.tint : (ca.containsMouse ? Theme.sunkenHover : Theme.sunken)
+                color: lit ? Theme.litOf(root.tint) : (ca.containsMouse ? Theme.sunkenHover : Theme.sunken)
                 Behavior on color { ColorAnimation { duration: Theme.quick } }
                 // the light: the picked cell, its glow over its neighbours
                 z: cell.on ? 1 : 0

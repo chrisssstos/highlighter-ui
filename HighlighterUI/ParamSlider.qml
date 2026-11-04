@@ -17,8 +17,8 @@ import "ParamMath.js" as PM
 Item {
     id: root
 
-    //! The accent it draws in: its window's own, if that declares one (see Theme).
-    readonly property color tint: Theme.accentIn(Window.window)
+    //! The accent it draws in: the nearest one declared around it (see Theme).
+    readonly property color tint: Theme.accentAt(root, Window.window)
 
     property string label: ""
     property real value: 0
@@ -255,7 +255,7 @@ Item {
             x: root.fillX
             width: root.fillW
             height: parent.height
-            color: root.tint
+            color: Theme.litOf(root.tint)
             radius: Theme.radius
             // the light: the fill itself, its glow as big as it is
             layer.enabled: Theme.glow && root.fillW > 0 && root.enabled

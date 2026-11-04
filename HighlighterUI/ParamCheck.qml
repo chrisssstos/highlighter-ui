@@ -5,8 +5,8 @@ import QtQuick
 Item {
     id: root
 
-    //! The accent it draws in: its window's own, if that declares one (see Theme).
-    readonly property color tint: Theme.accentIn(Window.window)
+    //! The accent it draws in: the nearest one declared around it (see Theme).
+    readonly property color tint: Theme.accentAt(root, Window.window)
 
     property string text: ""
     property bool checked: false
@@ -37,7 +37,7 @@ Item {
             id: tick
             anchors.fill: parent
             anchors.margins: Theme.s(3)
-            color: root.tint
+            color: Theme.litOf(root.tint)
             scale: root.checked ? 1 : 0
             layer.enabled: Theme.glow && root.checked && root.enabled
             layer.effect: ParamGlow { w: tick.width; h: tick.height; glowColor: root.tint }

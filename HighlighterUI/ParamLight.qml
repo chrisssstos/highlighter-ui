@@ -5,15 +5,15 @@ import QtQuick
 Rectangle {
     id: root
 
-    //! The accent it draws in: its window's own, if that declares one (see Theme).
-    readonly property color tint: Theme.accentIn(Window.window)
+    //! The accent it draws in: the nearest one declared around it (see Theme).
+    readonly property color tint: Theme.accentAt(root, Window.window)
 
     property bool on: false
 
     implicitWidth: Theme.s(10)
     implicitHeight: implicitWidth
     radius: Theme.radius
-    color: root.on ? root.tint : Theme.sunken
+    color: root.on ? Theme.litOf(root.tint) : Theme.sunken
     layer.enabled: Theme.glow && root.on && root.enabled
     layer.effect: ParamGlow { w: root.width; h: root.height; glowColor: root.tint }
     opacity: enabled ? 1 : 0.4

@@ -28,8 +28,8 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
    - see "What goes where" below for sections, grids and meters
 3. Keep the project's own setting plumbing. Value controls mirror Qt's
    Slider: bind `value`, write back in `onMoved: v => ...`. Watch for
-   settings reloads the same way the old code did. Checks, toggles, choices
-   and groups tell you first and only change themselves if you didn't, so
+   settings reloads the same way the old code did. Checks, toggles, checkable
+   buttons, choices and groups tell you first and only change themselves if you didn't, so
    `checked` / `currentIndex` / `open` bound to your state stay bound: bind
    them and set your state in the handler, no re-syncing needed.
    Anything a panel needs that the kit lacks goes into the kit (with the
@@ -49,8 +49,9 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
    bar has a toggle for it. A new control's lit part gets a `ParamGlow` too.
 7. Accent and size: set `Theme.accent` once if the project wants a colour
    other than the lime, and `Theme.compact = true` for a dense panel.
-   Two panels that should look apart: give one window its own
-   `property color accent` (Theme.accentIn). Don't recolour controls one by one.
+   Two panels that should look apart: give one window, or the item holding
+   one panel's controls, its own `property color accent` (Theme.accentAt).
+   Don't recolour controls one by one.
 8. Scale: if the window scales itself for DPI (an app's own `ui` scale), set
    `Theme.scale` to it once instead of multiplying sizes.
 9. Every kit control needs `width: parent.width` inside a Column, ParamPage
@@ -142,8 +143,9 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   `--scale=<n>`, `--compact`, `--accent=<#hex>`, `--glow`, `--second` (also
   shoots the second panel).
 - In qmltestrunner, a double-click is `mouseDoubleClickSequence`.
-- Skins (`Theme.skin`: "flat", the default and the one Christos uses;
-  "classic", shown as "old FL studio", only when asked for)
+- Skins (`Theme.skin`: "flat", the default; "classic", shown as "old FL
+  studio", only when asked for; "hardware", the look beater uses: faceplate,
+  dark screens, glow on what's lit, reflective LCDs via ParamLCD)
   are drawn on top of the flat look: every classic touch is a
   `visible: Theme.classic` layer or a Theme colour that follows the skin, so
   "flat" must stay the plain look unchanged. A new control needs its classic

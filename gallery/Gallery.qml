@@ -102,10 +102,10 @@ Window {
                 }
             }
             ParamChoice {
-                width: Theme.s(210)
-                model: ["flat", "old FL studio"]
-                currentIndex: ["flat", "classic"].indexOf(Theme.skin)
-                onActivated: i => Theme.skin = ["flat", "classic"][i]
+                width: Theme.s(300)
+                model: ["flat", "old FL studio", "hardware"]
+                currentIndex: ["flat", "classic", "hardware"].indexOf(Theme.skin)
+                onActivated: i => Theme.skin = ["flat", "classic", "hardware"][i]
             }
             ParamToggle {
                 height: Theme.s(28)
@@ -281,6 +281,19 @@ Window {
 
             }
             ParamSection {
+                // Any item can declare its own accent: everything inside draws in it.
+                property color accent: "#b794ff"
+                width: parent.width; title: "Own accent"; note: "property color accent on the section"
+                ParamSlider { width: parent.width; key: "gallery.ownAccent"; label: "deck B volume"; unit: " %"; from: 0; to: 100; value: 70; compact: false }
+                Flow {
+                    width: parent.width
+                    spacing: Theme.s(6)
+                    ParamButton { text: "Play"; accent: true }
+                    ParamButton { text: "Sync"; checkable: true; checked: true }
+                    ParamToggle { text: "Loop"; checked: true }
+                }
+            }
+            ParamSection {
                 width: parent.width; title: "XY pad"; note: "drag the dot; Shift fine, Ctrl snaps"
                 ParamXY {
                     width: parent.width
@@ -292,6 +305,7 @@ Window {
                     minColumnWidth: Theme.s(180)
                     ParamXY { label: "graph (y up), 0..1"; xFrom: 0; xTo: 1; yFrom: 0; yTo: 1; stepSize: 0.01; yDown: false; xValue: 0.7; yValue: 0.25 }
                     ParamXY { label: "disabled"; xValue: -20; yValue: 50; enabled: false }
+                    ParamXY { label: "pad only"; showValues: false; aspect: 0.5; xFrom: -1; xTo: 1; yFrom: -1; yTo: 1; stepSize: 0.01; xValue: 0; yValue: -0.4 }
                 }
 
             }
@@ -491,6 +505,18 @@ Window {
                     }
                 }
                 ParamMeter { width: parent.width; label: "the guess the visuals follow"; value: live.a }
+                // a reflective LCD (any skin; it's at home in hardware)
+                Row {
+                    spacing: Theme.s(8)
+                    ParamLCD {
+                        label: "load"
+                        ParamSevenSeg { text: Math.round(live.load) + ""; digits: 3; digitHeight: Theme.s(26); ink: Theme.lcdInk; ghost: Theme.lcdGhost }
+                    }
+                    ParamLCD {
+                        label: "time"
+                        ParamSevenSeg { text: "10.36"; digits: 4; digitHeight: Theme.s(26); ink: Theme.lcdInk; ghost: Theme.lcdGhost }
+                    }
+                }
             }
 
             ParamHeading { width: parent.width; text: "Failure factor visuals"; note: "one open at a time" }
