@@ -10,11 +10,10 @@ Item {
     readonly property color tint: Theme.accentIn(Window.window)
 
     property string text: ""
-    //! A glyph drawn before the text: a transport name ("play", "pause",
-    //! "stop", "record", "rewind", "forward", "prev", "next") for a drawn
-    //! ParamIcon, or any character (e.g. "✓").
+    //! A glyph drawn before the text: a ParamIcon name ("play", "pause",
+    //! "loop"…, see ParamIcon) for a drawn icon, or any character (e.g. "✓").
     property string icon: ""
-    readonly property bool drawnIcon: ["play", "pause", "stop", "record", "rewind", "forward", "prev", "next"].indexOf(root.icon) >= 0
+    readonly property bool drawnIcon: drawn.names.indexOf(root.icon) >= 0
     property bool accent: false
     property bool danger: false
     property bool checkable: false

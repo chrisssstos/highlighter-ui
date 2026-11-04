@@ -9,6 +9,8 @@ import "ParamMath.js" as PM
 /// but stepping and typing may go past it, up to limitFrom..limitTo (no
 /// limit by default), so a full bar can still be nudged. Double-click the
 /// bar, or the reset mark by the label, to go back to defaultValue.
+/// The animate mark by the label opens a ParamAnimator under it, which
+/// sweeps the value between two ends (loop, bounce, once).
 ///
 /// Like Qt's Slider: value is set by the user, moved() reports only user
 /// changes, so bind value to your setting and write it back in onMoved.
@@ -36,6 +38,13 @@ Item {
     //! Whether it has its own min / max button (off when it is part of
     //! another control, as in a minimised ParamXY).
     property bool sizeToggle: true
+    //! Whether it has an animate mark (off, like sizeToggle, when it is part
+    //! of another control).
+    property bool animatable: sizeToggle
+    //! Its animator is open under it (the animate mark flips it).
+    property bool animOpen: false
+    //! The animator is moving the value.
+    readonly property bool animating: anim.playing
     //! Minimised: a thin bar. Sliders start minimised, unless the user
     //! maximised this one before; the min / max button by the label flips it.
     //! An illustrated slider starts maximised, so its picture shows; the
@@ -62,12 +71,18 @@ Item {
 
     implicitWidth: Theme.s(320)
     implicitHeight: head.height + pictures.height + track.height + box.height
+                    + (anim.visible ? Theme.s(6) + anim.height : 0)
     activeFocusOnTab: true
     opacity: enabled ? 1 : 0.4
 
     //! Sets the value as the user would: snapped, limited, reported.
     function setValue(v) {
         v = PM.clamp(PM.snap(v, root.stepSize, root.from), root.limitFrom, root.limitTo)
+        if (v !== root.value) { root.value = v; root.moved(v) }
+    }
+    //! The same, unsnapped: what an animation sets, so it glides between steps.
+    function setSmooth(v) {
+        v = PM.clamp(v, root.limitFrom, root.limitTo)
         if (v !== root.value) { root.value = v; root.moved(v) }
     }
     function step(direction, big) { setValue(root.value + direction * root.stepSize * (big ? 10 : 1)) }
@@ -98,7 +113,7 @@ Item {
 
     // Drawn from an eased copy of the value, so steps glide and drags don't lag.
     property real shown: value
-    Behavior on shown { enabled: !ma.dragging; NumberAnimation { duration: Theme.quick; easing.type: Easing.OutCubic } }
+    Behavior on shown { enabled: !ma.dragging && !anim.playing; NumberAnimation { duration: Theme.quick; easing.type: Easing.OutCubic } }
     function fraction(v) { return root.to === root.from ? 0 : PM.clamp((v - root.from) / (root.to - root.from), 0, 1) }
     readonly property real edgeX: track.width * fraction(root.shown)
     readonly property real originX: track.width * fraction(root.origin)
@@ -133,6 +148,7 @@ Item {
         Text {
             id: title
             width: parent.width - root.gutterR - sizeMark.width - resetMark.width - Theme.s(12)
+                   - (animMark.visible ? animMark.width + Theme.s(8) : 0)
             text: root.label
             elide: Text.ElideRight
             color: Theme.text
@@ -152,6 +168,22 @@ Item {
             Behavior on opacity { NumberAnimation { duration: Theme.ease } }
             HoverHandler { id: resetHover; cursorShape: Qt.PointingHandCursor }
             TapHandler { enabled: resetMark.opacity > 0; onTapped: root.reset() }
+        }
+        // animate: opens the animator; stays lit while it's open or playing
+        ParamIcon {
+            id: animMark
+            objectName: "animMark"
+            visible: root.animatable
+            anchors.right: resetMark.left
+            anchors.rightMargin: Theme.s(8)
+            anchors.verticalCenter: resetMark.verticalCenter
+            name: "animate"
+            size: Theme.s(9)
+            color: animHover.hovered || root.animOpen || anim.playing ? root.tint : Theme.textFaint
+            opacity: hover.hovered || root.activeFocus || root.animOpen || anim.playing ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: Theme.ease } }
+            HoverHandler { id: animHover; margin: Theme.s(4); cursorShape: Qt.PointingHandCursor }
+            TapHandler { margin: Theme.s(4); enabled: animMark.opacity > 0; onTapped: root.animOpen = !root.animOpen }
         }
         // min / max, like the reset mark only there while hovered or focused
         ParamSizeMark {
@@ -451,4 +483,22 @@ Item {
         // Give the keyboard back to the slider, without a focus ring.
         onFinished: { ma.focusedByMouse = true; root.forceActiveFocus(Qt.MouseFocusReason) }
     }
+
+    // --- the animator, under the value (the animate mark opens it) --------------
+    ParamAnimator {
+        id: anim
+        visible: root.animOpen
+        y: box.y + box.height + Theme.s(6)
+        width: root.width
+        stripWidth: track.width
+        from: root.from; to: root.to; stepSize: root.stepSize
+        decimals: root.decimals; unit: root.unit
+        value: root.value
+        enabled: root.enabled
+        onSwept: v => root.setSmooth(v)
+    }
+    // grabbing the bar takes the value back from the animation
+    Connections { target: ma; function onPressedChanged() { if (ma.pressed) anim.pause() } }
+    // closing it stops it
+    onAnimOpenChanged: if (!animOpen) anim.pause()
 }

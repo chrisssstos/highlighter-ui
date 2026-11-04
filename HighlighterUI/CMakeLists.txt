@@ -20,6 +20,7 @@ qt_add_qml_module(HighlighterUI
         ParamMath.js
         ParamArrow.qml
         ParamIcon.qml
+        ParamAnimator.qml
         ParamPlate.qml
         ParamBevel.qml
         ParamSizeMark.qml
