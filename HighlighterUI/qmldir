@@ -20,6 +20,7 @@ ParamTable 1.0 ParamTable.qml
 ParamField 1.0 ParamField.qml
 ParamMeter 1.0 ParamMeter.qml
 ParamGraph 1.0 ParamGraph.qml
+ParamCurve 1.0 ParamCurve.qml
 ParamHeading 1.0 ParamHeading.qml
 ParamGroup 1.0 ParamGroup.qml
 ParamCode 1.0 ParamCode.qml

@@ -404,6 +404,24 @@ Window {
                     ParamLevel { label: "R"; value: live.r; warnAt: 0.8 }
                     ParamLevel { label: "no warn"; value: live.a; segments: 10 }
                 }
+                // a curve the user shapes: here a roll-up screen's run, the dot where it is now
+                ParamCurve {
+                    id: rollCurve
+                    width: parent.width
+                    label: "curve: a screen rolling up, slowing near the top"
+                    valueText: "6.9 s"
+                    fromLabel: "down"; toLabel: "up"; startLabel: "0 s"; endLabel: "6.9 s"
+                    points: [{ t: 0, v: 0 }, { t: 0.15, v: 0.12 }, { t: 0.75, v: 0.88 }, { t: 1, v: 1 }]
+                    defaultPoints: [{ t: 0, v: 0 }, { t: 1, v: 1 }]
+                    position: live.a
+                }
+                ParamCurve {
+                    width: parent.width
+                    label: "curve, straight lines between the points (smooth off)"
+                    smooth: false
+                    points: [{ t: 0, v: 0 }, { t: 0.15, v: 0.12 }, { t: 0.75, v: 0.88 }, { t: 1, v: 1 }]
+                    plotHeight: Theme.s(60)
+                }
                 ParamGraph {
                     id: loadGraph
                     width: parent.width
