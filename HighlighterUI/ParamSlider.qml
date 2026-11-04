@@ -8,7 +8,8 @@ import "ParamMath.js" as PM
 /// a box under the edge; press it to type a value. The bar spans from..to,
 /// but stepping and typing may go past it, up to limitFrom..limitTo (no
 /// limit by default), so a full bar can still be nudged. Double-click the
-/// bar, or the reset mark by the label, to go back to defaultValue.
+/// bar, or the reset mark by the label, to go back to defaultValue (not
+/// while it's animating: the reset mark hides and reset() does nothing).
 /// The animate mark by the label opens a ParamAnimator under it, which
 /// sweeps the value between two ends (loop, bounce, once).
 ///
@@ -45,6 +46,9 @@ Item {
     property bool animOpen: false
     //! The animator is moving the value.
     readonly property bool animating: anim.playing
+    //! Its animator, for an app to save and restore its state (range, points,
+    //! mode, duration, playing) with its presets.
+    readonly property alias animator: anim
     //! Minimised: a thin bar. Sliders start minimised, unless the user
     //! maximised this one before; the min / max button by the label flips it.
     //! An illustrated slider starts maximised, so its picture shows; the
@@ -86,7 +90,8 @@ Item {
         if (v !== root.value) { root.value = v; root.moved(v) }
     }
     function step(direction, big) { setValue(root.value + direction * root.stepSize * (big ? 10 : 1)) }
-    function reset() { if (!isNaN(root.defaultValue)) setValue(root.defaultValue) }
+    //! Back to defaultValue; unavailable while the animator is moving the value.
+    function reset() { if (!isNaN(root.defaultValue) && !root.animating) setValue(root.defaultValue) }
     //! Makes the value the new default (what a panel's "Save as defaults" does).
     function saveDefault() { root.defaultValue = root.value }
 
@@ -164,7 +169,7 @@ Item {
             color: resetHover.hovered ? root.tint : Theme.textFaint
             font.family: Theme.family
             font.pixelSize: root.sz("title")
-            opacity: !root.isDefault && (hover.hovered || root.activeFocus) ? 1 : 0
+            opacity: !root.isDefault && !root.animating && (hover.hovered || root.activeFocus) ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.ease } }
             HoverHandler { id: resetHover; cursorShape: Qt.PointingHandCursor }
             TapHandler { enabled: resetMark.opacity > 0; onTapped: root.reset() }
