@@ -171,6 +171,12 @@ Window {
                 }
             }
             ParamSection {
+                width: parent.width; title: "Animation"; note: "the moving ball by a slider's label"
+                ParamSlider { width: parent.width; key: "gallery.anim.max"; compact: false; animOpen: true; label: "text size, animated (the pencil opens its graph)"; unit: "px"; from: 0; to: 100; value: 46; defaultValue: 16 }
+                ParamSlider { width: parent.width; key: "gallery.anim.min"; compact: true; animOpen: true; label: "speed, animated, minimised"; from: 0; to: 1; stepSize: 0.01; value: 0.3 }
+                ParamSlider { width: parent.width; key: "gallery.anim.closed"; label: "hover me: the ball opens the animator"; from: 0; to: 10; value: 4 }
+            }
+            ParamSection {
                 width: parent.width; title: "Ranges"
                 ParamSlider { width: parent.width; label: "top edge from centre (fills from 0)"; unit: " mm"; from: -400; to: 400; origin: 0; value: -300; defaultValue: 0 }
                 ParamSlider { width: parent.width; label: "left edge from centre"; unit: " mm"; from: -400; to: 400; origin: 0; value: 201; defaultValue: 0 }

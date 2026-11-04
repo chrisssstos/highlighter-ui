@@ -76,6 +76,17 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   `key` (it minimises to a thumbnail of itself and remembers being maximised).
   The pad replaces the two sliders, never sits beside them: its x / y boxes
   take typed values. A single position value stays a slider.
+- **Animation.** Every slider has an animate mark (a moving ball) by its label;
+  it opens a `ParamAnimator` under the bar: a range to sweep (drag its
+  handles or the range), back / pause / play, seconds per pass (typed, or Up / Down),
+  and loop, bounce or play once and hold.
+  Its strip lines the range up under the bar; the pencil opens a graph under
+  it shows the envelope (`points`, { t, v } each 0..1): time across, the
+  value up, labelled with the range's two values.
+  It sets the value as the user would, so the app's `onMoved` sees it;
+  grabbing the bar pauses it. Off for sliders inside other controls
+  (`animatable` follows `sizeToggle`); set `animatable: false` where a
+  setting must never move by itself.
 - **Tables.** Use `ParamTable` for read-only rows the app lists (presets,
   devices, files, a log), picked with `currentRow` / `onActivated` and opened
   with `onOpened`. Not for a setting with a few named options (that's a
