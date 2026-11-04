@@ -147,8 +147,11 @@ QtObject {
     property bool smooth: false
     //! Whatever is lit (a slider's fill, the picked choice, an accent button,
     //! a toggle that's on, a light) glows in its colour, like a backlit
-    //! display. Off by default; on with the hardware skin.
+    //! display. On by default in the hardware skin, off in the others;
+    //! choosing a skin sets it, and it can be switched after.
     property bool glow: hardware
+    // every change of skin sets it again: on for hardware, off for the others
+    onSkinChanged: glow = skin === "hardware"
 
     // --- motion ------------------------------------------------------------
     property int quick: 90
