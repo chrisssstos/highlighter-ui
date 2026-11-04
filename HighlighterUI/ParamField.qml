@@ -39,7 +39,7 @@ Item {
         radius: Theme.radius
         color: root.editing ? Theme.sunken : (hover.hovered ? Theme.wellHover : Theme.well)
         border.width: 1
-        border.color: root.editing ? root.tint : "transparent"
+        border.color: root.editing ? Theme.onPanel(root.tint) : "transparent"
         Behavior on color { ColorAnimation { duration: Theme.quick } }
 
         TextInput {
@@ -50,7 +50,7 @@ Item {
             text: root.text
             clip: true
             selectByMouse: true
-            color: Theme.text
+            color: root.editing ? Theme.text : Theme.screenText
             selectionColor: root.tint
             selectedTextColor: Theme.inkOf(root.tint)
             font.family: root.mono ? Theme.mono : Theme.family
@@ -66,7 +66,7 @@ Item {
             verticalAlignment: Text.AlignVCenter
             visible: !input.text.length && !root.editing
             text: root.placeholder
-            color: Theme.textFaint
+            color: Theme.screenFaint
             font: input.font
             elide: Text.ElideRight
         }

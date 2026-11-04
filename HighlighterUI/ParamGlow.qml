@@ -27,10 +27,10 @@ MultiEffect {
     property real strength: 1
 
     // how far the light reaches: mostly from its thickness, a little from its size
-    readonly property real reach: PM.clamp(Theme.s(3) + glow.thick * 0.6 + Math.sqrt(Math.max(0, glow.w * glow.h)) * 0.05,
-                                           Theme.s(3), Theme.s(40))
-    // and how bright: more light, a brighter glow
-    readonly property real intensity: PM.clamp(0.3 + glow.thick / Theme.s(50), 0.3, 0.85)
+    readonly property real reach: PM.clamp(Theme.s(5) + glow.thick * 0.8 + Math.sqrt(Math.max(0, glow.w * glow.h)) * 0.05,
+                                           Theme.s(5), Theme.s(40))
+    // and how bright: a blur spreads a thin light thin, so it starts high
+    readonly property real intensity: PM.clamp(0.75 + glow.thick / Theme.s(80), 0.75, 1)
 
     shadowEnabled: true
     shadowColor: glow.glowColor

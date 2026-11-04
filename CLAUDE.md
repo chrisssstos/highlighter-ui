@@ -140,8 +140,8 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 - `ParamArrow` (a Shape) must keep an explicit width and height; an implicit
   size collapses it in compiled builds.
 - Gallery screenshot flags (after `--`): `--shot=<png>`, `--scroll=<px>`,
-  `--scale=<n>`, `--compact`, `--accent=<#hex>`, `--glow`, `--second` (also
-  shoots the second panel).
+  `--scale=<n>`, `--compact`, `--accent=<#hex>`, `--glow`, `--mode=<dark|light>`
+  (the hardware skin's mode), `--second` (also shoots the second panel).
 - In qmltestrunner, a double-click is `mouseDoubleClickSequence`.
 - Skins (`Theme.skin`: "flat", the default; "classic", shown as "old FL
   studio", only when asked for; "hardware", the look beater uses: faceplate,
@@ -157,6 +157,13 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   Assets are rendered by `tools/render_assets.py`; never take graphics
   from commercial plugins. Any new asset: own render (or CC0), listed in
   `textures/CREDITS.txt`.
+- Hardware skin (`Theme.mode` "dark", the default, or "light"): rounded
+  corners everywhere (`Theme.radius`; give every new surface it), screens
+  always dark (`Theme.screenFill`) with `Theme.screenText` / `screenDim` /
+  `screenFaint` on them, never `Theme.text` (that is dark ink in light
+  mode). Accent text or thin lines straight on the faceplate or a key go
+  through `Theme.onPanel()`; lit fills through `Theme.litOf()`. Shoot both
+  modes: nothing dark on dark or light on light.
 - Classic: in a panel, every run of controls belongs in a `ParamSection` or
   `ParamGroup` (each is a plugin window); loose controls on the bare page
   look wrong. Headings go between

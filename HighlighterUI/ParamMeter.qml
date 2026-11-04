@@ -44,7 +44,7 @@ Item {
             id: reading
             anchors.right: parent.right
             text: PM.format(root.value, root.decimals) + root.unit
-            color: root.tint
+            color: Theme.onPanel(root.tint)
             font.family: Theme.family
             font.pixelSize: Theme.valueSize
             font.features: { "tnum": 1 }
@@ -55,10 +55,12 @@ Item {
         y: head.height + Theme.rowGap
         width: parent.width
         height: Theme.s(6)
-        color: Theme.sunken
+        radius: Theme.radius / 2
+        color: Theme.hardware ? Theme.well : Theme.sunken
         Rectangle {
             id: meterFill
             width: parent.width * root.fraction(root.value); height: parent.height
+            radius: Theme.radius / 2
             color: Theme.litOf(root.tint)
             layer.enabled: Theme.glow && width > 0 && root.enabled
             layer.effect: ParamGlow { w: meterFill.width; h: meterFill.height; glowColor: root.tint }
@@ -67,7 +69,7 @@ Item {
             visible: root.showPeak && root.peak > 0
             x: Math.min(parent.width - width, parent.width * root.peak)
             width: Theme.s(2); height: parent.height
-            color: Theme.text
+            color: Theme.screenText
         }
     }
 }

@@ -93,6 +93,8 @@ Item {
         height: root.rowHeight
         // a graph's title bar: grey, a dark line under it
         color: Theme.panelBar
+        radius: Theme.radius
+        Rectangle { y: parent.height - Theme.radius; width: parent.width; height: Theme.radius; visible: Theme.radius > 0; color: Theme.panelBar }
         gradient: Theme.classic ? classicBar : null
         Gradient {
             id: classicBar
@@ -130,13 +132,15 @@ Item {
         y: head.y + head.height
         width: parent.width
         height: root.visibleRows * root.rowHeight
-        color: Theme.sunken
+        color: Theme.screenFill
+        radius: Theme.radius
+        Rectangle { width: parent.width; height: Theme.radius; visible: Theme.radius > 0; color: Theme.screenFill }
         clip: true
         border.width: root.activeFocus && !area.focusedByMouse ? 1 : 0
         border.color: root.tint
         ParamBevel { anchors.fill: parent; visible: Theme.classic; inset: true; light: 0.1; dark: 0.45 }
 
-        readonly property color rule: Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.07)
+        readonly property color rule: Qt.rgba(Theme.screenText.r, Theme.screenText.g, Theme.screenText.b, 0.07)
 
         // the column lines, down the whole well so an empty table still shows its grid
         Repeater {
@@ -184,7 +188,7 @@ Item {
                         text: cell === undefined || cell === null ? "" : rich ? String(cell.text ?? "") : String(cell)
                         elide: Text.ElideRight
                         color: tone === "good" ? root.tint : tone === "ok" ? Theme.caution : tone === "bad" ? Theme.danger
-                             : tone === "dim" ? Theme.textFaint : row.on ? root.tint : Theme.text
+                             : tone === "dim" ? Theme.screenFaint : row.on ? root.tint : Theme.screenText
                         font.family: root.mono ? Theme.mono : Theme.family
                         font.pixelSize: Theme.valueSize
                         font.features: { "tnum": 1 }
@@ -197,7 +201,7 @@ Item {
             anchors.centerIn: parent
             visible: root.rows.length === 0
             text: root.placeholder
-            color: Theme.textFaint
+            color: Theme.screenFaint
             font.family: Theme.family
             font.pixelSize: Theme.smallSize
         }
@@ -219,7 +223,7 @@ Item {
     }
 
     // a thin outline round the header and rows, as round a graph
-    Rectangle { x: head.x; y: head.y; width: head.width; height: head.height + body.height; color: "transparent"; border.width: 1; border.color: Theme.panelEdge; visible: !Theme.classic }
+    Rectangle { x: head.x; y: head.y; width: head.width; height: head.height + body.height; radius: Theme.radius; color: "transparent"; border.width: 1; border.color: Theme.panelEdge; visible: !Theme.classic }
 
     Keys.onUpPressed: { area.focusedByMouse = false; pick(currentRow < 0 ? 0 : currentRow - 1) }
     Keys.onDownPressed: { area.focusedByMouse = false; pick(currentRow + 1) }

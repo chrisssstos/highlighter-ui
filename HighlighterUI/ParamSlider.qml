@@ -141,6 +141,8 @@ Item {
         if (ux + w > track.width) ux = track.width + g
         return { down: dx, up: ux }
     }
+    //! Whether an arrow at x is on the bar (else it hangs past the end, on the faceplate).
+    function onBar(x) { return x >= 0 && x + arrowW <= track.width }
     function onFill(x) { const c = x + arrowW / 2; return c > fillX && c < fillX + fillW }
 
     // --- label row -----------------------------------------------------------
@@ -166,7 +168,7 @@ Item {
             anchors.rightMargin: root.sizeToggle ? Theme.s(8) : root.gutterR
             anchors.verticalCenter: sizeMark.verticalCenter
             text: "↺"   // ↺
-            color: resetHover.hovered ? root.tint : Theme.textFaint
+            color: resetHover.hovered ? Theme.onPanel(root.tint) : Theme.textFaint
             font.family: Theme.family
             font.pixelSize: root.sz("title")
             opacity: !root.isDefault && !root.animating && (hover.hovered || root.activeFocus) ? 1 : 0
@@ -184,7 +186,7 @@ Item {
             anchors.verticalCenter: resetMark.verticalCenter
             name: "animate"
             size: Theme.s(9)
-            color: animHover.hovered || root.animOpen || anim.playing ? root.tint : Theme.textFaint
+            color: animHover.hovered || root.animOpen || anim.playing ? Theme.onPanel(root.tint) : Theme.textFaint
             opacity: hover.hovered || root.activeFocus || root.animOpen || anim.playing ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.ease } }
             HoverHandler { id: animHover; margin: Theme.s(4); cursorShape: Qt.PointingHandCursor }
@@ -200,7 +202,7 @@ Item {
             visible: root.sizeToggle
             compact: root.compact
             shown: hover.hovered || root.activeFocus
-            tint: root.tint
+            tint: Theme.onPanel(root.tint)
             onToggled: {
                 root.compact = !root.compact
                 PanelMemory.setMaximised(root.key, !root.compact)
@@ -313,7 +315,7 @@ Item {
                     y: index * Theme.s(6)
                     width: defaultMark.width; height: Theme.s(3)
                     visible: !(defaultMark.broken && y + height > defaultMark.gapTop && y < defaultMark.gapBottom)
-                    color: defaultMark.overFill ? Theme.inkOf(root.tint) : Theme.text
+                    color: defaultMark.overFill ? Theme.inkOf(root.tint) : Theme.screenText
                     opacity: defaultMark.overFill ? 0.55 : 0.6
                 }
             }
@@ -340,7 +342,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             readonly property bool hot: root.canDown && (ma.hoverZone === -1 || (ma.pressed && ma.pressZone === -1))
             color: root.onFill(x) ? (hot ? Theme.inkOf(root.tint) : Theme.dimOf(root.tint))
-                                  : (hot ? Theme.arrowHot : Theme.arrow)
+                                  : root.onBar(x) ? (hot ? Theme.arrowHot : Theme.arrow) : (hot ? Theme.panelArrowHot : Theme.panelArrow)
             scale: hot && ma.pressed && !ma.dragging ? 0.85 : 1
         }
         ParamArrow {
@@ -354,7 +356,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             readonly property bool hot: root.canUp && (ma.hoverZone === 1 || (ma.pressed && ma.pressZone === 1))
             color: root.onFill(x) ? (hot ? Theme.inkOf(root.tint) : Theme.dimOf(root.tint))
-                                  : (hot ? Theme.arrowHot : Theme.arrow)
+                                  : root.onBar(x) ? (hot ? Theme.arrowHot : Theme.arrow) : (hot ? Theme.panelArrowHot : Theme.panelArrow)
             scale: hot && ma.pressed && !ma.dragging ? 0.85 : 1
         }
     }

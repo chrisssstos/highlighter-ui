@@ -84,13 +84,13 @@ Item {
                     layer.enabled: Theme.glow && visible && root.enabled
                     layer.effect: ParamGlow { w: pickedOutline.width; h: pickedOutline.height; thick: Theme.s(2); glowColor: root.tint }
                     color: "transparent"
-                    border.width: Theme.s(2); border.color: root.tint
+                    border.width: Theme.s(2); border.color: Theme.onPanel(root.tint)
                 }
                 Text {
                     id: t
                     anchors.centerIn: parent
                     text: cell.modelData
-                    color: cell.lit ? Theme.inkOf(root.tint) : cell.on ? root.tint : cell.isFaint ? Theme.textFaint : Theme.textDim
+                    color: cell.lit ? Theme.inkOf(root.tint) : cell.on ? Theme.onPanel(root.tint) : cell.isFaint ? Theme.textFaint : Theme.textDim
                     opacity: cell.isFaint && !cell.on ? 0.55 : 1
                     font.family: Theme.family
                     font.pixelSize: root.cellHeight > Theme.s(34) ? Math.round(root.cellHeight * 0.55) : Theme.labelSize

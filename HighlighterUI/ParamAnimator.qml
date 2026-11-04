@@ -131,6 +131,7 @@ Item {
         id: strip
         width: root.stripWidth
         height: Theme.s(12)
+        radius: Theme.radius
         color: Theme.well
 
         readonly property real ax: Math.round(strip.width * root.frac(Math.min(root.rangeFrom, root.rangeTo)))
@@ -140,7 +141,8 @@ Item {
         Rectangle {
             id: box
             x: strip.ax; width: Math.max(1, strip.bx - strip.ax); height: strip.height
-            color: Theme.sunken
+            radius: Theme.radius
+            color: Theme.screenMarked(root.tint)
             ParamBevel { anchors.fill: parent; visible: Theme.classic; inset: true; light: 0.1; dark: 0.45 }
             Repeater {
                 model: 3
@@ -154,7 +156,7 @@ Item {
                 // kept clear of the handles at the ends
                 x: Math.round(PM.clamp(vx - width / 2, strip.handleW, box.width - strip.handleW - width))
                 width: Theme.s(2); height: box.height
-                color: Theme.text
+                color: Theme.screenText
             }
         }
         // drag the range itself to move it
@@ -228,7 +230,8 @@ Item {
             id: plot
             x: scale.width + Theme.s(6)
             width: graph.width - x; height: graph.height
-            color: Theme.sunken
+            color: Theme.screenFill
+            radius: Theme.radius
             clip: true
             ParamBevel { anchors.fill: parent; visible: Theme.classic; inset: true; light: 0.1; dark: 0.45 }
 
@@ -266,7 +269,7 @@ Item {
                 preferredRendererType: Theme.smooth ? Shape.CurveRenderer : Shape.GeometryRenderer
                 antialiasing: Theme.smooth
                 ShapePath {
-                    strokeColor: root.tint; strokeWidth: Theme.s(1.5)
+                    strokeColor: Theme.litOf(root.tint); strokeWidth: Theme.s(1.5)
                     fillColor: "transparent"; joinStyle: ShapePath.MiterJoin
                     PathPolyline { path: root.points.map(p => plot.at(p)) }
                 }
@@ -275,15 +278,15 @@ Item {
             Rectangle {
                 x: Math.round(PM.clamp(plot.xOf(root.phase) - width / 2, 0, plot.width - width))
                 width: Theme.s(2); height: plot.height
-                color: Theme.text
+                color: Theme.screenText
             }
             Rectangle {
                 readonly property real size: Theme.s(6)
                 x: Math.round(plot.xOf(PM.clamp(root.phase, 0, 1)) - size / 2)
                 y: Math.round(plot.yOf(root.valueAt(PM.clamp(root.phase, 0, 1))) - size / 2)
                 width: size; height: size
-                color: Theme.text
-                border.width: 1; border.color: Theme.sunken
+                color: Theme.screenText
+                border.width: 1; border.color: Theme.screenFill
             }
             // the envelope's points, while editing
             Repeater {

@@ -121,7 +121,7 @@ Item {
             anchors.rightMargin: Theme.s(8)
             anchors.verticalCenter: title.verticalCenter
             text: "↺"   // ↺
-            color: resetHover.hovered ? root.tint : Theme.textFaint
+            color: resetHover.hovered ? Theme.onPanel(root.tint) : Theme.textFaint
             font.family: Theme.family
             font.pixelSize: Theme.titleSize
             opacity: !root.isDefault && (hover.hovered || root.activeFocus) ? 1 : 0
@@ -136,7 +136,7 @@ Item {
             anchors.verticalCenter: title.verticalCenter
             compact: root.compact
             shown: hover.hovered || root.activeFocus
-            tint: root.tint
+            tint: Theme.onPanel(root.tint)
             onToggled: {
                 root.compact = !root.compact
                 PanelMemory.setMaximised(root.key, !root.compact)
@@ -153,6 +153,7 @@ Item {
         height: Math.round(width / Math.max(0.05, root.aspect))
         // minimising and maximising grow the one grid, not swap it
         Behavior on width { NumberAnimation { duration: Theme.ease; easing.type: Easing.OutCubic } }
+        radius: Theme.radius
         color: hover.hovered && !ma.pressed ? Theme.wellHover : Theme.well
         clip: true
 
@@ -162,7 +163,7 @@ Item {
             Rectangle {
                 required property var modelData
                 x: Math.round(root.px(modelData)); width: 1; height: pad.height
-                color: modelData === 0 ? Theme.textFaint : Theme.line
+                color: modelData === 0 ? Theme.screenFaint : Theme.line
                 opacity: modelData === 0 ? 0.9 : root.compact ? 0 : 0.5
             }
         }
@@ -171,7 +172,7 @@ Item {
             Rectangle {
                 required property var modelData
                 y: Math.round(root.py(modelData)); height: 1; width: pad.width
-                color: modelData === 0 ? Theme.textFaint : Theme.line
+                color: modelData === 0 ? Theme.screenFaint : Theme.line
                 opacity: modelData === 0 ? 0.9 : root.compact ? 0 : 0.5
             }
         }
@@ -185,13 +186,13 @@ Item {
                 Rectangle {
                     readonly property int side: root.compact ? Theme.s(3) : Theme.s(7)
                     x: -Math.floor(side / 2); y: -Math.floor(side / 2); width: side; height: side
-                    color: "transparent"; border.width: 1; border.color: Theme.textDim
+                    color: "transparent"; border.width: 1; border.color: Theme.screenDim
                 }
                 Text {
                     visible: !root.compact
                     x: Theme.s(6); y: -Theme.s(6)
                     text: modelData.label || ""
-                    color: Theme.textDim
+                    color: Theme.screenDim
                     font.family: Theme.family
                     font.pixelSize: Theme.smallSize
                 }
@@ -219,18 +220,31 @@ Item {
                     x: edge === 0 ? t : edge === 1 ? parent.side - width : edge === 2 ? parent.side - width - t : 0
                     y: edge === 0 ? 0 : edge === 1 ? t : edge === 2 ? parent.side - height : parent.side - height - t
                     width: Theme.s(2); height: Theme.s(2)
-                    color: Theme.text; opacity: 0.6
+                    color: Theme.screenText; opacity: 0.6
                 }
             }
         }
 
         // crosshairs through the dot
-        Rectangle { x: Math.round(root.px(root.xValue)); width: 1; height: pad.height; color: root.tint; opacity: 0.45 }
-        Rectangle { y: Math.round(root.py(root.yValue)); height: 1; width: pad.width; color: root.tint; opacity: 0.45 }
+        Rectangle {
+            id: crossV
+            x: Math.round(root.px(root.xValue)); width: 1; height: pad.height; color: root.tint; opacity: Theme.glow ? 0.7 : 0.45
+            layer.enabled: Theme.glow && root.enabled
+            layer.effect: ParamGlow { w: crossV.width; h: crossV.height; thick: Theme.s(2); strength: 0.7; glowColor: root.tint }
+        }
+        Rectangle {
+            id: crossH
+            y: Math.round(root.py(root.yValue)); height: 1; width: pad.width; color: root.tint; opacity: Theme.glow ? 0.7 : 0.45
+            layer.enabled: Theme.glow && root.enabled
+            layer.effect: ParamGlow { w: crossH.width; h: crossH.height; thick: Theme.s(2); strength: 0.7; glowColor: root.tint }
+        }
 
         // the placed element's size
         Rectangle {
+            id: footprint
             visible: root.footprintWidth > 0 && root.footprintHeight > 0
+            layer.enabled: Theme.glow && visible && root.enabled
+            layer.effect: ParamGlow { w: footprint.width; h: footprint.height; thick: Theme.s(2); glowColor: root.tint }
             readonly property real w: Math.abs(root.px(root.xFrom + root.footprintWidth) - root.px(root.xFrom))
             readonly property real h: Math.abs(root.py(root.yFrom + root.footprintHeight) - root.py(root.yFrom))
             x: Math.round(root.px(root.xValue) - (root.footprintFromCorner ? 0 : w / 2))
