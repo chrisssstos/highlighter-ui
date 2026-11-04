@@ -43,6 +43,22 @@ Item {
         height: text.length ? implicitHeight : 0
     }
 
+    // the light: the lit arc, drawn again under the dial as the glow's source
+    Shape {
+        id: litArc
+        x: dial.x; y: dial.y; width: dial.width; height: dial.height
+        visible: Theme.glow && root.enabled && dial.f > 0
+        preferredRendererType: Theme.smooth ? Shape.CurveRenderer : Shape.GeometryRenderer
+        antialiasing: Theme.smooth
+        layer.enabled: visible
+        layer.effect: ParamGlow { w: root.diameter; h: root.diameter / 2; thick: dial.ring; glowColor: root.warning ? Theme.danger : root.tint }
+        ShapePath {
+            strokeColor: root.warning ? Theme.danger : root.tint
+            strokeWidth: dial.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
+            PathAngleArc { centerX: dial.cx; centerY: dial.cy; radiusX: dial.outer - dial.ring / 2; radiusY: radiusX; startAngle: 180; sweepAngle: 180 * dial.f }
+        }
+    }
+
     // Drawn as shapes, so Theme.smooth can turn the antialiasing off.
     Shape {
         id: dial

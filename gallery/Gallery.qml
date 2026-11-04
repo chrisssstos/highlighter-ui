@@ -29,6 +29,7 @@ Window {
         if (Qt.application.arguments.indexOf("--flat") >= 0) Theme.skin = "flat"
         const sk = Qt.application.arguments.find(a => a.startsWith("--skin="))
         if (sk) Theme.skin = sk.substring(7)
+        if (Qt.application.arguments.indexOf("--glow") >= 0) Theme.glow = true
         if (Qt.application.arguments.indexOf("--compact") >= 0) Theme.compact = true   // every slider starts minimised
         const acc = Qt.application.arguments.find(a => a.startsWith("--accent="))
         if (acc) Theme.accent = acc.substring(9)
@@ -105,6 +106,12 @@ Window {
                 model: ["flat", "old FL studio"]
                 currentIndex: ["flat", "classic"].indexOf(Theme.skin)
                 onActivated: i => Theme.skin = ["flat", "classic"][i]
+            }
+            ParamToggle {
+                height: Theme.s(28)
+                text: "glow"
+                checked: Theme.glow
+                onToggled: on => Theme.glow = on
             }
             ParamToggle {
                 id: allOff
@@ -227,7 +234,8 @@ Window {
             }
             ParamSection {
                 width: parent.width; title: "Preset slots"; note: "faint: empty slots, still pickable"
-                ParamChoice { width: parent.width; model: ["1", "2", "3", "4", "5", "6", "7", "8"]; currentIndex: 1; faint: [3, 5, 6, 7] }
+                ParamChoice { width: parent.width; label: "a filled slot picked"; model: ["1", "2", "3", "4", "5", "6", "7", "8"]; currentIndex: 1; faint: [3, 5, 6, 7] }
+                ParamChoice { width: parent.width; label: "an empty slot picked: outlined, not filled"; model: ["1", "2", "3", "4", "5", "6", "7", "8"]; currentIndex: 3; faint: [3, 5, 6, 7] }
             }
             ParamSection {
                 width: parent.width; title: "Buttons"

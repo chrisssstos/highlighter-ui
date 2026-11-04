@@ -122,6 +122,10 @@ QtObject {
     //! Antialiasing for arrows, dials and round shapes. Off: hard,
     //! nearest-neighbour edges, the kit's look. Text stays smooth.
     property bool smooth: false
+    //! Whatever is lit (a slider's fill, the picked choice, an accent button,
+    //! a toggle that's on, a light) glows in its colour, like a backlit
+    //! display. Off by default.
+    property bool glow: false
 
     // --- motion ------------------------------------------------------------
     property int quick: 90

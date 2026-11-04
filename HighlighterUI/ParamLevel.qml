@@ -40,6 +40,7 @@ Item {
         Repeater {
             model: root.segments
             Rectangle {
+                id: seg
                 required property int index
                 // drawn top down: the top cell is the loudest
                 readonly property real level: (root.segments - index) / root.segments
@@ -49,6 +50,8 @@ Item {
                 width: bar.width
                 height: bar.cell
                 color: lit || isPeak ? (hot ? Theme.danger : root.tint) : Theme.sunken
+                layer.enabled: Theme.glow && lit && root.enabled
+                layer.effect: ParamGlow { w: seg.width; h: seg.height; glowColor: seg.hot ? Theme.danger : root.tint; strength: 0.8 }
                 opacity: isPeak && !lit ? 0.7 : 1
             }
         }

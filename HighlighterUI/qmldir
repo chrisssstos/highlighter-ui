@@ -5,6 +5,7 @@ ParamArrow 1.0 ParamArrow.qml
 ParamIcon 1.0 ParamIcon.qml
 ParamAnimator 1.0 ParamAnimator.qml
 ParamPlate 1.0 ParamPlate.qml
+ParamGlow 1.0 ParamGlow.qml
 ParamBevel 1.0 ParamBevel.qml
 ParamSizeMark 1.0 ParamSizeMark.qml
 ParamValueBox 1.0 ParamValueBox.qml

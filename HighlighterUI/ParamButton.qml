@@ -57,6 +57,9 @@ Item {
              : root.checked ? (area.pressed ? Theme.sunken : Theme.sunkenHover)
              : (area.pressed ? Qt.darker(Theme.sunken, 1.15) : area.containsMouse ? Theme.sunkenHover : Theme.sunken)
         Behavior on color { ColorAnimation { duration: Theme.quick } }
+        // the light: an accent button's whole face
+        layer.enabled: Theme.glow && root.accent && root.enabled
+        layer.effect: ParamGlow { w: slab.width; h: slab.height; glowColor: root.tint }
         // classic: lighter at the top, a raised bevel, sunk when pressed
         gradient: Theme.classic ? classicFace : null
         Gradient {
@@ -97,9 +100,12 @@ Item {
 
         // checked, flat: a lime bar on the left
         Rectangle {
+            id: checkBar
             visible: root.checkable && !Theme.classic
             width: Theme.s(3); height: parent.height
             color: root.checked ? root.tint : Theme.line
+            layer.enabled: Theme.glow && root.checked && root.enabled
+            layer.effect: ParamGlow { w: checkBar.width; h: checkBar.height; glowColor: root.tint }
         }
 
         // keyboard focus
@@ -112,6 +118,9 @@ Item {
 
     Row {
         id: content
+        // the light, on a dark button: its lime label (thin strokes, a faint glow)
+        layer.enabled: Theme.glow && root.enabled && !root.accent && root.ink === root.tint
+        layer.effect: ParamGlow { w: content.width; h: content.height; thick: Theme.s(2); glowColor: root.tint }
         anchors.centerIn: parent
         anchors.verticalCenterOffset: area.pressed ? 1 : 0
         anchors.horizontalCenterOffset: led.visible ? Theme.s(6) : 0

@@ -32,6 +32,8 @@ Item {
         antialiasing: Theme.smooth
         color: root.checked ? root.tint : (area.containsMouse ? Theme.wellHover : Theme.well)
         Behavior on color { ColorAnimation { duration: Theme.ease } }
+        layer.enabled: Theme.glow && root.checked && root.enabled
+        layer.effect: ParamGlow { w: pill.width; h: pill.height; glowColor: root.tint }
         border.width: root.activeFocus && !area.focusedByMouse ? 1 : 0
         border.color: Theme.text
 

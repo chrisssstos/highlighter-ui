@@ -14,5 +14,7 @@ Rectangle {
     implicitHeight: implicitWidth
     radius: Theme.radius
     color: root.on ? root.tint : Theme.sunken
+    layer.enabled: Theme.glow && root.on && root.enabled
+    layer.effect: ParamGlow { w: root.width; h: root.height; glowColor: root.tint }
     opacity: enabled ? 1 : 0.4
 }

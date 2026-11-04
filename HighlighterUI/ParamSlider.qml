@@ -257,6 +257,9 @@ Item {
             height: parent.height
             color: root.tint
             radius: Theme.radius
+            // the light: the fill itself, its glow as big as it is
+            layer.enabled: Theme.glow && root.fillW > 0 && root.enabled
+            layer.effect: ParamGlow { w: fill.width; h: fill.height; glowColor: root.tint }
         }
         // the darker line along the fill's moving edge
         Rectangle {
