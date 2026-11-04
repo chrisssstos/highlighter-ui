@@ -10,8 +10,11 @@ Item {
     readonly property color tint: Theme.accentIn(Window.window)
 
     property string text: ""
-    //! A glyph drawn before the text (any character, e.g. "✓").
+    //! A glyph drawn before the text: a transport name ("play", "pause",
+    //! "stop", "record", "rewind", "forward", "prev", "next") for a drawn
+    //! ParamIcon, or any character (e.g. "✓").
     property string icon: ""
+    readonly property bool drawnIcon: ["play", "pause", "stop", "record", "rewind", "forward", "prev", "next"].indexOf(root.icon) >= 0
     property bool accent: false
     property bool danger: false
     property bool checkable: false
@@ -29,7 +32,8 @@ Item {
     // kit scaled up) cuts its label short with an ellipsis instead of
     // spilling past its edges.
     implicitWidth: (glyph.visible ? glyph.implicitWidth : 0)
-                 + (glyph.visible && label.visible ? content.spacing : 0)
+                 + (drawn.visible ? drawn.width : 0)
+                 + ((glyph.visible || drawn.visible) && label.visible ? content.spacing : 0)
                  + (label.visible ? label.implicitWidth : 0)
                  + 2 * horizontalPadding
                  + (Theme.classic && checkable ? Theme.s(12) : 0)   // the LED
@@ -113,9 +117,16 @@ Item {
         anchors.verticalCenterOffset: area.pressed ? 1 : 0
         anchors.horizontalCenterOffset: led.visible ? Theme.s(6) : 0
         spacing: Theme.s(6)
+        ParamIcon {
+            id: drawn
+            visible: root.drawnIcon
+            name: root.icon
+            color: root.ink
+            anchors.verticalCenter: parent.verticalCenter
+        }
         Text {
             id: glyph
-            visible: root.icon.length > 0
+            visible: root.icon.length > 0 && !root.drawnIcon
             text: root.icon
             color: root.ink
             font.family: Theme.family
@@ -127,7 +138,8 @@ Item {
             visible: root.text.length > 0
             width: Math.max(0, Math.min(implicitWidth, root.width - 2 * root.horizontalPadding
                                         - (led.visible ? Theme.s(12) : 0)
-                                        - (glyph.visible ? glyph.implicitWidth + content.spacing : 0)))
+                                        - (glyph.visible ? glyph.implicitWidth + content.spacing : 0)
+                                        - (drawn.visible ? drawn.width + content.spacing : 0)))
             elide: Text.ElideRight
             text: root.text
             color: root.ink

@@ -239,11 +239,14 @@ Window {
                 Flow {
                     width: parent.width
                     spacing: 1
-                    ParamButton { icon: "\u25AE\u25C0"; text: "" ; implicitWidth: Theme.s(34) }
-                    ParamButton { icon: "\u25B6"; text: "Play"; checkable: true; checked: true }
-                    ParamButton { icon: "\u275A\u275A"; text: "Pause" }
-                    ParamButton { icon: "\u25A0"; text: "Stop" }
-                    ParamButton { icon: "\u25B6\u25AE"; text: ""; implicitWidth: Theme.s(34) }
+                    ParamButton { icon: "prev"; implicitWidth: Theme.s(34) }
+                    ParamButton { icon: "rewind"; implicitWidth: Theme.s(34) }
+                    ParamButton { icon: "play"; implicitWidth: Theme.s(34); checkable: true; checked: true }
+                    ParamButton { icon: "pause"; implicitWidth: Theme.s(34) }
+                    ParamButton { icon: "stop"; implicitWidth: Theme.s(34) }
+                    ParamButton { icon: "forward"; implicitWidth: Theme.s(34) }
+                    ParamButton { icon: "next"; implicitWidth: Theme.s(34) }
+                    ParamButton { icon: "record"; implicitWidth: Theme.s(34) }
                 }
                 ParamButton { width: parent.width; text: "A full-width button with a label long enough to need the room" }
 
