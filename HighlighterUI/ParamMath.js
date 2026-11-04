@@ -42,3 +42,37 @@ function parse(text, unit) {
         return NaN
     }
 }
+
+// A curve through points { t, v } (t rising, 0..1) at t: straight lines
+// between them, or (smooth) a monotone cubic through them (Fritsch-Carlson),
+// which bends smoothly but never overshoots a point, so a curve kept within
+// 0..1 stays within it. Before the first point and after the last, their v.
+function curveAt(p, t, smooth) {
+    const n = p ? p.length : 0
+    if (!n) return t
+    if (t <= p[0].t) return p[0].v
+    if (t >= p[n - 1].t) return p[n - 1].v
+    let i = 1
+    while (i < n - 1 && t > p[i].t) i++
+    const a = p[i - 1], b = p[i], h = b.t - a.t
+    if (h <= 0) return b.v
+    const s = (t - a.t) / h
+    if (!smooth || n < 3) return a.v + (b.v - a.v) * s
+    // the slopes between points, then a tangent at each
+    const d = [], m = []
+    for (let k = 0; k < n - 1; k++) {
+        const w = p[k + 1].t - p[k].t
+        d.push(w > 0 ? (p[k + 1].v - p[k].v) / w : 0)
+    }
+    m.push(d[0])
+    for (let k = 1; k < n - 1; k++) m.push(d[k - 1] * d[k] <= 0 ? 0 : (d[k - 1] + d[k]) / 2)
+    m.push(d[n - 2])
+    for (let k = 0; k < n - 1; k++) {
+        if (d[k] === 0) { m[k] = 0; m[k + 1] = 0; continue }
+        const x = m[k] / d[k], y = m[k + 1] / d[k], r = x * x + y * y
+        if (r > 9) { const tau = 3 / Math.sqrt(r); m[k] = tau * x * d[k]; m[k + 1] = tau * y * d[k] }
+    }
+    const s2 = s * s, s3 = s2 * s
+    return (2 * s3 - 3 * s2 + 1) * a.v + (s3 - 2 * s2 + s) * h * m[i - 1]
+         + (-2 * s3 + 3 * s2) * b.v + (s3 - s2) * h * m[i]
+}

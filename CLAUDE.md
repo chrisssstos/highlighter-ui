@@ -91,6 +91,15 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   grabbing the bar pauses it. Off for sliders inside other controls
   (`animatable` follows `sizeToggle`); set `animatable: false` where a
   setting must never move by itself.
+- **Curves.** Use `ParamCurve` for a setting that is a shape over time: an
+  easing, a motor's run, a fade (points { t, v }, each 0..1). Bind `points`
+  to the setting and write back in `onMoved`; give `defaultPoints` (a
+  double-click on an empty spot goes back to them), name the ends
+  (`fromLabel` / `toLabel`, `startLabel` / `endLabel`) and, when something
+  follows the curve live, its `position`. `smooth` (on) bends through the
+  points without overshooting; the app works the value out with the same
+  maths, `curveAt(points, t, smooth)` in ParamMath.js (copy it if the app
+  can't import it). Not for a live reading (that's a `ParamGraph`).
 - **Tables.** Use `ParamTable` for read-only rows the app lists (presets,
   devices, files, a log), picked with `currentRow` / `onActivated` and opened
   with `onOpened`. Not for a setting with a few named options (that's a

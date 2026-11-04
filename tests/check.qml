@@ -36,6 +36,18 @@ Item {
         out.push("window accent=" + (inPink.tint.toString() === "#ff79c6") + " kit accent=" + (ch.tint === Theme.accent)
                  + " panel accent=" + (inPanel.tint.toString() === "#b794ff")
                  + " section's own=" + (ownSection.tint.toString() === "#5cc8ff"))
+        const ease = [{ t: 0, v: 0 }, { t: 0.2, v: 0.1 }, { t: 0.8, v: 0.9 }, { t: 1, v: 1 }]
+        let within = true, rising = true, prev = -1
+        for (let i = 0; i <= 200; i++) {
+            const v = PM.curveAt(ease, i / 200, true)
+            if (v < 0 || v > 1) within = false
+            if (v < prev - 1e-9) rising = false
+            prev = v
+        }
+        out.push("curve ends=" + PM.curveAt(ease, 0, true) + "," + PM.curveAt(ease, 1, true)
+                 + " through points=" + (Math.abs(PM.curveAt(ease, 0.2, true) - 0.1) < 1e-9)
+                 + " no overshoot=" + within + " rising=" + rising
+                 + " straight half=" + PM.curveAt([{ t: 0, v: 0 }, { t: 1, v: 1 }], 0.5, false))
         console.warn(out.join(" | "))
         Qt.quit()
     }
