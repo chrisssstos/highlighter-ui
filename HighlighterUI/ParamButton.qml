@@ -6,8 +6,8 @@ import QtQuick
 Item {
     id: root
 
-    //! The accent it draws in: its window's own, if that declares one (see Theme).
-    readonly property color tint: Theme.accentIn(Window.window)
+    //! The accent it draws in: the nearest one declared around it (see Theme).
+    readonly property color tint: Theme.accentAt(root, Window.window)
 
     property string text: ""
     //! A glyph drawn before the text: a ParamIcon name ("play", "pause",
@@ -40,20 +40,25 @@ Item {
     opacity: enabled ? 1 : 0.4
 
     function activate() {
-        if (root.checkable) { root.checked = !root.checked; root.toggled(root.checked) }
+        // Tells you first, like ParamCheck, so checked bound to your state stays bound.
+        if (root.checkable) {
+            const want = !root.checked
+            root.toggled(want)
+            if (root.checked !== want) root.checked = want
+        }
         root.clicked()
     }
 
     readonly property color ink: root.accent ? Theme.inkOf(root.tint)
                               : root.danger ? Theme.danger
-                              : root.checked ? root.tint
-                              : Theme.classic ? Theme.text : root.tint
-
+                              : root.checked ? Theme.litOf(root.tint)
+                              : Theme.classic || Theme.hardware ? Theme.text : root.tint
     Rectangle {
         id: slab
         anchors.fill: parent
         radius: Theme.radius
-        color: root.accent ? (area.pressed ? Qt.darker(root.tint, 1.18) : area.containsMouse ? Qt.lighter(root.tint, 1.07) : root.tint)
+        color: root.accent ? (area.pressed ? Qt.darker(Theme.litOf(root.tint), 1.18) : area.containsMouse ? Qt.lighter(Theme.litOf(root.tint), 1.04) : Theme.litOf(root.tint))
+             : root.checked && Theme.hardware ? Qt.tint(Theme.sunken, Qt.rgba(root.tint.r, root.tint.g, root.tint.b, area.pressed ? 0.16 : 0.26))
              : root.checked ? (area.pressed ? Theme.sunken : Theme.sunkenHover)
              : (area.pressed ? Qt.darker(Theme.sunken, 1.15) : area.containsMouse ? Theme.sunkenHover : Theme.sunken)
         Behavior on color { ColorAnimation { duration: Theme.quick } }
@@ -98,10 +103,10 @@ Item {
             }
         }
 
-        // checked, flat: a lime bar on the left
+        // checked, flat: a lime bar on the left (hardware: the key lights up instead)
         Rectangle {
             id: checkBar
-            visible: root.checkable && !Theme.classic
+            visible: root.checkable && !Theme.classic && !Theme.hardware
             width: Theme.s(3); height: parent.height
             color: root.checked ? root.tint : Theme.line
             layer.enabled: Theme.glow && root.checked && root.enabled

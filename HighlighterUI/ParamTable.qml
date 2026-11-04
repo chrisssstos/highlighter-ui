@@ -11,7 +11,7 @@ Item {
     id: root
 
     //! The accent it draws in: its window's own, if that declares one (see Theme).
-    readonly property color tint: Theme.accentIn(Window.window)
+    readonly property color tint: Theme.accentAt(root, Window.window)
 
     property string label: ""
     //! The columns: names ("name"), or objects { title, width, align }. A width

@@ -4,8 +4,8 @@ import QtQuick
 Item {
     id: root
 
-    //! The accent it draws in: its window's own, if that declares one (see Theme).
-    readonly property color tint: Theme.accentIn(Window.window)
+    //! The accent it draws in: the nearest one declared around it (see Theme).
+    readonly property color tint: Theme.accentAt(root, Window.window)
 
     property string text: ""
     property bool checked: false
@@ -30,7 +30,7 @@ Item {
         width: Theme.s(36); height: Theme.s(18)
         radius: height / 2
         antialiasing: Theme.smooth
-        color: root.checked ? root.tint : (area.containsMouse ? Theme.wellHover : Theme.well)
+        color: root.checked ? Theme.litOf(root.tint) : (area.containsMouse ? Theme.wellHover : Theme.well)
         Behavior on color { ColorAnimation { duration: Theme.ease } }
         layer.enabled: Theme.glow && root.checked && root.enabled
         layer.effect: ParamGlow { w: pill.width; h: pill.height; glowColor: root.tint }
