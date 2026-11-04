@@ -29,6 +29,8 @@ Window {
         if (Qt.application.arguments.indexOf("--flat") >= 0) Theme.skin = "flat"
         const sk = Qt.application.arguments.find(a => a.startsWith("--skin="))
         if (sk) Theme.skin = sk.substring(7)
+        const md = Qt.application.arguments.find(a => a.startsWith("--mode="))
+        if (md) Theme.mode = md.substring(7)
         if (Qt.application.arguments.indexOf("--glow") >= 0) Theme.glow = true
         if (Qt.application.arguments.indexOf("--compact") >= 0) Theme.compact = true   // every slider starts minimised
         const acc = Qt.application.arguments.find(a => a.startsWith("--accent="))
@@ -106,6 +108,14 @@ Window {
                 model: ["flat", "old FL studio", "hardware"]
                 currentIndex: ["flat", "classic", "hardware"].indexOf(Theme.skin)
                 onActivated: i => Theme.skin = ["flat", "classic", "hardware"][i]
+            }
+            // the hardware skin's two modes
+            ParamChoice {
+                visible: Theme.hardware
+                width: Theme.s(110)
+                model: ["dark", "light"]
+                currentIndex: Theme.lightMode ? 1 : 0
+                onActivated: i => Theme.mode = ["dark", "light"][i]
             }
             ParamToggle {
                 height: Theme.s(28)

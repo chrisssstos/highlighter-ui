@@ -9,6 +9,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
+        radius: Theme.hardware ? Theme.radius * 1.5 : 0
         color: plate.color
         gradient: Theme.classic ? classicFace : null
         Gradient {
@@ -19,7 +20,16 @@ Item {
     }
     Rectangle { anchors.fill: parent; visible: Theme.classic; color: "transparent"; border.width: 1; border.color: Qt.rgba(0, 0, 0, 0.7) }
     ParamBevel { anchors.fill: parent; anchors.margins: 1; visible: Theme.classic; light: 0.2; dark: 0.4 }
-    // hardware: a faceplate edge, lit from above
-    Rectangle { visible: Theme.hardware; width: parent.width; height: 1; color: Qt.rgba(1, 1, 1, 0.10) }
-    Rectangle { visible: Theme.hardware; y: parent.height - 1; width: parent.width; height: 1; color: Qt.rgba(0, 0, 0, 0.35) }
+    // hardware: a faceplate lit from above: a light top edge, a dark outline
+    Rectangle {
+        visible: Theme.hardware
+        anchors.fill: parent
+        radius: Theme.radius * 1.5
+        color: "transparent"; border.width: 1; border.color: Qt.rgba(0, 0, 0, Theme.lightMode ? 0.28 : 0.45)
+    }
+    Rectangle {
+        visible: Theme.hardware
+        x: Theme.radius * 1.5; y: 1; width: parent.width - 2 * x; height: 1
+        color: Qt.rgba(1, 1, 1, Theme.lightMode ? 0.55 : 0.10)
+    }
 }

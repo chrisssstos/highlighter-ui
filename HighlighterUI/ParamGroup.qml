@@ -111,7 +111,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             direction: Qt.RightArrow
             width: Theme.s(7); height: Theme.s(9)
-            color: headArea.containsMouse ? root.tint : Theme.textDim
+            color: headArea.containsMouse ? Theme.onPanel(root.tint) : Theme.textDim
             rotation: root.open ? 90 : 0
             Behavior on rotation { NumberAnimation { duration: Theme.ease; easing.type: Easing.OutCubic } }
         }
@@ -164,13 +164,13 @@ Item {
         Behavior on height { NumberAnimation { duration: Theme.ease; easing.type: Easing.OutCubic } }
 
         // flat: the raised body and, on a group that folds, the bracket
-        Rectangle { anchors.fill: parent; visible: !root.window; color: Theme.raised }
+        Rectangle { anchors.fill: parent; visible: !root.window; color: Theme.raised; radius: Theme.radius * 1.5 }
         Item {
             anchors.fill: parent
             visible: root.collapsible && !root.window
-            Rectangle { width: Theme.s(4); height: parent.height; color: root.tint }
-            Rectangle { width: Theme.s(10); height: Theme.s(3); color: root.tint }
-            Rectangle { y: parent.height - height; width: Theme.s(10); height: Theme.s(3); color: root.tint }
+            Rectangle { width: Theme.s(4); height: parent.height; color: Theme.onPanel(root.tint) }
+            Rectangle { width: Theme.s(10); height: Theme.s(3); color: Theme.onPanel(root.tint) }
+            Rectangle { y: parent.height - height; width: Theme.s(10); height: Theme.s(3); color: Theme.onPanel(root.tint) }
         }
 
         Column {

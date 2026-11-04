@@ -49,7 +49,8 @@ Item {
                 readonly property bool isPeak: Math.abs(root.peak - level) < 0.5 / root.segments
                 width: bar.width
                 height: bar.cell
-                color: lit || isPeak ? Theme.litOf(hot ? Theme.danger : root.tint) : Theme.sunken
+                radius: Theme.radius / 2
+                color: lit || isPeak ? Theme.litOf(hot ? Theme.danger : root.tint) : Theme.hardware ? Theme.well : Theme.sunken
                 layer.enabled: Theme.glow && lit && root.enabled
                 layer.effect: ParamGlow { w: seg.width; h: seg.height; glowColor: seg.hot ? Theme.danger : root.tint; strength: 0.8 }
                 opacity: isPeak && !lit ? 0.7 : 1

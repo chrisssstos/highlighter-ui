@@ -41,7 +41,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             direction: Qt.RightArrow
             width: Theme.s(7); height: Theme.s(9)
-            color: headArea.containsMouse ? root.tint : Theme.textDim
+            color: headArea.containsMouse ? Theme.onPanel(root.tint) : Theme.textDim
             rotation: root.open ? 90 : 0
             Behavior on rotation { NumberAnimation { duration: Theme.ease; easing.type: Easing.OutCubic } }
         }
@@ -89,7 +89,7 @@ Item {
         height: edit.implicitHeight + 2 * Theme.s(10)
         color: Theme.sunken
         radius: Theme.radius
-        Rectangle { width: Theme.s(3); height: parent.height; color: root.tint; opacity: 0.6 }
+        Rectangle { width: Theme.s(3); height: parent.height; color: Theme.onPanel(root.tint); opacity: 0.6 }
 
         TextEdit {
             id: edit

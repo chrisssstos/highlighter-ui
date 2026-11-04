@@ -51,7 +51,7 @@ Item {
 
     readonly property color ink: root.accent ? Theme.inkOf(root.tint)
                               : root.danger ? Theme.danger
-                              : root.checked ? Theme.litOf(root.tint)
+                              : root.checked ? (Theme.lightMode ? Theme.onPanel(root.tint) : Theme.litOf(root.tint))
                               : Theme.classic || Theme.hardware ? Theme.text : root.tint
     Rectangle {
         id: slab
@@ -125,7 +125,7 @@ Item {
         id: content
         // the light, on a dark button: its lime label (thin strokes, a faint glow)
         layer.enabled: Theme.glow && root.enabled && !root.accent && root.ink === root.tint
-        layer.effect: ParamGlow { w: content.width; h: content.height; thick: Theme.s(2); glowColor: root.tint }
+        layer.effect: ParamGlow { w: content.width; h: content.height; thick: Theme.s(2); strength: 0.5; glowColor: root.tint }
         anchors.centerIn: parent
         anchors.verticalCenterOffset: area.pressed ? 1 : 0
         anchors.horizontalCenterOffset: led.visible ? Theme.s(6) : 0

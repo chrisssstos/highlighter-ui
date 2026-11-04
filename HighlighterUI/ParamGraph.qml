@@ -98,7 +98,10 @@ Item {
         id: bar
         width: parent.width
         height: head.height + Theme.s(8)
+        radius: Theme.radius * 1.5
         color: Theme.panelBar
+        // square under, so only the panel's top corners round
+        Rectangle { y: parent.height - Theme.radius * 1.5; width: parent.width; height: Theme.radius * 1.5; visible: Theme.radius > 0; color: Theme.panelBar }
         gradient: Theme.classic ? classicBar : null
         Gradient {
             id: classicBar
@@ -114,9 +117,10 @@ Item {
     // a thin outline round the whole panel; in the accent while picked
     Rectangle {
         anchors.fill: parent
+        radius: Theme.radius * 1.5
         color: "transparent"
         border.width: root.highlighted ? Theme.s(2) : 1
-        border.color: root.highlighted ? root.tint : Theme.panelEdge
+        border.color: root.highlighted ? Theme.onPanel(root.tint) : Theme.panelEdge
         visible: root.highlighted || !Theme.classic
     }
 
@@ -141,7 +145,9 @@ Item {
             anchors.right: parent.right
             width: Math.max(Theme.s(root.narrow ? 40 : 72), reading.implicitWidth + Theme.s(12))
             height: reading.implicitHeight + Theme.s(4)
-            color: Theme.sunken
+            radius: Theme.radius
+            // a little screen (hardware), so the reading in the accent always reads
+            color: Theme.hardware ? Theme.screenFill : Theme.sunken
             ParamBevel { anchors.fill: parent; visible: Theme.classic; inset: true; light: 0.12; dark: 0.45 }
             Text {
                 id: reading
@@ -174,7 +180,8 @@ Item {
         y: bar.height + Theme.s(12)
         width: parent.width - x - Theme.s(10)
         height: root.plotHeight
-        color: Theme.sunken
+        color: Theme.screenFill
+        radius: Theme.radius
         clip: true
         ParamBevel { anchors.fill: parent; visible: Theme.classic; inset: true; light: 0.1; dark: 0.45 }
 
@@ -234,7 +241,7 @@ Item {
             }
             // the line
             ShapePath {
-                strokeColor: root.ink
+                strokeColor: Theme.litOf(root.ink)
                 strokeWidth: Theme.s(1.5)
                 fillColor: "transparent"
                 joinStyle: ShapePath.MiterJoin
@@ -247,7 +254,7 @@ Item {
             visible: !isNaN(root.mark)
             preferredRendererType: Shape.GeometryRenderer
             ShapePath {
-                strokeColor: Theme.textDim
+                strokeColor: Theme.screenDim
                 strokeWidth: 1
                 strokeStyle: ShapePath.DashLine
                 dashPattern: [4, 4]

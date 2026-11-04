@@ -53,7 +53,7 @@ Item {
         layer.enabled: visible
         layer.effect: ParamGlow { w: root.diameter; h: root.diameter / 2; thick: dial.ring; glowColor: root.warning ? Theme.danger : root.tint }
         ShapePath {
-            strokeColor: root.warning ? Theme.danger : root.tint
+            strokeColor: Theme.litOf(root.warning ? Theme.danger : root.tint)
             strokeWidth: dial.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
             PathAngleArc { centerX: dial.cx; centerY: dial.cy; radiusX: dial.outer - dial.ring / 2; radiusY: radiusX; startAngle: 180; sweepAngle: 180 * dial.f }
         }
@@ -88,7 +88,7 @@ Item {
         readonly property real needle: outer - ring - Theme.s(4)
 
         ShapePath {   // the track
-            strokeColor: Theme.sunken; strokeWidth: dial.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
+            strokeColor: Theme.hardware ? Theme.well : Theme.sunken; strokeWidth: dial.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
             PathAngleArc { centerX: dial.cx; centerY: dial.cy; radiusX: dial.outer - dial.ring / 2; radiusY: radiusX; startAngle: 180; sweepAngle: 180 }
         }
         ShapePath {   // the warning stretch, faintly, so you can see it coming
@@ -98,7 +98,7 @@ Item {
                            startAngle: 180 + 180 * dial.fw; sweepAngle: 180 * (1 - dial.fw) }
         }
         ShapePath {   // the value
-            strokeColor: dial.f <= 0 ? "transparent" : root.warning ? Theme.danger : root.tint
+            strokeColor: dial.f <= 0 ? "transparent" : Theme.litOf(root.warning ? Theme.danger : root.tint)
             strokeWidth: dial.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
             PathAngleArc { centerX: dial.cx; centerY: dial.cy; radiusX: dial.outer - dial.ring / 2; radiusY: radiusX; startAngle: 180; sweepAngle: 180 * dial.f }
         }
@@ -122,7 +122,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         y: dial.y + dial.height + Theme.s(2)
         text: PM.format(root.value, root.decimals) + root.unit
-        color: root.warning ? Theme.danger : root.tint
+        color: root.warning ? Theme.danger : Theme.onPanel(root.tint)
         font.family: Theme.family
         font.pixelSize: Theme.valueSize
     }

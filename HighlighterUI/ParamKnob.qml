@@ -79,7 +79,7 @@ Item {
             layer.enabled: visible
             layer.effect: ParamGlow { w: root.diameter; h: root.diameter; thick: face.ring; glowColor: root.tint }
             ShapePath {
-                strokeColor: root.tint; strokeWidth: face.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
+                strokeColor: Theme.litOf(root.tint); strokeWidth: face.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
                 PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.outer - face.ring / 2; radiusY: radiusX
                                startAngle: face.deg(Math.min(face.fo, face.fv)); sweepAngle: 270 * Math.abs(face.fv - face.fo) }
             }
@@ -119,7 +119,7 @@ Item {
                 PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.outer - face.ring / 2; radiusY: radiusX; startAngle: 135; sweepAngle: 270 }
             }
             ShapePath {   // the value along it
-                strokeColor: face.fo === face.fv ? "transparent" : root.tint
+                strokeColor: face.fo === face.fv ? "transparent" : Theme.litOf(root.tint)
                 strokeWidth: face.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
                 PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.outer - face.ring / 2; radiusY: radiusX
                                startAngle: face.deg(Math.min(face.fo, face.fv)); sweepAngle: 270 * Math.abs(face.fv - face.fo) }
@@ -131,7 +131,7 @@ Item {
                 PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.fr; radiusY: face.fr; startAngle: 0; sweepAngle: 360 }
             }
             ShapePath {   // the pointer: a dot near the rim (flat look)
-                strokeColor: "transparent"; fillColor: Theme.classic ? "transparent" : root.tint
+                strokeColor: "transparent"; fillColor: Theme.classic ? "transparent" : Theme.litOf(root.tint)
                 PathAngleArc {
                     readonly property real pr: face.fr - Theme.s(8)
                     centerX: face.cx + Math.cos(face.rad(face.fv)) * pr
@@ -268,7 +268,7 @@ Item {
             anchors.centerIn: parent
             direction: sa.direction
             opacity: sa.active && root.enabled ? 1 : 0.3
-            color: area.pressed ? root.tint : area.containsMouse ? Theme.arrowHot : Theme.arrow
+            color: area.pressed ? Theme.onPanel(root.tint) : area.containsMouse ? Theme.panelArrowHot : Theme.panelArrow
             scale: area.pressed ? 0.85 : 1
         }
         MouseArea {
