@@ -259,7 +259,10 @@ Item {
             }
             // the envelope
             Shape {
+                id: curve
                 anchors.fill: parent
+                layer.enabled: Theme.glow && root.enabled
+                layer.effect: ParamGlow { w: curve.width; h: curve.height; thick: Theme.s(1.5); glowColor: root.tint }
                 preferredRendererType: Theme.smooth ? Shape.CurveRenderer : Shape.GeometryRenderer
                 antialiasing: Theme.smooth
                 ShapePath {

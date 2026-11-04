@@ -34,10 +34,13 @@ Item {
         border.width: 1
         border.color: root.checked || area.containsMouse || (root.activeFocus && !area.focusedByMouse) ? root.tint : Theme.line
         Rectangle {
+            id: tick
             anchors.fill: parent
             anchors.margins: Theme.s(3)
             color: root.tint
             scale: root.checked ? 1 : 0
+            layer.enabled: Theme.glow && root.checked && root.enabled
+            layer.effect: ParamGlow { w: tick.width; h: tick.height; glowColor: root.tint }
             Behavior on scale { NumberAnimation { duration: Theme.quick; easing.type: Easing.OutBack } }
         }
     }

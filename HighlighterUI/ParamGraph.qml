@@ -215,8 +215,12 @@ Item {
         }
 
         Shape {
+            id: lineShape
             anchors.fill: parent
             visible: plot.runs.some(r => r.length > 1)
+            // the light: the line (and faintly the fill under it)
+            layer.enabled: Theme.glow && visible
+            layer.effect: ParamGlow { w: lineShape.width; h: lineShape.height; thick: Theme.s(1.5); glowColor: root.ink }
             preferredRendererType: Theme.smooth ? Shape.CurveRenderer : Shape.GeometryRenderer
             antialiasing: Theme.smooth
             // the fill under the line

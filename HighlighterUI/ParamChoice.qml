@@ -14,7 +14,8 @@ Item {
     property int cellHeight: Theme.s(26)
     property int cellMinWidth: Theme.s(30)
     //! Indices of options drawn faint (e.g. empty preset slots): still
-    //! clickable, so one can be picked and filled.
+    //! clickable, so one can be picked and filled. A picked one is outlined
+    //! in the accent, not filled, so an empty slot never reads as a full one.
     property var faint: []
     signal activated(int index)
 
@@ -59,25 +60,41 @@ Item {
                 required property var modelData
                 readonly property bool on: index === root.currentIndex
                 readonly property bool isFaint: (root.faint ?? []).indexOf(index) >= 0
+                // picked and filled: the solid accent; picked but empty: only outlined
+                readonly property bool lit: on && !isFaint
                 width: Math.max(root.cellMinWidth, t.implicitWidth + Theme.s(18))
                 height: root.cellHeight
                 radius: Theme.radius
-                color: on ? root.tint : (ca.containsMouse ? Theme.sunkenHover : Theme.sunken)
+                color: lit ? root.tint : (ca.containsMouse ? Theme.sunkenHover : Theme.sunken)
                 Behavior on color { ColorAnimation { duration: Theme.quick } }
+                // the light: the picked cell, its glow over its neighbours
+                z: cell.on ? 1 : 0
+                layer.enabled: Theme.glow && cell.lit && root.enabled
+                layer.effect: ParamGlow { w: cell.width; h: cell.height; glowColor: root.tint }
                 border.width: on && root.activeFocus && !ca.focusedByMouse ? 1 : 0
                 border.color: Theme.text
                 // classic: raised buttons, the chosen one pressed in
                 Rectangle { anchors.fill: parent; visible: Theme.classic; color: "transparent"; border.width: 1; border.color: Qt.rgba(0, 0, 0, 0.65) }
                 ParamBevel { anchors.fill: parent; anchors.margins: 1; visible: Theme.classic; inset: cell.on; light: 0.2; dark: 0.4 }
+                // an empty one picked: an accent outline, inside the cell
+                Rectangle {
+                    id: pickedOutline
+                    anchors.fill: parent
+                    visible: cell.on && cell.isFaint
+                    layer.enabled: Theme.glow && visible && root.enabled
+                    layer.effect: ParamGlow { w: pickedOutline.width; h: pickedOutline.height; thick: Theme.s(2); glowColor: root.tint }
+                    color: "transparent"
+                    border.width: Theme.s(2); border.color: root.tint
+                }
                 Text {
                     id: t
                     anchors.centerIn: parent
                     text: cell.modelData
-                    color: cell.on ? Theme.inkOf(root.tint) : cell.isFaint ? Theme.textFaint : Theme.textDim
+                    color: cell.lit ? Theme.inkOf(root.tint) : cell.on ? root.tint : cell.isFaint ? Theme.textFaint : Theme.textDim
                     opacity: cell.isFaint && !cell.on ? 0.55 : 1
                     font.family: Theme.family
                     font.pixelSize: root.cellHeight > Theme.s(34) ? Math.round(root.cellHeight * 0.55) : Theme.labelSize
-                    font.weight: cell.on ? Font.DemiBold : Font.Normal
+                    font.weight: cell.lit ? Font.DemiBold : Font.Normal
                 }
                 MouseArea {
                     id: ca

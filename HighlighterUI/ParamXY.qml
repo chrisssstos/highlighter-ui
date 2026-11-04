@@ -248,6 +248,8 @@ Item {
             width: side; height: side
             color: root.tint
             border.width: 1; border.color: Theme.page
+            layer.enabled: Theme.glow && root.enabled
+            layer.effect: ParamGlow { w: dot.side; h: dot.side; glowColor: root.tint }
         }
 
         // an inset edge, in the classic skin

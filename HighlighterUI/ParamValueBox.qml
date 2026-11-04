@@ -63,6 +63,10 @@ Item {
 
     Timer { id: badTimer; interval: 900; onTriggered: box.bad = false }
 
+    // the light: the lime outline and figures, thin, so a short faint glow
+    layer.enabled: Theme.glow && box.enabled && !box.editing
+    layer.effect: ParamGlow { w: box.width; h: box.height; thick: Theme.s(2); glowColor: box.bad ? Theme.danger : box.tint }
+
     Rectangle {
         anchors.fill: parent
         radius: Theme.radius

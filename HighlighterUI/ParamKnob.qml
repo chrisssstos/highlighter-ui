@@ -68,6 +68,22 @@ Item {
 
         // Drawn as shapes, not a Canvas, so Theme.smooth can turn the
         // antialiasing off (a Canvas always smooths).
+        // the light: the lit arc, drawn again under the face as the glow's source
+        // (the face shape also holds the grey track, which mustn't glow)
+        Shape {
+            id: litArc
+            anchors.fill: parent
+            visible: Theme.glow && root.enabled && face.fo !== face.fv
+            preferredRendererType: Theme.smooth ? Shape.CurveRenderer : Shape.GeometryRenderer
+            antialiasing: Theme.smooth
+            layer.enabled: visible
+            layer.effect: ParamGlow { w: root.diameter; h: root.diameter; thick: face.ring; glowColor: root.tint }
+            ShapePath {
+                strokeColor: root.tint; strokeWidth: face.ring; fillColor: "transparent"; capStyle: ShapePath.FlatCap
+                PathAngleArc { centerX: face.cx; centerY: face.cy; radiusX: face.outer - face.ring / 2; radiusY: radiusX
+                               startAngle: face.deg(Math.min(face.fo, face.fv)); sweepAngle: 270 * Math.abs(face.fv - face.fo) }
+            }
+        }
         Shape {
             id: face
             anchors.fill: parent

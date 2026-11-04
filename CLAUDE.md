@@ -44,13 +44,16 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
    mark shows. When the project saves defaults, set each slider's
    `defaultValue` to the saved value (or call `saveDefault()`), so the mark
    clears.
-6. Accent and size: set `Theme.accent` once if the project wants a colour
+6. Glow: `Theme.glow = true` makes whatever is lit glow in its colour
+   (`ParamGlow` behind it; needs Qt 6.9+). Off by default; the gallery's top
+   bar has a toggle for it. A new control's lit part gets a `ParamGlow` too.
+7. Accent and size: set `Theme.accent` once if the project wants a colour
    other than the lime, and `Theme.compact = true` for a dense panel.
    Two panels that should look apart: give one window its own
    `property color accent` (Theme.accentIn). Don't recolour controls one by one.
-7. Scale: if the window scales itself for DPI (an app's own `ui` scale), set
+8. Scale: if the window scales itself for DPI (an app's own `ui` scale), set
    `Theme.scale` to it once instead of multiplying sizes.
-8. Every kit control needs `width: parent.width` inside a Column, ParamPage
+9. Every kit control needs `width: parent.width` inside a Column, ParamPage
    or ParamGroup. Never bind a width to a Row's width (that makes a binding
    loop).
 
@@ -136,8 +139,8 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 - `ParamArrow` (a Shape) must keep an explicit width and height; an implicit
   size collapses it in compiled builds.
 - Gallery screenshot flags (after `--`): `--shot=<png>`, `--scroll=<px>`,
-  `--scale=<n>`, `--compact`, `--accent=<#hex>`, `--second` (also shoots the
-  second panel).
+  `--scale=<n>`, `--compact`, `--accent=<#hex>`, `--glow`, `--second` (also
+  shoots the second panel).
 - In qmltestrunner, a double-click is `mouseDoubleClickSequence`.
 - Skins (`Theme.skin`: "flat", the default and the one Christos uses;
   "classic", shown as "old FL studio", only when asked for)
