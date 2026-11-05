@@ -410,6 +410,7 @@ Window {
                     width: parent.width
                     label: "curve: a screen rolling up, slowing near the top"
                     valueText: "6.9 s"
+                    duration: 6.9
                     fromLabel: "down"; toLabel: "up"; startLabel: "0 s"; endLabel: "6.9 s"
                     points: [{ t: 0, v: 0 }, { t: 0.15, v: 0.12 }, { t: 0.75, v: 0.88 }, { t: 1, v: 1 }]
                     defaultPoints: [{ t: 0, v: 0 }, { t: 1, v: 1 }]

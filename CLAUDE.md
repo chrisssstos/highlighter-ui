@@ -93,10 +93,13 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   setting must never move by itself.
 - **Curves.** Use `ParamCurve` for a setting that is a shape over time: an
   easing, a motor's run, a fade (points { t, v }, each 0..1). Bind `points`
-  to the setting and write back in `onMoved`; give `defaultPoints` (a
-  double-click on an empty spot goes back to them), name the ends
+  to the setting and write back in `onMoved`; give `defaultPoints` (its
+  Reset button goes back to them), `duration` when time is seconds (the
+  readout then says where a hovered point is in seconds), name the ends
   (`fromLabel` / `toLabel`, `startLabel` / `endLabel`) and, when something
-  follows the curve live, its `position`. `smooth` (on) bends through the
+  follows the curve live, its `position`. Any control that drags inside a
+  ParamPage needs `preventStealing: true` on its MouseArea, or the page
+  scrolls under the drag. `smooth` (on) bends through the
   points without overshooting; the app works the value out with the same
   maths, `curveAt(points, t, smooth)` in ParamMath.js (copy it if the app
   can't import it). Not for a live reading (that's a `ParamGraph`).
