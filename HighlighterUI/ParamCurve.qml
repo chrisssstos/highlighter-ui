@@ -321,7 +321,7 @@ Item {
         width: plot.width
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
-        text: "click to add · drag to move · right-click or double-click to remove"
+        text: "click: add · drag: move · right-click: remove"
         color: Theme.textFaint
         font.family: Theme.family
         font.pixelSize: Theme.smallSize
