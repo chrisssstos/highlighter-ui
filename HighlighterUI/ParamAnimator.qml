@@ -308,6 +308,8 @@ Item {
                 anchors.fill: parent
                 enabled: root.enabled && root.editing
                 hoverEnabled: true
+                // a drag here moves the point, never the page under it
+                preventStealing: true
                 cursorShape: dragging >= 0 ? Qt.ClosedHandCursor : hover >= 0 ? Qt.OpenHandCursor : Qt.CrossCursor
                 property int dragging: -1
                 readonly property int hover: containsMouse && dragging < 0 ? nearest(mouseX, mouseY) : -1

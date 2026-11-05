@@ -5,9 +5,13 @@ import "ParamMath.js" as PM
 /// A curve the user shapes: how a value goes from start to end over a move
 /// (an easing, a motor's run). A raised panel like ParamGraph's, the name in
 /// a grey title bar, then a plot of `points` ({ t, v }, both 0..1): time
-/// across, the value up. Click to add a point, drag one, double-click one to
-/// drop it; the first stays at t 0 and the last at t 1. Double-click an empty
-/// spot to go back to `defaultPoints`, if given. `smooth` bends it through
+/// across, the value up. Click an empty spot to add a point, drag one (it
+/// grabs within a finger's reach, and the page under it never scrolls while
+/// you do), right-click or double-click one to drop it; the first stays at
+/// t 0 and the last at t 1. While a point is hovered or dragged, the readout
+/// says where it is (in seconds if `duration` is given). Reset, in the title
+/// bar, goes back to `defaultPoints` when they are given and differ. A faint
+/// line under the plot says all this (`hint`). `smooth` bends it through
 /// the points without overshooting them (valueAt() and ParamMath curveAt()
 /// work it out the same way); off, straight lines. `position` (0..1, NaN for
 /// none) puts a white line and dot where something following the curve is
@@ -24,7 +28,7 @@ Item {
     property string label: ""
     //! The curve: { t, v } each 0..1, t rising; the first at t 0, the last at t 1.
     property var points: [{ t: 0, v: 0 }, { t: 1, v: 1 }]
-    //! What a double-click on an empty spot goes back to; [] for nothing.
+    //! What Reset goes back to; [] for no Reset.
     property var defaultPoints: []
     property bool smooth: true
     //! Where something following the curve is now, 0..1, or NaN for nothing.
@@ -35,6 +39,10 @@ Item {
     property string endLabel: "end"
     //! What the readout shows (a duration, the value now); none if empty.
     property string valueText: ""
+    //! Seconds the curve spans, for the readout of a point (0: in %).
+    property real duration: 0
+    //! The line under the plot saying how to edit it.
+    property bool hint: true
     property real plotHeight: Theme.s(120)
 
     signal moved(var points)
@@ -44,8 +52,26 @@ Item {
 
     function setPoints(p) { root.points = p; root.moved(p) }
 
+    //! The points differ from the defaults (Reset has something to do).
+    readonly property bool changed: {
+        const a = root.points, b = root.defaultPoints
+        if (b.length < 2) return false
+        if (a.length !== b.length) return true
+        for (let i = 0; i < a.length; i++)
+            if (Math.abs(a[i].t - b[i].t) > 1e-4 || Math.abs(a[i].v - b[i].v) > 1e-4) return true
+        return false
+    }
+    //! The point hovered or dragged, or -1.
+    readonly property int activePoint: edit.dragging >= 0 ? edit.dragging : edit.hover
+    function pointText(p) {
+        const t = root.duration > 0 ? PM.format(p.t * root.duration, 1) + " s" : Math.round(p.t * 100) + "%"
+        return t + " · " + Math.round(p.v * 100) + "%"
+    }
+    readonly property string readoutText: root.activePoint >= 0 && root.activePoint < root.points.length
+                                          ? root.pointText(root.points[root.activePoint]) : root.valueText
+
     implicitWidth: Theme.s(320)
-    implicitHeight: bar.height + plot.height + axis.height + Theme.s(22)
+    implicitHeight: bar.height + plot.height + axis.height + (root.hint ? help.height + Theme.s(4) : 0) + Theme.s(22)
 
     ParamPlate { anchors.fill: parent }
 
@@ -84,7 +110,7 @@ Item {
         Text {
             id: name
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - (readout.visible ? readout.width : 0) - Theme.s(8)
+            width: parent.width - (readout.visible ? readout.width : 0) - (reset.visible ? reset.width + Theme.s(6) : 0) - Theme.s(8)
             text: root.label
             elide: Text.ElideRight
             color: Theme.text
@@ -92,9 +118,21 @@ Item {
             font.pixelSize: Theme.titleSize
             style: Theme.titleStyle; styleColor: Theme.titleStyleColor
         }
+        ParamButton {
+            id: reset
+            objectName: "reset"
+            visible: root.changed
+            anchors.right: readout.visible ? readout.left : parent.right
+            anchors.rightMargin: readout.visible ? Theme.s(6) : 0
+            anchors.verticalCenter: parent.verticalCenter
+            text: "Reset"
+            implicitHeight: Theme.s(20)
+            horizontalPadding: Theme.s(8)
+            onClicked: root.setPoints(root.defaultPoints.slice())
+        }
         Rectangle {
             id: readout
-            visible: root.valueText !== ""
+            visible: root.readoutText !== ""
             anchors.right: parent.right
             width: Math.max(Theme.s(72), reading.implicitWidth + Theme.s(12))
             height: reading.implicitHeight + Theme.s(4)
@@ -105,8 +143,8 @@ Item {
                 id: reading
                 anchors.right: parent.right; anchors.rightMargin: Theme.s(6)
                 anchors.verticalCenter: parent.verticalCenter
-                text: root.valueText
-                color: root.tint
+                text: root.readoutText
+                color: root.activePoint >= 0 ? Theme.screenText : root.tint
                 font.family: Theme.family
                 font.pixelSize: Theme.valueSize
                 font.features: { "tnum": 1 }
@@ -127,6 +165,7 @@ Item {
     // --- the plot ------------------------------------------------------------
     Rectangle {
         id: plot
+        objectName: "plot"
         x: scale.x + scale.width + Theme.s(6)
         y: bar.height + Theme.s(12)
         width: parent.width - x - Theme.s(10)
@@ -201,8 +240,8 @@ Item {
             model: root.points.length
             Rectangle {
                 required property int index
-                readonly property real size: Theme.s(7)
                 readonly property bool hot: edit.dragging === index || edit.hover === index
+                readonly property real size: Theme.s(hot ? 10 : 7)
                 x: Math.round(plot.at(root.points[index]).x - size / 2)
                 y: Math.round(plot.at(root.points[index]).y - size / 2)
                 width: size; height: size
@@ -211,18 +250,21 @@ Item {
             }
         }
 
-        // click to add a point, drag one, double-click one to drop it, or an
-        // empty spot to go back to the defaults
+        // click an empty spot to add a point, drag one, right-click or
+        // double-click one to drop it
         MouseArea {
             id: edit
             anchors.fill: parent
             enabled: root.enabled
             hoverEnabled: true
+            // a drag here moves the point, never the page the curve sits in
+            preventStealing: true
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
             cursorShape: dragging >= 0 ? Qt.ClosedHandCursor : hover >= 0 ? Qt.OpenHandCursor : Qt.CrossCursor
             property int dragging: -1
             readonly property int hover: containsMouse && dragging < 0 ? nearest(mouseX, mouseY) : -1
             function nearest(mx, my) {
-                const p = root.points, reach = Theme.s(8)
+                const p = root.points, reach = Theme.s(14)
                 let best = -1, bestD = reach * reach
                 for (let i = 0; i < p.length; i++) {
                     const q = plot.at(p[i]), dx = q.x - mx, dy = q.y - my, d = dx * dx + dy * dy
@@ -239,8 +281,13 @@ Item {
                 p[i] = { t: t, v: plot.vAt(my) }
                 root.setPoints(p)
             }
+            function remove(i) {
+                const p = root.points.slice()
+                if (i > 0 && i < p.length - 1) { p.splice(i, 1); root.setPoints(p) }
+            }
             onPressed: m => {
                 let i = nearest(m.x, m.y)
+                if (m.button === Qt.RightButton) { remove(i); return }
                 if (i < 0) {
                     const t = plot.tAt(m.x), p = root.points.slice()
                     i = p.findIndex(q => q.t > t)
@@ -253,11 +300,8 @@ Item {
             }
             onPositionChanged: m => { if (dragging >= 0) place(dragging, m.x, m.y) }
             onReleased: dragging = -1
-            onDoubleClicked: m => {
-                const i = nearest(m.x, m.y), p = root.points.slice()
-                if (i > 0 && i < p.length - 1) { p.splice(i, 1); root.setPoints(p) }
-                else if (i < 0 && root.defaultPoints.length >= 2) root.setPoints(root.defaultPoints.slice())
-            }
+            onCanceled: dragging = -1
+            onDoubleClicked: m => { if (m.button === Qt.LeftButton) remove(nearest(m.x, m.y)) }
         }
     }
 
@@ -269,5 +313,17 @@ Item {
         height: startText.implicitHeight
         Text { id: startText; text: root.startLabel; color: Theme.textFaint; font.family: Theme.family; font.pixelSize: Theme.smallSize }
         Text { anchors.right: parent.right; text: root.endLabel; color: Theme.textFaint; font.family: Theme.family; font.pixelSize: Theme.smallSize }
+    }
+    Text {
+        id: help
+        visible: root.hint
+        x: plot.x; y: axis.y + axis.height + Theme.s(4)
+        width: plot.width
+        horizontalAlignment: Text.AlignHCenter
+        elide: Text.ElideRight
+        text: "click to add · drag to move · right-click or double-click to remove"
+        color: Theme.textFaint
+        font.family: Theme.family
+        font.pixelSize: Theme.smallSize
     }
 }
