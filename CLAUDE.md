@@ -103,6 +103,12 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   points without overshooting; the app works the value out with the same
   maths, `curveAt(points, t, smooth)` in ParamMath.js (copy it if the app
   can't import it). Not for a live reading (that's a `ParamGraph`).
+  Every editable graph in the kit (ParamCurve, ParamAnimator's envelope)
+  edits the same way: click an empty spot to add, drag within
+  `Theme.s(14)` of a point, right-click or double-click to remove, the ends
+  pinned to t 0 and 1, points growing while hot, `preventStealing` on.
+  `tests/tst_curve.qml` drives it with the mouse inside a ParamPage; a new
+  editable graph gets the same tests.
 - **Tables.** Use `ParamTable` for read-only rows the app lists (presets,
   devices, files, a log), picked with `currentRow` / `onActivated` and opened
   with `onOpened`. Not for a setting with a few named options (that's a
