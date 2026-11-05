@@ -8,8 +8,9 @@ import "ParamMath.js" as PM
 /// white playhead at the value, as on the bar above. The pencil opens a
 /// graph under it of the envelope: time across, the value up, its top and
 /// bottom the range's two values (labelled), a white line at the time it's
-/// at. With `editing` on, the graph takes clicks: add a point, drag one,
-/// double-click one to drop it (no button for it yet). Under it, back / pause / play, how long one pass
+/// at. With `editing` on, the graph takes clicks as ParamCurve does: add a
+/// point, drag one (within a finger's reach, never scrolling the page),
+/// right-click or double-click one to drop it (no button for it yet). Under it, back / pause / play, how long one pass
 /// takes (type it, or Up / Down), and the mode: loop, bounce (the pass
 /// forward, then back), play once and hold. A ParamSlider opens one from its animate mark; it sets the value
 /// through swept(v), as the user would, so the app sees moved(). It sweeps
@@ -228,6 +229,7 @@ Item {
 
         Rectangle {
             id: plot
+            objectName: "envelopePlot"
             x: scale.width + Theme.s(6)
             width: graph.width - x; height: graph.height
             color: Theme.screenFill
@@ -293,8 +295,8 @@ Item {
                 model: root.editing ? root.points.length : 0
                 Rectangle {
                     required property int index
-                    readonly property real size: Theme.s(7)
                     readonly property bool hot: edit.dragging === index || edit.hover === index
+                    readonly property real size: Theme.s(hot ? 10 : 7)
                     x: Math.round(plot.at(root.points[index]).x - size / 2)
                     y: Math.round(plot.at(root.points[index]).y - size / 2)
                     width: size; height: size
@@ -310,11 +312,12 @@ Item {
                 hoverEnabled: true
                 // a drag here moves the point, never the page under it
                 preventStealing: true
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
                 cursorShape: dragging >= 0 ? Qt.ClosedHandCursor : hover >= 0 ? Qt.OpenHandCursor : Qt.CrossCursor
                 property int dragging: -1
                 readonly property int hover: containsMouse && dragging < 0 ? nearest(mouseX, mouseY) : -1
                 function nearest(mx, my) {
-                    const p = root.points, reach = Theme.s(8)
+                    const p = root.points, reach = Theme.s(14)
                     let best = -1, bestD = reach * reach
                     for (let i = 0; i < p.length; i++) {
                         const q = plot.at(p[i]), dx = q.x - mx, dy = q.y - my, d = dx * dx + dy * dy
@@ -332,8 +335,13 @@ Item {
                     p[i] = { t: t, v: plot.vAt(my) }
                     root.points = p
                 }
+                function remove(i) {
+                    const p = root.points.slice()
+                    if (i > 0 && i < p.length - 1) { p.splice(i, 1); root.points = p }
+                }
                 onPressed: m => {
                     let i = nearest(m.x, m.y)
+                    if (m.button === Qt.RightButton) { remove(i); return }
                     if (i < 0) {
                         const t = plot.tAt(m.x), p = root.points.slice()
                         i = p.findIndex(q => q.t > t)
@@ -346,10 +354,8 @@ Item {
                 }
                 onPositionChanged: m => { if (dragging >= 0) place(dragging, m.x, m.y) }
                 onReleased: dragging = -1
-                onDoubleClicked: m => {
-                    const i = nearest(m.x, m.y), p = root.points.slice()
-                    if (i > 0 && i < p.length - 1) { p.splice(i, 1); root.points = p }
-                }
+                onCanceled: dragging = -1
+                onDoubleClicked: m => { if (m.button === Qt.LeftButton) remove(nearest(m.x, m.y)) }
             }
         }
     }

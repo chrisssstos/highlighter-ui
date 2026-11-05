@@ -7,7 +7,7 @@ import HighlighterUI
 // points must move them and never the page.
 Item {
     id: top
-    width: 500; height: 400
+    width: 500; height: 900
     ParamPage {
         id: page
         anchors.fill: parent
@@ -21,6 +21,14 @@ Item {
             defaultPoints: [{ t: 0, v: 0 }, { t: 0.5, v: 0.5 }, { t: 1, v: 1 }]
             onMoved: p => moves.push(p)
             property var moves: []
+        }
+        // the slider animator's envelope, open and editable
+        ParamAnimator {
+            id: anim
+            width: parent.width
+            from: 0; to: 100; rangeFrom: 0; rangeTo: 100
+            expanded: true
+            editing: true
         }
         // enough below it that the page has somewhere to scroll
         Item { width: parent.width; height: 1200 }
@@ -93,6 +101,27 @@ Item {
             mouseMove(p, a.x - 80, a.y + 30)
             mouseRelease(p, a.x - 80, a.y + 30)
             compare(curve.points[2].t, 1, "the last point stays at the end")
+        }
+
+        function test_animatorEnvelopeEditsTheSameWay() {
+            anim.points = [{ t: 0, v: 0 }, { t: 1, v: 1 }]
+            const p = findChild(anim, "envelopePlot")
+            verify(p && p.visible, "the envelope graph is open")
+            // add a point in the middle, near the bottom
+            const x = p.width / 2, y = p.height * 0.8
+            mouseClick(p, x, y)
+            compare(anim.points.length, 3, "a click adds a point")
+            // drag it up, in steps: the point follows, the page stays
+            const q = p.at(anim.points[1])
+            mousePress(p, q.x, q.y)
+            for (let dy = 0; dy <= 50; dy += 5) mouseMove(p, q.x, q.y - dy)
+            mouseRelease(p, q.x, q.y - 50)
+            compare(page.contentY, 0, "the page did not scroll")
+            verify(anim.points[1].v > 0.5, "the point followed the drag up: " + anim.points[1].v)
+            // a near miss still grabs it; a right-click removes it
+            const r = p.at(anim.points[1])
+            mouseClick(p, r.x + Theme.s(9), r.y + Theme.s(6), Qt.RightButton)
+            compare(anim.points.length, 2, "right-click removes it")
         }
 
         function test_readoutAndReset() {
