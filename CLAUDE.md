@@ -211,4 +211,8 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   and shadows the app's own types (LaunchPortal's Canvas became Qt's).
 - The editor's shared state (selected slice and point, view, mask mode, test
   card, show on output) lives on OutputMap, so scripts and the outputs see it.
-
+- Outputs have ids (DisplayOutputs: "display:<screen name>"); slices keep
+  the id, never an index (outputs come and go). Anything the editor follows
+  across that (the viewed output) is kept by id too.
+- The editor's preview grabs `thumbnail` (1/6 size) every 66 ms, one grab
+  at a time: the output held 62-63 fps with it running.

@@ -7,8 +7,8 @@ import OutputMapper
 /// the slices down the left, and a view of either the source (Input: which
 /// rectangle each slice takes) or one output (Output: where its points put
 /// it, and its mask). The views show a still of the content, taken now and
-/// then (`previewSource`, a quarter size), or the test card: the live
-/// picture is the one on the outputs (Show on output).
+/// (`previewSource`, small, previewMs apart), or the test card; the
+/// full picture is on the outputs (Show on output).
 ///
 /// Output view: drag a point, or inside a slice to move it all; Shift is
 /// fine, Ctrl stops it snapping to the output's edges. Arrow keys nudge the
@@ -21,11 +21,16 @@ Item {
     //! what the views show, grabbed every previewMs: a MappedOutput's
     //! `thumbnail` (null: none)
     property Item previewSource: null
-    property int previewMs: 1000
+    property int previewMs: 66
 
     readonly property var sel: { map.revision; return map.selected >= 0 && map.selected < map.slices.length ? map.slices[map.selected] : null }
-    property int viewedOutput: sel ? sel.output : 0
-    onSelChanged: if (sel && view === "output") viewedOutput = sel.output
+    //! the output the Output view shows, by id (outputs come and go: a
+    //! display found after start, one unplugged)
+    property string viewedId: sel?.output ?? ""
+    onSelChanged: if (sel && ed.map.view === "output") viewedId = sel.output
+    readonly property int viewedOutput: Math.max(0, map.outputIndex(viewedId))
+    //! the output a slice is on, as an index here (-1: not connected now)
+    function at(s) { map.outputs; return map.outputIndex(s.output) }
     readonly property var outputNames: map.outputs.map(o => o.name)
     property url snapshot: ""
 
@@ -36,7 +41,13 @@ Item {
         repeat: true
         triggeredOnStart: true
         running: ed.visible && !!ed.previewSource && !ed.map.testCard
-        onTriggered: ed.previewSource.grabToImage(r => ed.snapshot = r.url)
+        // one grab at a time
+        property bool busy: false
+        onTriggered: {
+            if (busy) return
+            busy = true
+            if (!ed.previewSource.grabToImage(r => { ed.snapshot = r.url; busy = false })) busy = false
+        }
     }
 
     // the views' picture: the still, or the test card (drawn here, small)
@@ -45,10 +56,11 @@ Item {
     Image {
         id: still
         x: -width - 16 // beside the window, never seen
-        width: Math.max(1, Math.round(ed.map.sourceWidth / 4))
-        height: Math.max(1, Math.round(ed.map.sourceHeight / 4))
+        width: ed.previewSource ? ed.previewSource.width : 1
+        height: ed.previewSource ? ed.previewSource.height : 1
         source: ed.snapshot
         smooth: true
+        cache: false
     }
     ShaderEffectSource {
         id: stillTexture
@@ -90,7 +102,7 @@ Item {
             ParamTable {
                 width: parent.width
                 columns: [{ title: "slice" }, { title: "output", width: 0.4 }]
-                rows: { ed.map.revision; return ed.map.slices.map(s => [s.enabled ? s.name : { text: s.name, tone: "dim" }, ed.outputNames[s.output] ?? "?"]) }
+                rows: { ed.map.revision; return ed.map.slices.map(s => [s.enabled ? s.name : { text: s.name, tone: "dim" }, ed.outputNames[ed.at(s)] ?? { text: "not connected", tone: "bad" }]) }
                 currentRow: ed.map.selected
                 visibleRows: 5
                 onActivated: r => { ed.map.selected = r; ed.map.selectedPoint = -1 }
@@ -114,12 +126,12 @@ Item {
                 text: ed.sel?.name ?? ""
                 onAccepted: t => ed.map.set(ed.map.selected, { name: t.trim() || ed.sel.name })
             }
-            ParamChoice {
+            ParamCombo {
                 width: parent.width
                 label: "Output"
                 model: ed.outputNames
-                currentIndex: ed.sel?.output ?? 0
-                onActivated: i => { ed.map.set(ed.map.selected, { output: i }); ed.viewedOutput = i }
+                currentIndex: ed.sel ? ed.at(ed.sel) : -1
+                onActivated: i => { ed.map.set(ed.map.selected, { output: ed.map.outputs[i].id }); ed.viewedId = ed.map.outputs[i].id }
             }
             ParamToggle {
                 width: parent.width
@@ -195,13 +207,13 @@ Item {
                 currentIndex: ed.map.view === "input" ? 0 : 1
                 onActivated: i => ed.map.view = i === 0 ? "input" : "output"
             }
-            ParamChoice {
+            ParamCombo {
                 width: parent.width
                 visible: ed.map.view === "output" && ed.outputNames.length > 1
                 label: "Showing"
                 model: ed.outputNames
                 currentIndex: ed.viewedOutput
-                onActivated: i => ed.viewedOutput = i
+                onActivated: i => ed.viewedId = ed.map.outputs[i].id
             }
             ParamToggle {
                 width: parent.width
@@ -376,7 +388,7 @@ Item {
                         required property int index
                         readonly property var s: { ed.map.revision; return ed.map.slices[index] }
                         anchors.fill: parent
-                        visible: s.enabled && s.output === ed.viewedOutput
+                        visible: s.enabled && ed.at(s) === ed.viewedOutput
                         WarpMesh {
                             anchors.fill: parent
                             source: ed.picture
@@ -397,7 +409,7 @@ Item {
                         required property int index
                         readonly property var s: { ed.map.revision; return ed.map.slices[index] }
                         anchors.fill: parent
-                        visible: s.output === ed.viewedOutput
+                        visible: ed.at(s) === ed.viewedOutput
                         slice: s
                         selected: index === ed.map.selected
                         selectedPoint: ed.map.selectedPoint
@@ -442,7 +454,7 @@ Item {
                         start = p
                         dragging = ""
                         const s = ed.sel
-                        if (ed.map.maskMode && s && s.output === ed.viewedOutput) {
+                        if (ed.map.maskMode && s && ed.at(s) === ed.viewedOutput) {
                             const k = s.mask.findIndex(q => dist(q, p) < Theme.s(10))
                             if (mouse.button === Qt.RightButton) { if (k >= 0) ed.map.removeMaskPoint(ed.map.selected, k); return }
                             if (k >= 0) { dragging = "mask"; index = k; startPoints = s.mask.map(q => ({ x: q.x, y: q.y })); return }
@@ -452,7 +464,7 @@ Item {
                         }
                         if (mouse.button === Qt.RightButton) return
                         // a point of the picked slice
-                        if (s && s.output === ed.viewedOutput) {
+                        if (s && ed.at(s) === ed.viewedOutput) {
                             let best = -1, bestD = Theme.s(12)
                             s.points.forEach((q, k) => { const d = dist(q, p); if (d < bestD) { best = k; bestD = d } })
                             if (best >= 0) {
@@ -464,7 +476,7 @@ Item {
                         // inside a slice on this output: pick it, and move it all
                         for (let i = ed.map.slices.length - 1; i >= 0; i--) {
                             const t = ed.map.slices[i]
-                            if (t.output !== ed.viewedOutput || !t.enabled) continue
+                            if (ed.at(t) !== ed.viewedOutput || !t.enabled) continue
                             if (inside(p, Warp.outline(t.points, t.columns, t.rows, t.perspective, 8))) {
                                 if (ed.map.selected !== i) { ed.map.selected = i }
                                 ed.map.selectedPoint = -1
