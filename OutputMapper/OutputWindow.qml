@@ -5,7 +5,9 @@ import QtQuick.Window
 /// outputs go full screen: borderless, covering exactly those displays (one
 /// window spanning them: windows can't share a rendered picture, so the
 /// content stays rendered once). With no slice on a display, the window
-/// goes back to where and how it was.
+/// goes back to where and how it was, or, with parkWhenUnused, out of sight
+/// beside the screens (as Resolume shows no output then; the window still
+/// renders, for the editor's preview).
 QtObject {
     id: root
 
@@ -14,6 +16,11 @@ QtObject {
     required property DisplayOutputs displays
     //! off: the window is left alone
     property bool enabled: true
+    //! with no slice on a display, out of sight rather than back in place
+    property bool parkWhenUnused: false
+    //! false until the app has had its say (it may put slices on displays
+    //! first): nothing is parked before
+    property bool ready: true
 
     //! the displays enabled slices are on
     readonly property var used: {
@@ -29,7 +36,8 @@ QtObject {
     function place() {
         if (!window) return
         const want = enabled ? used : []
-        const key = JSON.stringify(want)
+        const park = enabled && !want.length && parkWhenUnused && ready
+        const key = JSON.stringify(want) + park
         if (key === _placed) return
         _placed = key
         if (want.length) {
@@ -42,6 +50,16 @@ QtObject {
             window.x = x0; window.y = y0
             window.width = x1 - x0; window.height = y1 - y0
             console.info("OutputMapper: output window over", want.map(d => d.name).join(", "), "at", x0, y0, x1 - x0, "x", y1 - y0)
+        } else if (park) {
+            if (!_was) _was = { x: window.x, y: window.y, width: window.width, height: window.height,
+                                flags: window.flags, visibility: window.visibility }
+            if (window.visibility === Window.FullScreen || window.visibility === Window.Maximized) window.visibility = Window.Windowed
+            window.flags = _was.flags | Qt.FramelessWindowHint
+            const s = displays.screens
+            window.width = 64; window.height = 64
+            window.x = (s.length ? Math.min(...s.map(d => d.gx)) : 0) - 2000
+            window.y = (s.length ? Math.min(...s.map(d => d.gy)) : 0) - 2000
+            console.info("OutputMapper: no slice on a display: the output window out of sight")
         } else if (_was) {
             window.flags = _was.flags
             window.x = _was.x; window.y = _was.y
@@ -54,4 +72,6 @@ QtObject {
 
     onUsedChanged: Qt.callLater(place)
     onEnabledChanged: Qt.callLater(place)
+    onParkWhenUnusedChanged: Qt.callLater(place)
+    onReadyChanged: Qt.callLater(place)
 }

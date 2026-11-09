@@ -36,6 +36,9 @@ Item {
 
     Rectangle { anchors.fill: parent; color: Theme.page }
 
+    Shortcut { enabled: ed.visible; sequences: [StandardKey.Undo]; onActivated: ed.map.undo() }
+    Shortcut { enabled: ed.visible; sequences: [StandardKey.Redo, "Ctrl+Y"]; onActivated: ed.map.redo() }
+
     Timer {
         interval: ed.previewMs
         repeat: true
