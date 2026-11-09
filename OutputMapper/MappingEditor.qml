@@ -102,7 +102,7 @@ Item {
             ParamTable {
                 width: parent.width
                 columns: [{ title: "slice" }, { title: "output", width: 0.4 }]
-                rows: { ed.map.revision; return ed.map.slices.map(s => [s.enabled ? s.name : { text: s.name, tone: "dim" }, ed.outputNames[ed.at(s)] ?? { text: "not connected", tone: "bad" }]) }
+                rows: { ed.map.revision; return ed.map.slices.map(s => [s.enabled ? s.name : { text: s.name, tone: "dim" }, s.output === "" ? { text: "none", tone: "dim" } : ed.outputNames[ed.at(s)] ?? { text: "not connected", tone: "bad" }]) }
                 currentRow: ed.map.selected
                 visibleRows: 5
                 onActivated: r => { ed.map.selected = r; ed.map.selectedPoint = -1 }
@@ -129,9 +129,13 @@ Item {
             ParamCombo {
                 width: parent.width
                 label: "Output"
-                model: ed.outputNames
-                currentIndex: ed.sel ? ed.at(ed.sel) : -1
-                onActivated: i => { ed.map.set(ed.map.selected, { output: ed.map.outputs[i].id }); ed.viewedId = ed.map.outputs[i].id }
+                model: ["None"].concat(ed.outputNames)
+                currentIndex: ed.sel ? ed.at(ed.sel) + 1 : 0
+                onActivated: i => {
+                    const id = i === 0 ? "" : ed.map.outputs[i - 1].id
+                    ed.map.set(ed.map.selected, { output: id })
+                    if (id !== "") ed.viewedId = id
+                }
             }
             ParamToggle {
                 width: parent.width
@@ -232,6 +236,8 @@ Item {
         Flow {
             width: parent.width
             spacing: Theme.s(6)
+            ParamButton { text: "Undo"; enabled: ed.map.canUndo; onClicked: ed.map.undo() }
+            ParamButton { text: "Redo"; enabled: ed.map.canRedo; onClicked: ed.map.redo() }
             ParamButton { text: "Save"; accent: true; enabled: ed.map.dirty; onClicked: ed.map.saveRequested() }
             ParamButton { text: "Revert"; enabled: ed.map.dirty; onClicked: ed.map.revertRequested() }
             ParamButton { text: "Reset all"; danger: true; onClicked: ed.map.resetAll() }
@@ -356,6 +362,7 @@ Item {
                         }
                         if (corner >= 0) { start = p; startRect = Object.assign({}, ed.map.slices[ed.map.selected].input) }
                     }
+                    onPressedChanged: pressed ? ed.map.beginGroup() : ed.map.endGroup()
                     onReleased: corner = -1
                 }
             }
@@ -368,7 +375,8 @@ Item {
             focus: visible
             anchors { top: caption.bottom; topMargin: Theme.s(8); left: parent.left; right: parent.right; bottom: parent.bottom }
             readonly property var o: ed.map.outputs[ed.viewedOutput] ?? { width: 1920, height: 1080 }
-            readonly property real k: Math.min(width / o.width, height / o.height)
+            // room round the output for the stretch bars and points past its edge
+            readonly property real k: Math.min((width - Theme.s(64)) / o.width, (height - Theme.s(64)) / o.height)
             property string hoverText: ""
 
             Item {
@@ -419,6 +427,24 @@ Item {
                     }
                 }
 
+                // stretch: drag a bar to stretch the slice that way
+                Repeater {
+                    model: ed.sel && !ed.map.maskMode && ed.at(ed.sel) === ed.viewedOutput ? ["left", "right", "top", "bottom"] : []
+                    Rectangle {
+                        required property string modelData
+                        readonly property var b: { ed.map.revision; return ed.map.bounds(ed.map.selected) }
+                        readonly property bool across: modelData === "left" || modelData === "right"
+                        readonly property point at: pointer.handleAt(modelData)
+                        width: across ? Theme.s(6) : Theme.s(30)
+                        height: across ? Theme.s(30) : Theme.s(6)
+                        x: at.x - width / 2
+                        y: at.y - height / 2
+                        color: pointer.dragging === "stretch" && pointer.side === modelData ? Theme.accent : Theme.accentDim
+                        border.color: Theme.accent
+                        border.width: 1
+                    }
+                }
+
                 MouseArea {
                     id: pointer
                     anchors.fill: parent
@@ -426,10 +452,23 @@ Item {
                     hoverEnabled: true
                     preventStealing: true
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
-                    property string dragging: ""   // "point", "all", "mask"
+                    property string dragging: ""   // "point", "all", "mask", "stretch"
                     property int index: -1
                     property point start
                     property var startPoints
+                    property var startMask
+                    property var startBounds
+                    property string side: ""
+
+                    //! a stretch bar's centre, in outFrame's pixels
+                    readonly property real reach: Theme.s(16)
+                    function handleAt(which) {
+                        const b = ed.map.bounds(ed.map.selected), w = outFrame.width, h = outFrame.height
+                        if (which === "left") return Qt.point(b.x * w - reach, (b.y + b.height / 2) * h)
+                        if (which === "right") return Qt.point((b.x + b.width) * w + reach, (b.y + b.height / 2) * h)
+                        if (which === "top") return Qt.point((b.x + b.width / 2) * w, b.y * h - reach)
+                        return Qt.point((b.x + b.width / 2) * w, (b.y + b.height) * h + reach)
+                    }
 
                     readonly property real pad: Theme.s(40)
                     function norm(mx, my) { return Qt.point((mx - pad) / outFrame.width, (my - pad) / outFrame.height) }
@@ -451,6 +490,7 @@ Item {
                     onPressed: mouse => {
                         outputView.forceActiveFocus()
                         const p = norm(mouse.x, mouse.y)
+                        side = ""
                         start = p
                         dragging = ""
                         const s = ed.sel
@@ -463,6 +503,19 @@ Item {
                             return
                         }
                         if (mouse.button === Qt.RightButton) return
+                        // a stretch bar of the picked slice
+                        if (s && ed.at(s) === ed.viewedOutput) {
+                            for (const which of ["left", "right", "top", "bottom"]) {
+                                const h = handleAt(which)
+                                if (Math.hypot(mouse.x - pad - h.x, mouse.y - pad - h.y) < Theme.s(14)) {
+                                    dragging = "stretch"; side = which
+                                    startPoints = s.points.map(q => ({ x: q.x, y: q.y }))
+                                    startMask = s.mask.map(q => ({ x: q.x, y: q.y }))
+                                    startBounds = ed.map.bounds(ed.map.selected)
+                                    return
+                                }
+                            }
+                        }
                         // a point of the picked slice
                         if (s && ed.at(s) === ed.viewedOutput) {
                             let best = -1, bestD = Theme.s(12)
@@ -501,8 +554,19 @@ Item {
                         } else if (dragging === "all") {
                             const cur = ed.sel.points[0], want = startPoints[0]
                             ed.map.moveAll(ed.map.selected, want.x + dx - cur.x, want.y + dy - cur.y)
+                        } else if (dragging === "stretch") {
+                            // the opposite edge stays; everything between scales
+                            const b = startBounds, min = 0.01
+                            let ax = 0, sx = 1, ay = 0, sy = 1
+                            if (side === "right") { ax = b.x; sx = Math.max(min, b.width + dx) / Math.max(min, b.width) }
+                            if (side === "left") { ax = b.x + b.width; sx = Math.max(min, b.width - dx) / Math.max(min, b.width) }
+                            if (side === "bottom") { ay = b.y; sy = Math.max(min, b.height + dy) / Math.max(min, b.height) }
+                            if (side === "top") { ay = b.y + b.height; sy = Math.max(min, b.height - dy) / Math.max(min, b.height) }
+                            const f = q => ({ x: ax + (q.x - ax) * sx, y: ay + (q.y - ay) * sy })
+                            ed.map.setShape(ed.map.selected, startPoints.map(f), startMask.map(f))
                         }
                     }
+                    onPressedChanged: pressed ? ed.map.beginGroup() : ed.map.endGroup()
                     onReleased: dragging = ""
                     onExited: outputView.hoverText = ""
                 }
@@ -527,8 +591,8 @@ Item {
                 event.accepted = true
                 const nx = dx / o.width, ny = dy / o.height
                 const k = ed.map.selectedPoint
-                if (k >= 0) ed.map.setPoint(ed.map.selected, k, Qt.point(s.points[k].x + nx, s.points[k].y + ny))
-                else ed.map.moveAll(ed.map.selected, nx, ny)
+                if (k >= 0) ed.map.setPoint(ed.map.selected, k, Qt.point(s.points[k].x + nx, s.points[k].y + ny), "nudge")
+                else ed.map.moveAll(ed.map.selected, nx, ny, "nudge")
             }
         }
     }

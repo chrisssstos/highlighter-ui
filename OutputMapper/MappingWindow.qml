@@ -18,6 +18,9 @@ Window {
 
     onClosing: map.showOnOutput = false
 
+    Shortcut { sequences: [StandardKey.Undo]; onActivated: win.map.undo() }
+    Shortcut { sequences: [StandardKey.Redo, "Ctrl+Y"]; onActivated: win.map.redo() }
+
     MappingEditor {
         anchors.fill: parent
         map: win.map
