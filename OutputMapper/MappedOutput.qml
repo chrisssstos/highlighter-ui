@@ -65,6 +65,9 @@ Item {
     }
     readonly property Item _drawn: cardLoader.item ? cardLoader.item.texture : rendered
 
+    // the outputs are black but for their slices
+    Rectangle { anchors.fill: parent; color: "black"; visible: root.map.live }
+
     // no slice on an output: the source plain, where the app puts it
     WarpMesh {
         visible: !root.map.live
