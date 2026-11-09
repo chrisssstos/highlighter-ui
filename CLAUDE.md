@@ -214,7 +214,7 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 - Outputs have ids (DisplayOutputs: "display:<screen name>"); slices keep
   the id, never an index (outputs come and go). Anything the editor follows
   across that (the viewed output) is kept by id too.
-- The editor's preview grabs `thumbnail` (1/6 size) every 66 ms, one grab
+- The editor's preview grabs `thumbnail` (1/6 size) every 33 ms, one grab
   at a time: the output held 62-63 fps with it running.
 - Displays are outputs whether or not the window covers them; OutputWindow
   moves the (one) output window over the displays slices use, frameless, and
