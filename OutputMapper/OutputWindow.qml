@@ -24,9 +24,16 @@ QtObject {
 
     //! the displays enabled slices are on
     readonly property var used: {
-        map.revision
         const ids = map.slices.filter(s => s.enabled).map(s => map.outputId(s.output))
         return displays.screens.filter(d => ids.indexOf(d.id) >= 0)
+    }
+    //! the window's own place and look, kept the first time it is taken over;
+    //! windowed and borderless from then
+    function takeOver() {
+        if (!_was) _was = { x: window.x, y: window.y, width: window.width, height: window.height,
+                            flags: window.flags, visibility: window.visibility }
+        if (window.visibility === Window.FullScreen || window.visibility === Window.Maximized) window.visibility = Window.Windowed
+        window.flags = _was.flags | Qt.FramelessWindowHint
     }
     //! the window, as it was before it went over the displays
     property var _was: null
@@ -43,18 +50,12 @@ QtObject {
         if (want.length) {
             const x0 = Math.min(...want.map(d => d.gx)), y0 = Math.min(...want.map(d => d.gy))
             const x1 = Math.max(...want.map(d => d.gx + d.width)), y1 = Math.max(...want.map(d => d.gy + d.height))
-            if (!_was) _was = { x: window.x, y: window.y, width: window.width, height: window.height,
-                                flags: window.flags, visibility: window.visibility }
-            if (window.visibility === Window.FullScreen || window.visibility === Window.Maximized) window.visibility = Window.Windowed
-            window.flags = _was.flags | Qt.FramelessWindowHint
+            takeOver()
             window.x = x0; window.y = y0
             window.width = x1 - x0; window.height = y1 - y0
             console.info("OutputMapper: output window over", want.map(d => d.name).join(", "), "at", x0, y0, x1 - x0, "x", y1 - y0)
         } else if (park) {
-            if (!_was) _was = { x: window.x, y: window.y, width: window.width, height: window.height,
-                                flags: window.flags, visibility: window.visibility }
-            if (window.visibility === Window.FullScreen || window.visibility === Window.Maximized) window.visibility = Window.Windowed
-            window.flags = _was.flags | Qt.FramelessWindowHint
+            takeOver()
             const s = displays.screens
             window.width = 64; window.height = 64
             window.x = (s.length ? Math.min(...s.map(d => d.gx)) : 0) - 2000

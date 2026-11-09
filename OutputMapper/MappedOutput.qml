@@ -20,8 +20,6 @@ Item {
     //! where the source shows while no slice is on an output (this item's coordinates)
     property rect plainRect: Qt.rect(0, 0, width, height)
 
-    //! the rendered source, for anything else here that wants to read it
-    readonly property alias texture: rendered
     //! the source small, for the editor's views to grab (grabbing the
     //! source itself would render it all again)
     readonly property alias thumbnail: thumb
@@ -84,7 +82,7 @@ Item {
         Item {
             id: slot
             required property int index
-            readonly property var s: { root.map.revision; return root.map.slices[index] }
+            readonly property var s: root.map.sliceAt(index)
             readonly property var o: { root.map.outputs; return root.map.outputOf(s) ?? { x: 0, y: 0, width: 0, height: 0 } }
             x: o.x; y: o.y; width: o.width; height: o.height
             visible: !!s && s.enabled && width > 0
@@ -128,7 +126,7 @@ Item {
         model: root.map.showOnOutput ? root.map.slices.length : 0
         SliceOverlay {
             required property int index
-            readonly property var s: { root.map.revision; return root.map.slices[index] }
+            readonly property var s: root.map.sliceAt(index)
             readonly property var o: { root.map.outputs; return root.map.outputOf(s) ?? { x: 0, y: 0, width: 0, height: 0 } }
             x: o.x; y: o.y; width: o.width; height: o.height
             visible: width > 0

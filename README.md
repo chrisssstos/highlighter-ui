@@ -185,8 +185,8 @@ Item { id: content; width: 7680; height: 2160 /* the app's content */ }
 OutputMap {
     id: mapping
     sourceWidth: 7680; sourceHeight: 2160
-    outputs: displays.displays   // or areas: [{ id, name, x, y, width, height }]
-    defaults: [slice("Whole", displays.displays[0]?.id, { x: 0, y: 0, width: 7680, height: 2160 })]
+    outputs: displays.outputs   // the displays (and any areas the app adds)
+    defaults: [slice("Whole", displays.outputs[0]?.id, { x: 0, y: 0, width: 7680, height: 2160 })]
     Component.onCompleted: load(savedJson)
     onSaveRequested: { save(toJson()); saved() }
 }

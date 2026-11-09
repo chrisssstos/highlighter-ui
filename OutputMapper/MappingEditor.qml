@@ -68,6 +68,24 @@ Item {
     }
     Component.onCompleted: refreshTable()
 
+    //! v snapped to the nearest of `lines` within `tol` (Ctrl: not at all): { v, line }
+    function nearest(v, lines, tol, mods) {
+        if (mods & Qt.ControlModifier) return { v: v, line: NaN }
+        let best = NaN, d = tol
+        for (const e of lines) if (Math.abs(v - e) < d) { d = Math.abs(v - e); best = e }
+        return { v: isNaN(best) ? v : best, line: best }
+    }
+    //! A span (from, length) moved by delta, snapped by whichever of its ends
+    //! (or its middle) is nearest a line: { off, line } (off: the snapped delta).
+    function snapSpan(from, length, delta, lines, tol, mods) {
+        let best = { off: delta, line: NaN, d: Infinity }
+        for (const e of [from, from + length / 2, from + length]) {
+            const s = nearest(e + delta, lines, tol, mods)
+            if (!isNaN(s.line) && Math.abs(s.v - e - delta) < best.d) best = { off: s.v - e, line: s.line, d: Math.abs(s.v - e - delta) }
+        }
+        return best
+    }
+
     Shortcut { enabled: ed.visible; sequences: [StandardKey.Undo]; onActivated: ed.map.undo() }
     Shortcut { enabled: ed.visible; sequences: [StandardKey.Redo]; onActivated: ed.map.redo() }
 
@@ -76,50 +94,24 @@ Item {
         repeat: true
         triggeredOnStart: true
         running: ed.visible && (ed.Window.window?.visible ?? false) && !!ed.previewSource && !ed.map.testCard
-        // one grab at a time
-        property bool busy: false
+        // one grab at a time (a grab that never comes back is given up after a second)
+        property real busySince: 0
         onTriggered: {
-            if (busy) return
-            busy = true
-            if (!ed.previewSource.grabToImage(r => { still.take(r.url); busy = false })) busy = false
+            if (busySince > 0 && Date.now() - busySince < 1000) return
+            busySince = Date.now()
+            if (!ed.previewSource.grabToImage(r => { still.source = r.url; busySince = 0 })) busySince = 0
         }
     }
 
-    // the views' picture: the still, or the test card (drawn here, small)
-    // (through a layer: an Image's own texture is replaced, and freed, with
-    // each new still; a layer's stays the same one)
-    // Two stills, taking turns: the next loads off the GUI thread while the
-    // other is on show, so the views never flash blank and dragging never waits.
-    Item {
+    // the views' picture: the still, or the test card (drawn here, small).
+    // The next still loads off the GUI thread; the last stays on show meanwhile.
+    Image {
         id: still
-        x: -width - 16 // beside the window, never seen
+        visible: false // only its texture is used
         width: ed.previewSource ? ed.previewSource.width : 1
         height: ed.previewSource ? ed.previewSource.height : 1
-        property int shown: 0
-        //! a new still to load into whichever image is not on show
-        function take(url) { (shown === 0 ? stillB : stillA).source = url }
-        Image {
-            id: stillA
-            anchors.fill: parent
-            visible: still.shown === 0
-            asynchronous: true; cache: false; smooth: true
-            onStatusChanged: if (status === Image.Ready && still.shown !== 0) still.shown = 0
-        }
-        Image {
-            id: stillB
-            anchors.fill: parent
-            visible: still.shown === 1
-            asynchronous: true; cache: false; smooth: true
-            onStatusChanged: if (status === Image.Ready && still.shown !== 1) still.shown = 1
-        }
-    }
-    ShaderEffectSource {
-        id: stillTexture
-        sourceItem: still
-        hideSource: true
-        visible: false
-        textureSize: Qt.size(still.width, still.height)
-        textureMirroring: ShaderEffectSource.MirrorVertically
+        asynchronous: true; cache: false; smooth: true
+        retainWhileLoading: true
     }
     Item {
         id: cardHolder
@@ -139,7 +131,7 @@ Item {
         textureSize: Qt.size(Math.round(ed.map.sourceWidth / 4), Math.round(ed.map.sourceHeight / 4))
         textureMirroring: ShaderEffectSource.MirrorVertically
     }
-    readonly property Item picture: map.testCard ? cardTexture : stillTexture
+    readonly property Item picture: map.testCard ? cardTexture : still
 
     // --- the side: slices, the picked slice, the view ---------------------------
     ParamPage {
@@ -374,7 +366,7 @@ rows: ed.tableRows
                     model: ed.map.slices.length
                     Rectangle {
                         required property int index
-                        readonly property var s: { ed.map.revision; return ed.map.slices[index] ?? ed.map.blank }
+                        readonly property var s: ed.map.sliceAt(index)
                         readonly property bool on: index === ed.map.selected
                         x: s.input.x * inputView.k; y: s.input.y * inputView.k
                         width: s.input.width * inputView.k; height: s.input.height * inputView.k
@@ -421,6 +413,9 @@ rows: ed.tableRows
                     readonly property real pad: Math.max(Theme.s(28), Math.min(srcFrame.x, srcFrame.y))
 
                     function srcAt(mx, my) { return Qt.point((mx - pad) / inputView.k, (my - pad) / inputView.k) }
+                    //! the key lines, worked out when a drag starts (they don't move during it)
+                    property var linesX: []
+                    property var linesY: []
                     //! the key lines: the source's edges and middle, the app's own
                     //! lines, the other slices' edges
                     function lines(horizontal) {
@@ -433,12 +428,8 @@ rows: ed.tableRows
                         })
                         return out
                     }
-                    //! v snapped to the nearest key line close enough (Ctrl: none)
                     function snap(v, horizontal, mods) {
-                        if (mods & Qt.ControlModifier) return { v: v, line: NaN }
-                        let best = NaN, d = Theme.s(10) / inputView.k
-                        for (const e of lines(horizontal)) if (Math.abs(v - e) < d) { d = Math.abs(v - e); best = e }
-                        return { v: isNaN(best) ? v : best, line: best }
+                        return ed.nearest(v, horizontal ? linesX : linesY, Theme.s(10) / inputView.k, mods)
                     }
 
                     onPositionChanged: mouse => {
@@ -449,13 +440,12 @@ rows: ed.tableRows
                         const m = mouse.modifiers
                         const r = Object.assign({}, startRect)
                         if (corner === 4) {
-                            // the whole rectangle: whichever of its edges is nearest a key line
-                            const l = snap(startRect.x + dx, true, m), rr = snap(startRect.x + dx + r.width, true, m)
-                            const t = snap(startRect.y + dy, false, m), b = snap(startRect.y + dy + r.height, false, m)
-                            r.x = !isNaN(l.line) ? l.v : !isNaN(rr.line) ? rr.v - r.width : startRect.x + dx
-                            r.y = !isNaN(t.line) ? t.v : !isNaN(b.line) ? b.v - r.height : startRect.y + dy
-                            inputView.guideX = !isNaN(l.line) ? l.line : rr.line
-                            inputView.guideY = !isNaN(t.line) ? t.line : b.line
+                            // the whole rectangle: whichever of its edges (or middle) is nearest a key line
+                            const tol = Theme.s(10) / inputView.k
+                            const sx = ed.snapSpan(startRect.x, r.width, dx, linesX, tol, m)
+                            const sy = ed.snapSpan(startRect.y, r.height, dy, linesY, tol, m)
+                            r.x = startRect.x + sx.off; r.y = startRect.y + sy.off
+                            inputView.guideX = sx.line; inputView.guideY = sy.line
                         } else {
                             const right = corner % 2 === 1, bottom = corner >= 2
                             let x0 = startRect.x, y0 = startRect.y, x1 = startRect.x + startRect.width, y1 = startRect.y + startRect.height
@@ -488,7 +478,10 @@ rows: ed.tableRows
                                 }
                             }
                         }
-                        if (corner >= 0) { start = p; startRect = Object.assign({}, ed.map.slices[ed.map.selected].input) }
+                        if (corner >= 0) {
+                            start = p; startRect = ed.map.slices[ed.map.selected].input
+                            linesX = lines(true); linesY = lines(false)
+                        }
                     }
                     onPressedChanged: pressed ? ed.map.beginGroup() : ed.map.endGroup()
                     onReleased: corner = -1
@@ -526,7 +519,7 @@ rows: ed.tableRows
                         model: ed.map.slices.length
                         WarpMesh {
                             required property int index
-                            readonly property var s: { ed.map.revision; return ed.map.slices[index] ?? ed.map.blank }
+                            readonly property var s: ed.map.sliceAt(index)
                             x: pointer.pad; y: pointer.pad
                             width: outFrame.width; height: outFrame.height
                             visible: s.enabled && ed.at(s) === ed.viewedOutput
@@ -548,7 +541,7 @@ rows: ed.tableRows
                     Item {
                         id: pv
                         required property int index
-                        readonly property var s: { ed.map.revision; return ed.map.slices[index] ?? ed.map.blank }
+                        readonly property var s: ed.map.sliceAt(index)
                         anchors.fill: parent
                         visible: s.enabled && ed.at(s) === ed.viewedOutput
                         WarpMesh {
@@ -569,7 +562,7 @@ rows: ed.tableRows
                     model: ed.map.slices.length
                     SliceOverlay {
                         required property int index
-                        readonly property var s: { ed.map.revision; return ed.map.slices[index] ?? ed.map.blank }
+                        readonly property var s: ed.map.sliceAt(index)
                         anchors.fill: parent
                         visible: ed.at(s) === ed.viewedOutput
                         slice: s
@@ -595,9 +588,10 @@ rows: ed.tableRows
 
                 // stretch: drag a bar to stretch the slice that way
                 Repeater {
-                    model: ed.sel && !ed.map.maskMode && ed.at(ed.sel) === ed.viewedOutput ? ["left", "right", "top", "bottom"] : []
+                    model: ed.sel && !ed.map.maskMode && ed.at(ed.sel) === ed.viewedOutput ? 4 : 0
                     Rectangle {
-                        required property string modelData
+                        required property int index
+                        readonly property string modelData: ["left", "right", "top", "bottom"][index]
                         readonly property var b: { ed.map.revision; return ed.map.bounds(ed.map.selected) }
                         readonly property bool across: modelData === "left" || modelData === "right"
                         readonly property point at: pointer.handleAt(modelData)
@@ -622,7 +616,6 @@ rows: ed.tableRows
                     property int index: -1
                     property point start
                     property var startPoints
-                    property var startMask
                     property var startBounds
                     property string stretchSide: ""
 
@@ -647,25 +640,28 @@ rows: ed.tableRows
                         }
                         return c
                     }
-                    //! the key lines across (x) or down (y), output-normalised: the
-                    //! output's edges and middle, every other point on this output
-                    function lines(horizontal, skipSlice, skipPoint) {
-                        const out = [0, 0.5, 1]
-                        // a whole slice moved: the display's edges and middle only
-                        if (dragging === "all") return out
-                        ed.map.slices.forEach((s, i) => {
-                            if (ed.at(s) !== ed.viewedOutput) return
-                            s.points.forEach((q, k) => { if (!(i === skipSlice && (skipPoint < 0 || k === skipPoint))) out.push(horizontal ? q.x : q.y) })
-                        })
-                        return out
+                    //! The key lines across (x) or down (y), output-normalised, for the
+                    //! drag just begun: the display's edges and middle, and (but for a
+                    //! whole slice moved) the points on this display other than those
+                    //! being dragged. Worked out once: nothing else moves during a drag.
+                    property var linesX: []
+                    property var linesY: []
+                    function prepareLines() {
+                        const xs = [0, 0.5, 1], ys = [0, 0.5, 1]
+                        if (dragging !== "all") {
+                            ed.map.slices.forEach((s, i) => {
+                                if (ed.at(s) !== ed.viewedOutput) return
+                                s.points.forEach((q, k) => {
+                                    const own = i === ed.map.selected && (dragging === "stretch" || (dragging === "point" && k === index))
+                                    if (!own) { xs.push(q.x); ys.push(q.y) }
+                                })
+                            })
+                        }
+                        linesX = xs; linesY = ys
                     }
-                    //! v snapped to the nearest key line close enough (Ctrl: none)
-                    function snap(v, horizontal, mods, skipSlice, skipPoint) {
-                        if (mods & Qt.ControlModifier) return { v: v, line: NaN }
-                        const size = horizontal ? outFrame.width : outFrame.height
-                        let best = NaN, d = (dragging === "all" ? Theme.s(6) : Theme.s(10)) / size
-                        for (const e of lines(horizontal, skipSlice, skipPoint)) if (Math.abs(v - e) < d) { d = Math.abs(v - e); best = e }
-                        return { v: isNaN(best) ? v : best, line: best }
+                    function snap(v, horizontal, mods) {
+                        const tol = (dragging === "all" ? Theme.s(6) : Theme.s(10)) / (horizontal ? outFrame.width : outFrame.height)
+                        return ed.nearest(v, horizontal ? linesX : linesY, tol, mods)
                     }
 
                     onPressed: mouse => {
@@ -678,9 +674,9 @@ rows: ed.tableRows
                         if (ed.map.maskMode && s && ed.at(s) === ed.viewedOutput) {
                             const k = s.mask.findIndex(q => dist(q, p) < Theme.s(10))
                             if (mouse.button === Qt.RightButton) { if (k >= 0) ed.map.removeMaskPoint(ed.map.selected, k); return }
-                            if (k >= 0) { dragging = "mask"; index = k; startPoints = s.mask.map(q => ({ x: q.x, y: q.y })); return }
+                            if (k >= 0) { dragging = "mask"; index = k; startPoints = s.mask; prepareLines(); return }
                             ed.map.addMaskPoint(ed.map.selected, p)
-                            dragging = "mask"; index = s.mask.length; startPoints = ed.sel.mask.map(q => ({ x: q.x, y: q.y }))
+                            dragging = "mask"; index = s.mask.length; startPoints = ed.sel.mask; prepareLines()
                             return
                         }
                         if (mouse.button === Qt.RightButton) return
@@ -690,9 +686,8 @@ rows: ed.tableRows
                                 const h = handleAt(which)
                                 if (Math.hypot(mouse.x - pad - h.x, mouse.y - pad - h.y) < Theme.s(14)) {
                                     dragging = "stretch"; stretchSide = which
-                                    startPoints = s.points.map(q => ({ x: q.x, y: q.y }))
-                                    startMask = s.mask.map(q => ({ x: q.x, y: q.y }))
                                     startBounds = ed.map.bounds(ed.map.selected)
+                                    prepareLines()
                                     return
                                 }
                             }
@@ -703,7 +698,8 @@ rows: ed.tableRows
                             s.points.forEach((q, k) => { const d = dist(q, p); if (d < bestD) { best = k; bestD = d } })
                             if (best >= 0) {
                                 ed.map.selectedPoint = best
-                                dragging = "point"; index = best; startPoints = s.points.map(q => ({ x: q.x, y: q.y }))
+                                dragging = "point"; index = best; startPoints = s.points
+                                prepareLines()
                                 return
                             }
                         }
@@ -712,9 +708,10 @@ rows: ed.tableRows
                             const t = ed.map.slices[i]
                             if (ed.at(t) !== ed.viewedOutput || !t.enabled) continue
                             if (inside(p, Warp.outline(t.points, t.columns, t.rows, t.perspective, 8))) {
-                                if (ed.map.selected !== i) { ed.map.selected = i }
+                                ed.map.selected = i
                                 ed.map.selectedPoint = -1
-                                dragging = "all"; startPoints = t.points.map(q => ({ x: q.x, y: q.y })); startBounds = ed.map.bounds(i)
+                                dragging = "all"; startBounds = ed.map.bounds(i)
+                                prepareLines()
                                 return
                             }
                         }
@@ -731,36 +728,29 @@ rows: ed.tableRows
                         outputView.guideX = NaN; outputView.guideY = NaN
                         if (dragging === "point" || dragging === "mask") {
                             const q = startPoints[index]
-                            const sx = dragging === "point" ? snap(q.x + dx, true, m, i, index) : snap(q.x + dx, true, m, -1, -1)
-                            const sy = dragging === "point" ? snap(q.y + dy, false, m, i, index) : snap(q.y + dy, false, m, -1, -1)
+                            const sx = snap(q.x + dx, true, m), sy = snap(q.y + dy, false, m)
                             outputView.guideX = sx.line; outputView.guideY = sy.line
                             if (dragging === "point") ed.map.setPoint(i, index, Qt.point(sx.v, sy.v))
                             else ed.map.setMaskPoint(i, index, Qt.point(sx.v, sy.v))
                         } else if (dragging === "all") {
                             // whichever edge (or the middle) of the slice is nearest a key line
                             const b = startBounds
-                            let ox = dx, oy = dy
-                            for (const [h, ends] of [[true, [b.x, b.x + b.width / 2, b.x + b.width]], [false, [b.y, b.y + b.height / 2, b.y + b.height]]]) {
-                                let best = null
-                                for (const e of ends) {
-                                    const s = snap(e + (h ? dx : dy), h, m, i, -1)
-                                    if (!isNaN(s.line) && (!best || Math.abs(s.v - (e + (h ? dx : dy))) < best.d)) best = { d: Math.abs(s.v - (e + (h ? dx : dy))), off: s.v - e, line: s.line }
-                                }
-                                if (best) { if (h) { ox = best.off; outputView.guideX = best.line } else { oy = best.off; outputView.guideY = best.line } }
-                            }
-                            const cur = ed.sel.points[0], want = startPoints[0]
-                            ed.map.moveAll(i, want.x + ox - cur.x, want.y + oy - cur.y)
+                            const sx = ed.snapSpan(b.x, b.width, dx, linesX, Theme.s(6) / outFrame.width, m)
+                            const sy = ed.snapSpan(b.y, b.height, dy, linesY, Theme.s(6) / outFrame.height, m)
+                            outputView.guideX = sx.line; outputView.guideY = sy.line
+                            ed.map.setBounds(i, { x: b.x + sx.off, y: b.y + sy.off, width: b.width, height: b.height })
                         } else if (dragging === "stretch") {
-                            // the opposite edge stays; everything between scales; the
-                            // dragged edge snaps
+                            // the dragged edge snaps; the opposite one stays, all between scales
                             const b = startBounds, min = 0.01
-                            let ax = 0, sx = 1, ay = 0, sy = 1
-                            if (stretchSide === "right") { const s = snap(b.x + b.width + dx, true, m, i, -1); outputView.guideX = s.line; ax = b.x; sx = Math.max(min, s.v - b.x) / Math.max(min, b.width) }
-                            if (stretchSide === "left") { const s = snap(b.x + dx, true, m, i, -1); outputView.guideX = s.line; ax = b.x + b.width; sx = Math.max(min, b.x + b.width - s.v) / Math.max(min, b.width) }
-                            if (stretchSide === "bottom") { const s = snap(b.y + b.height + dy, false, m, i, -1); outputView.guideY = s.line; ay = b.y; sy = Math.max(min, s.v - b.y) / Math.max(min, b.height) }
-                            if (stretchSide === "top") { const s = snap(b.y + dy, false, m, i, -1); outputView.guideY = s.line; ay = b.y + b.height; sy = Math.max(min, b.y + b.height - s.v) / Math.max(min, b.height) }
-                            const f = q => ({ x: ax + (q.x - ax) * sx, y: ay + (q.y - ay) * sy })
-                            ed.map.setShape(i, startPoints.map(f), startMask.map(f))
+                            const across = stretchSide === "left" || stretchSide === "right"
+                            const far = stretchSide === "right" || stretchSide === "bottom"
+                            const lo = across ? b.x : b.y, len = across ? b.width : b.height
+                            const s = snap((far ? lo + len : lo) + (across ? dx : dy), across, m)
+                            if (across) outputView.guideX = s.line; else outputView.guideY = s.line
+                            const from = far ? lo : Math.min(s.v, lo + len - min)
+                            const to = far ? Math.max(s.v, lo + min) : lo + len
+                            ed.map.setBounds(i, across ? { x: from, y: b.y, width: to - from, height: b.height }
+                                                       : { x: b.x, y: from, width: b.width, height: to - from })
                         }
                     }
                     onPressedChanged: pressed ? ed.map.beginGroup() : ed.map.endGroup()

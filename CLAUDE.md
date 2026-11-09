@@ -200,10 +200,11 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 - The content renders once (a ShaderEffectSource with hideSource); every
   slice and the editor's thumbnail read that texture. Never grabToImage the
   hidden source (it renders it all again, and crashed); grab `thumbnail`.
-- WarpMesh holds a raw texture pointer: feed it layer textures
-  (ShaderEffectSource), never an Image (its texture is freed on each new
-  source). A second reader of a texture already refreshed this frame, or
-  one drawn inside a grab, sets `refreshSource: false`.
+- WarpMesh keeps its source's texture provider, not a texture: it takes the
+  provider's current texture every frame (an Image's is replaced with each
+  picture) and takes an atlas texture out of the atlas, so any provider
+  works (layers, Images). `refreshSource: false` only stops it asking a
+  layer to update (a second reader drawn inside a grab, the thumbnail).
 - Layer textures come vertically mirrored on D3D11: the module's
   ShaderEffectSources use `MirrorVertically` (`flipSource` if a backend
   differs).
@@ -215,7 +216,8 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   the id, never an index (outputs come and go). Anything the editor follows
   across that (the viewed output) is kept by id too.
 - The editor's preview grabs `thumbnail` (1/6 size) every 33 ms, one grab
-  at a time: the output held 62-63 fps with it running.
+  at a time, into one hidden Image (retainWhileLoading, loaded off the GUI
+  thread) that the views' meshes read directly.
 - Displays are outputs whether or not the window covers them; OutputWindow
   moves the (one) output window over the displays slices use, frameless, and
   restores it when none are. Put MappedOutput straight in the window's
@@ -231,7 +233,10 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 - Speed: a mouse move in the editor should cost about a millisecond. Shapes
   that change on every move use GeometryRenderer with `asynchronous: true`
   (the CurveRenderer triangulates on the GUI thread); the slice list is
-  rebuilt only when what it shows changes; WarpMesh skips unchanged points.
+  rebuilt only when what it shows changes; WarpMesh skips unchanged points
+  and keeps its mesh's triangles; Repeaters of handles take a count, not the
+  points (an array model rebuilds every handle on every move); snapping
+  lines are worked out once per drag.
   LaunchPortal's `drag:` test step (TestInput) logs the cost per move.
 - Never give a property in the editor a name an id already has (`side` was
   the left column's id: assigning to it threw, and every press in the Output
