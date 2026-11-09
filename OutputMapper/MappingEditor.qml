@@ -21,7 +21,7 @@ Item {
     //! what the views show, grabbed every previewMs: a MappedOutput's
     //! `thumbnail` (null: none)
     property Item previewSource: null
-    property int previewMs: 66
+    property int previewMs: 33
 
     readonly property var sel: { map.revision; return map.selected >= 0 && map.selected < map.slices.length ? map.slices[map.selected] : null }
     //! the output the Output view shows, by id (outputs come and go: a
