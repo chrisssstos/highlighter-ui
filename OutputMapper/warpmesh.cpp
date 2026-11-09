@@ -64,9 +64,8 @@ void WarpMesh::changed()
 void WarpMesh::setSource(QQuickItem *source)
 {
     if (m_source == source) return;
-    if (m_provider) disconnect(m_provider, nullptr, this, nullptr);
+    // the provider is left to updatePaintNode (the render thread owns it)
     m_source = source;
-    m_provider = nullptr;
     emit sourceChanged();
     update();
 }

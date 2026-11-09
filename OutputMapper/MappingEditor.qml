@@ -29,7 +29,7 @@ Item {
     //! the output the Output view shows, by id (outputs come and go: a
     //! display found after start, one unplugged)
     property string viewedId: sel?.output ?? ""
-    onSelChanged: if (sel && ed.map.view === "output") viewedId = sel.output
+    onSelChanged: if (sel && sel.output !== "") viewedId = sel.output
     readonly property int viewedOutput: Math.max(0, map.outputIndex(viewedId))
     //! the output a slice is on, as an index here (-1: not connected now)
     function at(s) { map.outputs; return map.outputIndex(s.output) }
@@ -69,13 +69,13 @@ Item {
     Component.onCompleted: refreshTable()
 
     Shortcut { enabled: ed.visible; sequences: [StandardKey.Undo]; onActivated: ed.map.undo() }
-    Shortcut { enabled: ed.visible; sequences: [StandardKey.Redo, "Ctrl+Y"]; onActivated: ed.map.redo() }
+    Shortcut { enabled: ed.visible; sequences: [StandardKey.Redo]; onActivated: ed.map.redo() }
 
     Timer {
         interval: ed.previewMs
         repeat: true
         triggeredOnStart: true
-        running: ed.visible && !!ed.previewSource && !ed.map.testCard
+        running: ed.visible && (ed.Window.window?.visible ?? false) && !!ed.previewSource && !ed.map.testCard
         // one grab at a time
         property bool busy: false
         onTriggered: {
@@ -191,8 +191,10 @@ rows: ed.tableRows
                     // a slice put on a display as a plain rectangle starts
                     // fitted, its shape kept (not stretched to the display)
                     const fresh = id !== "" && ed.map.untouched(ed.map.selected)
+                    ed.map.beginGroup() // one undo step for both
                     ed.map.set(ed.map.selected, { output: id })
                     if (fresh) ed.map.sizeTo(ed.map.selected, "fit")
+                    ed.map.endGroup()
                     if (id !== "") ed.viewedId = id
                 }
             }
@@ -372,7 +374,7 @@ rows: ed.tableRows
                     model: ed.map.slices.length
                     Rectangle {
                         required property int index
-                        readonly property var s: { ed.map.revision; return ed.map.slices[index] }
+                        readonly property var s: { ed.map.revision; return ed.map.slices[index] ?? ed.map.blank }
                         readonly property bool on: index === ed.map.selected
                         x: s.input.x * inputView.k; y: s.input.y * inputView.k
                         width: s.input.width * inputView.k; height: s.input.height * inputView.k
@@ -524,7 +526,7 @@ rows: ed.tableRows
                         model: ed.map.slices.length
                         WarpMesh {
                             required property int index
-                            readonly property var s: { ed.map.revision; return ed.map.slices[index] }
+                            readonly property var s: { ed.map.revision; return ed.map.slices[index] ?? ed.map.blank }
                             x: pointer.pad; y: pointer.pad
                             width: outFrame.width; height: outFrame.height
                             visible: s.enabled && ed.at(s) === ed.viewedOutput
@@ -546,7 +548,7 @@ rows: ed.tableRows
                     Item {
                         id: pv
                         required property int index
-                        readonly property var s: { ed.map.revision; return ed.map.slices[index] }
+                        readonly property var s: { ed.map.revision; return ed.map.slices[index] ?? ed.map.blank }
                         anchors.fill: parent
                         visible: s.enabled && ed.at(s) === ed.viewedOutput
                         WarpMesh {
@@ -567,7 +569,7 @@ rows: ed.tableRows
                     model: ed.map.slices.length
                     SliceOverlay {
                         required property int index
-                        readonly property var s: { ed.map.revision; return ed.map.slices[index] }
+                        readonly property var s: { ed.map.revision; return ed.map.slices[index] ?? ed.map.blank }
                         anchors.fill: parent
                         visible: ed.at(s) === ed.viewedOutput
                         slice: s
