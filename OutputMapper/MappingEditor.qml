@@ -204,21 +204,6 @@ rows: ed.tableRows
                 onActivated: i => i === 0 ? ed.map.setGrid(ed.map.selected, 2, 2, true)
                                           : ed.map.setGrid(ed.map.selected, i + 2, i + 2, false)
             }
-            ParamHeading { width: parent.width; text: "Size"; note: "on its display" }
-            Flow {
-                width: parent.width
-                spacing: Theme.s(6)
-                Repeater {
-                    model: [["fit", "Fit"], ["fill", "Fill"], ["stretch", "Stretch"], ["native", "1:1"]]
-                    ParamButton {
-                        required property var modelData
-                        text: modelData[1]
-                        enabled: !!ed.sel && ed.at(ed.sel) >= 0
-                        onClicked: ed.map.sizeTo(ed.map.selected, modelData[0])
-                    }
-                }
-            }
-
             // where it lands, in the display's pixels (the bounding box of its points)
             ParamHeading { width: parent.width; text: "Output"; note: "display px"; visible: !!ed.sel && ed.at(ed.sel) >= 0 }
             ParamGrid {
@@ -333,13 +318,30 @@ rows: ed.tableRows
             id: caption
             anchors.top: toolbar.bottom
             anchors.topMargin: Theme.s(12)
-            width: parent.width
+            width: parent.width - sizeRow.width - Theme.s(12)
             mono: true
             small: true
             text: ed.map.view === "input"
                   ? "Source  " + ed.map.sourceWidth + " × " + ed.map.sourceHeight + (inputView.hoverText ? "   " + inputView.hoverText : "")
                   : (ed.outputNames[ed.viewedOutput] ?? "") + "  " + (ed.map.outputs[ed.viewedOutput]?.width ?? 0) + " × "
                     + (ed.map.outputs[ed.viewedOutput]?.height ?? 0) + (outputView.hoverText ? "   " + outputView.hoverText : "")
+        }
+
+        // the picked slice's size on its display, at hand in both views
+        Row {
+            id: sizeRow
+            anchors.right: parent.right
+            anchors.verticalCenter: caption.verticalCenter
+            spacing: Theme.s(6)
+            Repeater {
+                model: [["fit", "Fit"], ["fill", "Fill"], ["stretch", "Stretch"], ["native", "1:1"]]
+                ParamButton {
+                    required property var modelData
+                    text: modelData[1]
+                    enabled: !!ed.sel && ed.at(ed.sel) >= 0
+                    onClicked: ed.map.sizeTo(ed.map.selected, modelData[0])
+                }
+            }
         }
 
         // Input: the source, each slice's rectangle; drag a rectangle or its corners
@@ -404,15 +406,17 @@ rows: ed.tableRows
                 MouseArea {
                     id: inputPointer
                     anchors.fill: parent
-                    anchors.margins: -pad
+                    anchors { leftMargin: -padX; rightMargin: -padX; topMargin: -padY; bottomMargin: -padY }
                     hoverEnabled: true
                     preventStealing: true
                     property int corner: -1   // 0..3, or 4 for the whole rectangle
                     property point start
                     property var startRect
-                    readonly property real pad: Math.max(Theme.s(28), Math.min(srcFrame.x, srcFrame.y))
+                    // the whole view round the picture: corners can be anywhere in it
+                    readonly property real padX: Math.max(Theme.s(28), srcFrame.x)
+                    readonly property real padY: Math.max(Theme.s(28), srcFrame.y)
 
-                    function srcAt(mx, my) { return Qt.point((mx - pad) / inputView.k, (my - pad) / inputView.k) }
+                    function srcAt(mx, my) { return Qt.point((mx - padX) / inputView.k, (my - padY) / inputView.k) }
                     //! the key lines, worked out when a drag starts (they don't move during it)
                     property var linesX: []
                     property var linesY: []
@@ -512,7 +516,7 @@ rows: ed.tableRows
                 // past the display's edge: drawn too, faintly (the display shows only what's on it)
                 Item {
                     anchors.fill: parent
-                    anchors.margins: -pointer.pad
+                    anchors { leftMargin: -pointer.padX; rightMargin: -pointer.padX; topMargin: -pointer.padY; bottomMargin: -pointer.padY }
                     clip: true
                     opacity: 0.35
                     Repeater {
@@ -520,7 +524,7 @@ rows: ed.tableRows
                         WarpMesh {
                             required property int index
                             readonly property var s: ed.map.sliceAt(index)
-                            x: pointer.pad; y: pointer.pad
+                            x: pointer.padX; y: pointer.padY
                             width: outFrame.width; height: outFrame.height
                             visible: s.enabled && ed.at(s) === ed.viewedOutput
                             source: ed.picture
@@ -608,7 +612,8 @@ rows: ed.tableRows
                 MouseArea {
                     id: pointer
                     anchors.fill: parent
-                    anchors.margins: -pad // points and edges can go past the display's
+                    // the whole view round the display: points and edges can go past it
+                    anchors { leftMargin: -padX; rightMargin: -padX; topMargin: -padY; bottomMargin: -padY }
                     hoverEnabled: true
                     preventStealing: true
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -629,8 +634,9 @@ rows: ed.tableRows
                         return Qt.point((b.x + b.width / 2) * w, (b.y + b.height) * h + reach)
                     }
 
-                    readonly property real pad: Math.max(Theme.s(40), Math.min(outFrame.x, outFrame.y))
-                    function norm(mx, my) { return Qt.point((mx - pad) / outFrame.width, (my - pad) / outFrame.height) }
+                    readonly property real padX: Math.max(Theme.s(40), outFrame.x)
+                    readonly property real padY: Math.max(Theme.s(40), outFrame.y)
+                    function norm(mx, my) { return Qt.point((mx - padX) / outFrame.width, (my - padY) / outFrame.height) }
                     function dist(a, b) { return Math.hypot((a.x - b.x) * outFrame.width, (a.y - b.y) * outFrame.height) }
                     function inside(p, poly) {
                         let c = false
@@ -684,7 +690,7 @@ rows: ed.tableRows
                         if (s && ed.at(s) === ed.viewedOutput) {
                             for (const which of ["left", "right", "top", "bottom"]) {
                                 const h = handleAt(which)
-                                if (Math.hypot(mouse.x - pad - h.x, mouse.y - pad - h.y) < Theme.s(14)) {
+                                if (Math.hypot(mouse.x - padX - h.x, mouse.y - padY - h.y) < Theme.s(14)) {
                                     dragging = "stretch"; stretchSide = which
                                     startBounds = ed.map.bounds(ed.map.selected)
                                     prepareLines()

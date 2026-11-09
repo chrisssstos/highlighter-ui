@@ -223,8 +223,10 @@ QtObject {
             if (aIn > aOut) iw = ih * aOut; else ih = iw / aOut
             s.input = { x: Math.round(cx - iw / 2), y: Math.round(cy - ih / 2), width: Math.round(iw), height: Math.round(ih) }
         }
-        const x0 = (1 - w) / 2, y0 = (1 - h) / 2
-        s.points = Warp.grid(s.columns, s.rows).map(p => ({ x: x0 + p.x * w, y: y0 + p.y * h }))
+        // on whole display pixels
+        const pw = Math.round(w * o.width), ph = Math.round(h * o.height)
+        const px = Math.round((o.width - pw) / 2), py = Math.round((o.height - ph) / 2)
+        s.points = Warp.grid(s.columns, s.rows).map(p => ({ x: (px + p.x * pw) / o.width, y: (py + p.y * ph) / o.height }))
         put(i, s)
     }
     //! the slice's points are still the plain full rectangle (never warped)
