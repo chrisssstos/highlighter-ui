@@ -348,6 +348,8 @@ rows: ed.tableRows
     Item {
         id: area
         anchors { top: parent.top; bottom: parent.bottom; left: side.right; right: parent.right; margins: Theme.s(16) }
+        // what reaches past the view (an input far off the picture) stays in it
+        clip: true
 
         ParamText {
             id: caption
