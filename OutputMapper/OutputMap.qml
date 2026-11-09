@@ -22,6 +22,10 @@ QtObject {
     property real sourceWidth: 1920
     property real sourceHeight: 1080
     property var outputs: [{ id: "output", name: "Output", x: 0, y: 0, width: 1920, height: 1080 }]
+    //! lines of the source an input snaps to besides its edges, middle and the
+    //! other slices (source px): where the app's own parts meet, say
+    property var snapX: []
+    property var snapY: []
     //! slices to start from, and to go back to (Reset all); the app's
     //! one-per-output layout, say
     property var defaults: []
@@ -93,13 +97,19 @@ QtObject {
         return {
             name: String(s.name ?? "Slice"), output: outputId(s.output),
             enabled: s.enabled !== false,
-            input: { x: s.input?.x ?? 0, y: s.input?.y ?? 0, width: s.input?.width ?? sourceWidth, height: s.input?.height ?? sourceHeight },
+            input: onSource(s.input ?? {}),
             columns: c, rows: r, perspective: s.perspective !== false,
             points: pts.map(p => ({ x: Number(p.x), y: Number(p.y) })),
             mask: (s.mask ?? []).map(p => ({ x: Number(p.x), y: Number(p.y) }))
         }
     }
 
+    //! an input rectangle kept on the source
+    function onSource(r) {
+        const W = Math.round(sourceWidth), H = Math.round(sourceHeight)
+        const x = Math.max(0, Math.min(W - 1, Math.round(r.x ?? 0))), y = Math.max(0, Math.min(H - 1, Math.round(r.y ?? 0)))
+        return { x: x, y: y, width: Math.max(1, Math.min(W - x, Math.round(r.width ?? W))), height: Math.max(1, Math.min(H - y, Math.round(r.height ?? H))) }
+    }
     function touch() { slices = slices.slice(); revision++; dirty = true }
     function copyOf(i) { return JSON.parse(JSON.stringify(slices[i])) }
     function put(i, s, kind) { record(kind); const list = slices.slice(); list[i] = s; slices = list; revision++; dirty = true }
@@ -143,10 +153,10 @@ QtObject {
         for (const k in changes) s[k] = changes[k]
         put(i, s)
     }
+    //! the slice's input, kept on the source
     function setInput(i, rect) {
-        set(i, { input: {
-            x: Math.round(rect.x), y: Math.round(rect.y),
-            width: Math.max(1, Math.round(rect.width)), height: Math.max(1, Math.round(rect.height)) } })
+        set(i, { input: onSource({ x: rect.x, y: rect.y,
+                                   width: rect.width + Math.min(0, rect.x), height: rect.height + Math.min(0, rect.y) }) })
     }
     function setPoint(i, k, p, kind) {
         if (i < 0 || i >= slices.length) return

@@ -266,8 +266,10 @@ Item {
             id: inputView
             visible: ed.map.view === "input"
             anchors { top: caption.bottom; topMargin: Theme.s(8); left: parent.left; right: parent.right; bottom: parent.bottom }
-            readonly property real k: Math.min(width / ed.map.sourceWidth, height / ed.map.sourceHeight)
+            readonly property real k: Math.min((width - Theme.s(64)) / ed.map.sourceWidth, (height - Theme.s(64)) / ed.map.sourceHeight)
             property string hoverText: ""
+            property real guideX: NaN
+            property real guideY: NaN
 
             Item {
                 id: srcFrame
@@ -305,19 +307,48 @@ Item {
                     }
                 }
 
+                // the lines a drag snapped to
+                Rectangle {
+                    visible: inputPointer.pressed && !isNaN(inputView.guideX)
+                    x: inputView.guideX * inputView.k; y: 0; width: 1; height: parent.height
+                    color: Theme.accent
+                }
+                Rectangle {
+                    visible: inputPointer.pressed && !isNaN(inputView.guideY)
+                    x: 0; y: inputView.guideY * inputView.k; width: parent.width; height: 1
+                    color: Theme.accent
+                }
+
                 MouseArea {
+                    id: inputPointer
                     anchors.fill: parent
-                    anchors.margins: -Theme.s(10)
+                    anchors.margins: -pad
                     hoverEnabled: true
                     preventStealing: true
                     property int corner: -1   // 0..3, or 4 for the whole rectangle
                     property point start
                     property var startRect
+                    readonly property real pad: Theme.s(28)
 
-                    function srcAt(mx, my) { return Qt.point((mx - Theme.s(10)) / inputView.k, (my - Theme.s(10)) / inputView.k) }
-                    function snap(v, edges) {
-                        for (const e of edges) if (Math.abs(v - e) * inputView.k < Theme.s(8)) return e
-                        return v
+                    function srcAt(mx, my) { return Qt.point((mx - pad) / inputView.k, (my - pad) / inputView.k) }
+                    //! the key lines: the source's edges and middle, the app's own
+                    //! lines, the other slices' edges
+                    function lines(horizontal) {
+                        const size = horizontal ? ed.map.sourceWidth : ed.map.sourceHeight
+                        const out = [0, size / 2, size].concat(horizontal ? ed.map.snapX : ed.map.snapY)
+                        ed.map.slices.forEach((s, i) => {
+                            if (i === ed.map.selected) return
+                            const a = horizontal ? s.input.x : s.input.y, b = a + (horizontal ? s.input.width : s.input.height)
+                            out.push(a, b)
+                        })
+                        return out
+                    }
+                    //! v snapped to the nearest key line close enough (Ctrl: none)
+                    function snap(v, horizontal, mods) {
+                        if (mods & Qt.ControlModifier) return { v: v, line: NaN }
+                        let best = NaN, d = Theme.s(10) / inputView.k
+                        for (const e of lines(horizontal)) if (Math.abs(v - e) < d) { d = Math.abs(v - e); best = e }
+                        return { v: isNaN(best) ? v : best, line: best }
                     }
 
                     onPositionChanged: mouse => {
@@ -325,16 +356,26 @@ Item {
                         inputView.hoverText = Math.round(p.x) + ", " + Math.round(p.y)
                         if (!pressed || corner < 0) return
                         const dx = p.x - start.x, dy = p.y - start.y
+                        const m = mouse.modifiers
                         const r = Object.assign({}, startRect)
-                        const xs = [0, ed.map.sourceWidth], ys = [0, ed.map.sourceHeight]
                         if (corner === 4) {
-                            r.x = snap(startRect.x + dx, xs); r.y = snap(startRect.y + dy, ys)
-                            r.x = snap(r.x + r.width, xs) - r.width; r.y = snap(r.y + r.height, ys) - r.height
+                            // the whole rectangle: whichever of its edges is nearest a key line
+                            const l = snap(startRect.x + dx, true, m), rr = snap(startRect.x + dx + r.width, true, m)
+                            const t = snap(startRect.y + dy, false, m), b = snap(startRect.y + dy + r.height, false, m)
+                            r.x = !isNaN(l.line) ? l.v : !isNaN(rr.line) ? rr.v - r.width : startRect.x + dx
+                            r.y = !isNaN(t.line) ? t.v : !isNaN(b.line) ? b.v - r.height : startRect.y + dy
+                            inputView.guideX = !isNaN(l.line) ? l.line : rr.line
+                            inputView.guideY = !isNaN(t.line) ? t.line : b.line
+                            // a move stops at the source's edges (it doesn't shrink)
+                            r.x = Math.max(0, Math.min(ed.map.sourceWidth - r.width, r.x))
+                            r.y = Math.max(0, Math.min(ed.map.sourceHeight - r.height, r.y))
                         } else {
                             const right = corner % 2 === 1, bottom = corner >= 2
                             let x0 = startRect.x, y0 = startRect.y, x1 = startRect.x + startRect.width, y1 = startRect.y + startRect.height
-                            if (right) x1 = snap(x1 + dx, xs); else x0 = snap(x0 + dx, xs)
-                            if (bottom) y1 = snap(y1 + dy, ys); else y0 = snap(y0 + dy, ys)
+                            const sx = snap((right ? x1 : x0) + dx, true, m), sy = snap((bottom ? y1 : y0) + dy, false, m)
+                            if (right) x1 = sx.v; else x0 = sx.v
+                            if (bottom) y1 = sy.v; else y0 = sy.v
+                            inputView.guideX = sx.line; inputView.guideY = sy.line
                             r.x = Math.min(x0, x1); r.y = Math.min(y0, y1); r.width = Math.abs(x1 - x0); r.height = Math.abs(y1 - y0)
                         }
                         ed.map.setInput(ed.map.selected, r)
@@ -378,6 +419,8 @@ Item {
             // room round the output for the stretch bars and points past its edge
             readonly property real k: Math.min((width - Theme.s(64)) / o.width, (height - Theme.s(64)) / o.height)
             property string hoverText: ""
+            property real guideX: NaN
+            property real guideY: NaN
 
             Item {
                 id: outFrame
@@ -425,6 +468,18 @@ Item {
                         color: Theme.accent
                         unit: Theme.scale
                     }
+                }
+
+                // the lines a drag snapped to
+                Rectangle {
+                    visible: pointer.pressed && !isNaN(outputView.guideX)
+                    x: outputView.guideX * outFrame.width; y: -Theme.s(20); width: 1; height: outFrame.height + Theme.s(40)
+                    color: Theme.accent
+                }
+                Rectangle {
+                    visible: pointer.pressed && !isNaN(outputView.guideY)
+                    x: -Theme.s(20); y: outputView.guideY * outFrame.height; width: outFrame.width + Theme.s(40); height: 1
+                    color: Theme.accent
                 }
 
                 // stretch: drag a bar to stretch the slice that way
@@ -481,10 +536,23 @@ Item {
                         }
                         return c
                     }
-                    function snapEdge(v, size, mods) {
-                        if (mods & Qt.ControlModifier) return v
-                        for (const e of [0, 1]) if (Math.abs(v - e) * size < Theme.s(8)) return e
-                        return v
+                    //! the key lines across (x) or down (y), output-normalised: the
+                    //! output's edges and middle, every other point on this output
+                    function lines(horizontal, skipSlice, skipPoint) {
+                        const out = [0, 0.5, 1]
+                        ed.map.slices.forEach((s, i) => {
+                            if (ed.at(s) !== ed.viewedOutput) return
+                            s.points.forEach((q, k) => { if (!(i === skipSlice && (skipPoint < 0 || k === skipPoint))) out.push(horizontal ? q.x : q.y) })
+                        })
+                        return out
+                    }
+                    //! v snapped to the nearest key line close enough (Ctrl: none)
+                    function snap(v, horizontal, mods, skipSlice, skipPoint) {
+                        if (mods & Qt.ControlModifier) return { v: v, line: NaN }
+                        const size = horizontal ? outFrame.width : outFrame.height
+                        let best = NaN, d = Theme.s(10) / size
+                        for (const e of lines(horizontal, skipSlice, skipPoint)) if (Math.abs(v - e) < d) { d = Math.abs(v - e); best = e }
+                        return { v: isNaN(best) ? v : best, line: best }
                     }
 
                     onPressed: mouse => {
@@ -533,7 +601,7 @@ Item {
                             if (inside(p, Warp.outline(t.points, t.columns, t.rows, t.perspective, 8))) {
                                 if (ed.map.selected !== i) { ed.map.selected = i }
                                 ed.map.selectedPoint = -1
-                                dragging = "all"; startPoints = t.points.map(q => ({ x: q.x, y: q.y }))
+                                dragging = "all"; startPoints = t.points.map(q => ({ x: q.x, y: q.y })); startBounds = ed.map.bounds(i)
                                 return
                             }
                         }
@@ -546,24 +614,40 @@ Item {
                         if (!pressed || dragging === "") return
                         const fine = (mouse.modifiers & Qt.ShiftModifier) ? 0.1 : 1
                         const dx = (p.x - start.x) * fine, dy = (p.y - start.y) * fine
+                        const m = mouse.modifiers, i = ed.map.selected
+                        outputView.guideX = NaN; outputView.guideY = NaN
                         if (dragging === "point" || dragging === "mask") {
                             const q = startPoints[index]
-                            const np = Qt.point(snapEdge(q.x + dx, outFrame.width, mouse.modifiers), snapEdge(q.y + dy, outFrame.height, mouse.modifiers))
-                            if (dragging === "point") ed.map.setPoint(ed.map.selected, index, np)
-                            else ed.map.setMaskPoint(ed.map.selected, index, np)
+                            const sx = dragging === "point" ? snap(q.x + dx, true, m, i, index) : snap(q.x + dx, true, m, -1, -1)
+                            const sy = dragging === "point" ? snap(q.y + dy, false, m, i, index) : snap(q.y + dy, false, m, -1, -1)
+                            outputView.guideX = sx.line; outputView.guideY = sy.line
+                            if (dragging === "point") ed.map.setPoint(i, index, Qt.point(sx.v, sy.v))
+                            else ed.map.setMaskPoint(i, index, Qt.point(sx.v, sy.v))
                         } else if (dragging === "all") {
+                            // whichever edge (or the middle) of the slice is nearest a key line
+                            const b = startBounds
+                            let ox = dx, oy = dy
+                            for (const [h, ends] of [[true, [b.x, b.x + b.width / 2, b.x + b.width]], [false, [b.y, b.y + b.height / 2, b.y + b.height]]]) {
+                                let best = null
+                                for (const e of ends) {
+                                    const s = snap(e + (h ? dx : dy), h, m, i, -1)
+                                    if (!isNaN(s.line) && (!best || Math.abs(s.v - (e + (h ? dx : dy))) < best.d)) best = { d: Math.abs(s.v - (e + (h ? dx : dy))), off: s.v - e, line: s.line }
+                                }
+                                if (best) { if (h) { ox = best.off; outputView.guideX = best.line } else { oy = best.off; outputView.guideY = best.line } }
+                            }
                             const cur = ed.sel.points[0], want = startPoints[0]
-                            ed.map.moveAll(ed.map.selected, want.x + dx - cur.x, want.y + dy - cur.y)
+                            ed.map.moveAll(i, want.x + ox - cur.x, want.y + oy - cur.y)
                         } else if (dragging === "stretch") {
-                            // the opposite edge stays; everything between scales
+                            // the opposite edge stays; everything between scales; the
+                            // dragged edge snaps
                             const b = startBounds, min = 0.01
                             let ax = 0, sx = 1, ay = 0, sy = 1
-                            if (side === "right") { ax = b.x; sx = Math.max(min, b.width + dx) / Math.max(min, b.width) }
-                            if (side === "left") { ax = b.x + b.width; sx = Math.max(min, b.width - dx) / Math.max(min, b.width) }
-                            if (side === "bottom") { ay = b.y; sy = Math.max(min, b.height + dy) / Math.max(min, b.height) }
-                            if (side === "top") { ay = b.y + b.height; sy = Math.max(min, b.height - dy) / Math.max(min, b.height) }
+                            if (side === "right") { const s = snap(b.x + b.width + dx, true, m, i, -1); outputView.guideX = s.line; ax = b.x; sx = Math.max(min, s.v - b.x) / Math.max(min, b.width) }
+                            if (side === "left") { const s = snap(b.x + dx, true, m, i, -1); outputView.guideX = s.line; ax = b.x + b.width; sx = Math.max(min, b.x + b.width - s.v) / Math.max(min, b.width) }
+                            if (side === "bottom") { const s = snap(b.y + b.height + dy, false, m, i, -1); outputView.guideY = s.line; ay = b.y; sy = Math.max(min, s.v - b.y) / Math.max(min, b.height) }
+                            if (side === "top") { const s = snap(b.y + dy, false, m, i, -1); outputView.guideY = s.line; ay = b.y + b.height; sy = Math.max(min, b.y + b.height - s.v) / Math.max(min, b.height) }
                             const f = q => ({ x: ax + (q.x - ax) * sx, y: ay + (q.y - ay) * sy })
-                            ed.map.setShape(ed.map.selected, startPoints.map(f), startMask.map(f))
+                            ed.map.setShape(i, startPoints.map(f), startMask.map(f))
                         }
                     }
                     onPressedChanged: pressed ? ed.map.beginGroup() : ed.map.endGroup()
