@@ -216,3 +216,9 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   across that (the viewed output) is kept by id too.
 - The editor's preview grabs `thumbnail` (1/6 size) every 66 ms, one grab
   at a time: the output held 62-63 fps with it running.
+- Displays are outputs whether or not the window covers them; OutputWindow
+  moves the (one) output window over the displays slices use, frameless, and
+  restores it when none are. Put MappedOutput straight in the window's
+  content item, never inside a fit / scale view, so it is 1:1 on displays.
+- Windows can't share a scene graph texture: one window per display would
+  render the content once per display. Hence the one spanning window.

@@ -22,6 +22,7 @@ qt_add_qml_module(OutputMapper
         OutputMap.qml
         MappedOutput.qml
         DisplayOutputs.qml
+        OutputWindow.qml
         MaskShape.qml
         SliceOverlay.qml
         TestCard.qml
