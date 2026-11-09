@@ -140,3 +140,48 @@ a compiled app this way, to prove the module works.
 
 It uses Segoe UI and Consolas, which every Windows PC has (Helvetica Neue and
 Menlo on a Mac), so nothing needs bundling.
+
+## OutputMapper: Resolume-style output mapping
+
+`OutputMapper/` is a second module beside the kit: an app's content rendered
+**once**, offscreen, and drawn onto each output (a projector, an LED wall) as
+slices, like Resolume's Advanced Output.
+
+- **Slice:** a rectangle of the content (Input) drawn onto one output (Output),
+  either as a 4-corner pin (true perspective) or a smooth grid warp (3 × 3 up to
+  6 × 6), with an optional mask polygon (everything outside it black).
+- **Cheap:** the content renders once into a texture; each slice is one
+  textured mesh read from it (`WarpMesh`, C++). Nothing renders twice.
+- **Editor** (`MappingWindow`, drawn with HighlighterUI): slices list, Input and
+  Output views with a live still, drag points or a whole slice, Shift for fine,
+  Ctrl to stop snapping, arrow keys to nudge a pixel (Shift: ten), Tab for the
+  next point; mask mode (click to add, drag, right-click to remove); test card;
+  "Show on output" draws outlines, points and names on the outputs themselves.
+- **Saving is the app's:** `OutputMap.toJson()` / `load(json)`, on `saveRequested`.
+
+Link it with the kit, then `import OutputMapper`:
+
+```cmake
+add_subdirectory(<path>/HighlighterUI ${CMAKE_BINARY_DIR}/HighlighterUI)
+add_subdirectory(<path>/OutputMapper  ${CMAKE_BINARY_DIR}/OutputMapper)
+target_link_libraries(<app> PRIVATE HighlighterUIplugin OutputMapperplugin)
+```
+
+```qml
+Item { id: content; width: 7680; height: 2160 /* the app's content */ }
+OutputMap {
+    id: mapping
+    sourceWidth: 7680; sourceHeight: 2160
+    outputs: [{ name: "Left", x: 0, y: 0, width: 3840, height: 2160 },
+              { name: "Right", x: 3840, y: 0, width: 3840, height: 2160 }]
+    defaults: [slice("Left", 0, { x: 0, y: 0, width: 3840, height: 2160 }),
+               slice("Right", 1, { x: 3840, y: 0, width: 3840, height: 2160 })]
+    Component.onCompleted: load(savedJson)
+    onSaveRequested: { save(toJson()); saved() }
+}
+MappedOutput { id: out; anchors.fill: parent; source: content; map: mapping }
+MappingWindow { map: mapping; previewSource: out.thumbnail }
+```
+
+Needs C++ (it isn't in the gallery, which runs without a build). LaunchPortal
+(FM-STCE) is the first app using it.

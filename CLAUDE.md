@@ -189,3 +189,26 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 - Colours, sizes and the font live in `Theme.qml` only; sizes that change in
   compact mode use `Theme.c(full, compact)`. Write `Theme.s(px)`
   for every size, so `scale` works.
+
+## OutputMapper (the second module)
+
+- `OutputMapper/` maps an app's content onto its outputs, Resolume
+  Advanced Output style (README has the usage). Use it, not a project's own
+  warp code, whenever a projector or screen needs corner pin, warp or masks.
+- Projects copy `OutputMapper/` in beside `HighlighterUI/` (it needs the kit:
+  its editor is drawn with it). Changes go here first, then are copied in.
+- The content renders once (a ShaderEffectSource with hideSource); every
+  slice and the editor's thumbnail read that texture. Never grabToImage the
+  hidden source (it renders it all again, and crashed); grab `thumbnail`.
+- WarpMesh holds a raw texture pointer: feed it layer textures
+  (ShaderEffectSource), never an Image (its texture is freed on each new
+  source). A second reader of a texture already refreshed this frame, or
+  one drawn inside a grab, sets `refreshSource: false`.
+- Layer textures come vertically mirrored on D3D11: the module's
+  ShaderEffectSources use `MirrorVertically` (`flipSource` if a backend
+  differs).
+- Its qmldir deps are DEPENDENCIES, not IMPORTS: IMPORTS re-exports QtQuick
+  and shadows the app's own types (LaunchPortal's Canvas became Qt's).
+- The editor's shared state (selected slice and point, view, mask mode, test
+  card, show on output) lives on OutputMap, so scripts and the outputs see it.
+
