@@ -157,10 +157,13 @@ slices, like Resolume's Advanced Output.
   Ctrl to stop snapping, arrow keys to nudge a pixel (Shift: ten), Tab for the
   next point; mask mode (click to add, drag, right-click to remove); test card;
   "Show on output" draws outlines, points and names on the outputs themselves.
-- **Outputs:** `DisplayOutputs` finds the PC's displays the output window
-  covers (live: plugged in, unplugged, the window moved); an app can add areas
-  of its window too. A slice keeps its output by id, so a display that's
-  unplugged comes back to its slices.
+- **Outputs, as Resolume's:** `DisplayOutputs` lists every display the PC
+  has (live: plugged in, unplugged); an app can add areas of its window too.
+  Give a slice a display and `OutputWindow` puts the output window over the
+  displays in use, borderless, so each goes full screen by itself (one window
+  spanning them: windows can't share a rendered picture, so the content stays
+  rendered once). No slice on a display: the window goes back to how it was.
+  A slice keeps its display by id, so an unplugged one comes back.
 - **Saving is the app's:** `OutputMap.toJson()` / `load(json)`, on `saveRequested`.
 
 Link it with the kit, then `import OutputMapper`:
@@ -181,8 +184,10 @@ OutputMap {
     Component.onCompleted: load(savedJson)
     onSaveRequested: { save(toJson()); saved() }
 }
-DisplayOutputs { id: displays; item: out }
-MappedOutput { id: out; anchors.fill: parent; source: content; map: mapping }
+// straight in the window, not inside anything that scales it: 1:1 on the displays
+MappedOutput { id: out; parent: Window.contentItem; anchors.fill: parent; source: content; map: mapping }
+DisplayOutputs { id: displays; item: out.parent }
+OutputWindow { window: out.Window.window; map: mapping; displays: displays }
 MappingWindow { map: mapping; previewSource: out.thumbnail }
 ```
 
