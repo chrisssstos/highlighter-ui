@@ -182,9 +182,15 @@ QSGNode *WarpMesh::updatePaintNode(QSGNode *old, UpdatePaintNodeData *)
         auto *v = geometry->vertexDataAsTexturedPoint2D();
         const QRectF s = m_sourceRect;
         const qreal w = width(), h = height();
+        // an input reaching past the source: only the part on it is drawn
+        // (the rest stays black, rather than the source's edge smeared out)
+        const qreal u0 = s.width() > 0 ? std::clamp(-s.x() / s.width(), 0.0, 1.0) : 0;
+        const qreal u1 = s.width() > 0 ? std::clamp((1 - s.x()) / s.width(), 0.0, 1.0) : 1;
+        const qreal t0 = s.height() > 0 ? std::clamp(-s.y() / s.height(), 0.0, 1.0) : 0;
+        const qreal t1 = s.height() > 0 ? std::clamp((1 - s.y()) / s.height(), 0.0, 1.0) : 1;
         for (int j = 0; j <= n; ++j) {
             for (int i = 0; i <= n; ++i) {
-                const qreal u = qreal(i) / n, t = qreal(j) / n;
+                const qreal u = u0 + (u1 - u0) * i / n, t = t0 + (t1 - t0) * j / n;
                 const QPointF p = grid.valid() ? warpmath::map(grid, u, t) : QPointF(u, t);
                 qreal ty = s.y() + t * s.height();
                 if (m_flipSource) ty = 1 - ty;

@@ -104,11 +104,11 @@ QtObject {
         }
     }
 
-    //! an input rectangle kept on the source
+    //! an input rectangle in whole pixels; it may reach past the source
+    //! (that part shows black)
     function onSource(r) {
-        const W = Math.round(sourceWidth), H = Math.round(sourceHeight)
-        const x = Math.max(0, Math.min(W - 1, Math.round(r.x ?? 0))), y = Math.max(0, Math.min(H - 1, Math.round(r.y ?? 0)))
-        return { x: x, y: y, width: Math.max(1, Math.min(W - x, Math.round(r.width ?? W))), height: Math.max(1, Math.min(H - y, Math.round(r.height ?? H))) }
+        return { x: Math.round(r.x ?? 0), y: Math.round(r.y ?? 0),
+                 width: Math.max(1, Math.round(r.width ?? sourceWidth)), height: Math.max(1, Math.round(r.height ?? sourceHeight)) }
     }
     function touch() { slices = slices.slice(); revision++; dirty = true }
     function copyOf(i) { return JSON.parse(JSON.stringify(slices[i])) }
@@ -153,11 +153,8 @@ QtObject {
         for (const k in changes) s[k] = changes[k]
         put(i, s)
     }
-    //! the slice's input, kept on the source
-    function setInput(i, rect) {
-        set(i, { input: onSource({ x: rect.x, y: rect.y,
-                                   width: rect.width + Math.min(0, rect.x), height: rect.height + Math.min(0, rect.y) }) })
-    }
+    //! the slice's input
+    function setInput(i, rect) { set(i, { input: onSource(rect) }) }
     function setPoint(i, k, p, kind) {
         if (i < 0 || i >= slices.length) return
         const s = copyOf(i)
