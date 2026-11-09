@@ -222,3 +222,9 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   content item, never inside a fit / scale view, so it is 1:1 on displays.
 - Windows can't share a scene graph texture: one window per display would
   render the content once per display. Hence the one spanning window.
+- An app can host MappingEditor in its own panel (LaunchPortal: the panel's
+  Output tab) instead of MappingWindow; the editor carries its own Undo /
+  Redo shortcuts. OutputWindow.parkWhenUnused moves the output window out of
+  sight (still rendering: the preview stays live) while no slice is on a
+  display; keep `ready` false until the app has put its default slices on
+  displays, or it parks too early.
