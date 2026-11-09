@@ -99,6 +99,7 @@ void WarpMesh::setRows(int rows)
 
 void WarpMesh::setPoints(const QVariantList &points)
 {
+    if (m_points == points) return; // the same points: no new mesh
     m_points = points;
     emit warpChanged();
     changed();

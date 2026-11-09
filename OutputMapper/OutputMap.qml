@@ -179,6 +179,17 @@ QtObject {
         if (mask) s.mask = mask.map(p => ({ x: p.x, y: p.y }))
         put(i, s)
     }
+    //! The slice's points (and mask) moved and scaled so their bounding box is
+    //! `rect` (output-normalised): a warp keeps its shape.
+    function setBounds(i, rect) {
+        if (i < 0 || i >= slices.length) return
+        const b = bounds(i), s = copyOf(i)
+        const sx = rect.width / Math.max(1e-6, b.width), sy = rect.height / Math.max(1e-6, b.height)
+        const f = q => ({ x: rect.x + (q.x - b.x) * sx, y: rect.y + (q.y - b.y) * sy })
+        s.points = s.points.map(f)
+        s.mask = s.mask.map(f)
+        put(i, s)
+    }
     //! the bounding box of the slice's points (output-normalised)
     function bounds(i) {
         const pts = slices[i]?.points ?? []

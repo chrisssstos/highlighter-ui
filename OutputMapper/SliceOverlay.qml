@@ -25,7 +25,9 @@ Item {
     Shape {
         anchors.fill: parent
         visible: !!root.slice
-        preferredRendererType: Shape.CurveRenderer
+        // plain geometry, built off the GUI thread: these change on every move of a drag
+        preferredRendererType: Shape.GeometryRenderer
+        asynchronous: true
         // the warp's lines, faint
         ShapePath {
             strokeColor: Qt.rgba(root.ink.r, root.ink.g, root.ink.b, 0.35)
