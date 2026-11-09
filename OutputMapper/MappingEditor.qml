@@ -129,9 +129,13 @@ Item {
             ParamCombo {
                 width: parent.width
                 label: "Output"
-                model: ["None"].concat(ed.outputNames)
-                currentIndex: ed.sel ? ed.at(ed.sel) + 1 : 0
+                // a display the slice is on but that isn't connected now stays its
+                // own last entry, until another is picked
+                readonly property bool missing: !!ed.sel && ed.sel.output !== "" && ed.at(ed.sel) < 0
+                model: ["None"].concat(ed.outputNames).concat(missing ? ["Not connected"] : [])
+                currentIndex: !ed.sel ? 0 : missing ? ed.outputNames.length + 1 : ed.at(ed.sel) + 1
                 onActivated: i => {
+                    if (i > ed.outputNames.length) return
                     const id = i === 0 ? "" : ed.map.outputs[i - 1].id
                     ed.map.set(ed.map.selected, { output: id })
                     if (id !== "") ed.viewedId = id
@@ -266,7 +270,8 @@ Item {
             id: inputView
             visible: ed.map.view === "input"
             anchors { top: caption.bottom; topMargin: Theme.s(8); left: parent.left; right: parent.right; bottom: parent.bottom }
-            readonly property real k: Math.min((width - Theme.s(64)) / ed.map.sourceWidth, (height - Theme.s(64)) / ed.map.sourceHeight)
+            // room round the picture to drag past its edges
+            readonly property real k: Math.min(width * 0.75 / ed.map.sourceWidth, height * 0.75 / ed.map.sourceHeight)
             property string hoverText: ""
             property real guideX: NaN
             property real guideY: NaN
@@ -328,7 +333,7 @@ Item {
                     property int corner: -1   // 0..3, or 4 for the whole rectangle
                     property point start
                     property var startRect
-                    readonly property real pad: Theme.s(28)
+                    readonly property real pad: Math.max(Theme.s(28), Math.min(srcFrame.x, srcFrame.y))
 
                     function srcAt(mx, my) { return Qt.point((mx - pad) / inputView.k, (my - pad) / inputView.k) }
                     //! the key lines: the source's edges and middle, the app's own
@@ -366,9 +371,6 @@ Item {
                             r.y = !isNaN(t.line) ? t.v : !isNaN(b.line) ? b.v - r.height : startRect.y + dy
                             inputView.guideX = !isNaN(l.line) ? l.line : rr.line
                             inputView.guideY = !isNaN(t.line) ? t.line : b.line
-                            // a move stops at the source's edges (it doesn't shrink)
-                            r.x = Math.max(0, Math.min(ed.map.sourceWidth - r.width, r.x))
-                            r.y = Math.max(0, Math.min(ed.map.sourceHeight - r.height, r.y))
                         } else {
                             const right = corner % 2 === 1, bottom = corner >= 2
                             let x0 = startRect.x, y0 = startRect.y, x1 = startRect.x + startRect.width, y1 = startRect.y + startRect.height
@@ -416,8 +418,8 @@ Item {
             focus: visible
             anchors { top: caption.bottom; topMargin: Theme.s(8); left: parent.left; right: parent.right; bottom: parent.bottom }
             readonly property var o: ed.map.outputs[ed.viewedOutput] ?? { width: 1920, height: 1080 }
-            // room round the output for the stretch bars and points past its edge
-            readonly property real k: Math.min((width - Theme.s(64)) / o.width, (height - Theme.s(64)) / o.height)
+            // room round the display to stretch and drag past its edges
+            readonly property real k: Math.min(width * 0.75 / o.width, height * 0.75 / o.height)
             property string hoverText: ""
             property real guideX: NaN
             property real guideY: NaN
@@ -429,6 +431,30 @@ Item {
                 anchors.centerIn: parent
                 Rectangle { anchors.fill: parent; color: "black" }
 
+                // past the display's edge: drawn too, faintly (the display shows only what's on it)
+                Item {
+                    anchors.fill: parent
+                    anchors.margins: -pointer.pad
+                    clip: true
+                    opacity: 0.35
+                    Repeater {
+                        model: ed.map.slices.length
+                        WarpMesh {
+                            required property int index
+                            readonly property var s: { ed.map.revision; return ed.map.slices[index] }
+                            x: pointer.pad; y: pointer.pad
+                            width: outFrame.width; height: outFrame.height
+                            visible: s.enabled && ed.at(s) === ed.viewedOutput
+                            source: ed.picture
+                            subdivisions: 16
+                            sourceRect: Qt.rect(s.input.x / ed.map.sourceWidth, s.input.y / ed.map.sourceHeight,
+                                                s.input.width / ed.map.sourceWidth, s.input.height / ed.map.sourceHeight)
+                            columns: s.columns; rows: s.rows; perspective: s.perspective
+                            points: s.points
+                        }
+                    }
+                }
+                Rectangle { anchors.fill: parent; color: "black" }
                 Item {
                     anchors.fill: parent
                     clip: true
@@ -503,7 +529,7 @@ Item {
                 MouseArea {
                     id: pointer
                     anchors.fill: parent
-                    anchors.margins: -Theme.s(40) // points can sit past the output's edge
+                    anchors.margins: -pad // points and edges can go past the display's
                     hoverEnabled: true
                     preventStealing: true
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -525,7 +551,7 @@ Item {
                         return Qt.point((b.x + b.width / 2) * w, (b.y + b.height) * h + reach)
                     }
 
-                    readonly property real pad: Theme.s(40)
+                    readonly property real pad: Math.max(Theme.s(40), Math.min(outFrame.x, outFrame.y))
                     function norm(mx, my) { return Qt.point((mx - pad) / outFrame.width, (my - pad) / outFrame.height) }
                     function dist(a, b) { return Math.hypot((a.x - b.x) * outFrame.width, (a.y - b.y) * outFrame.height) }
                     function inside(p, poly) {
