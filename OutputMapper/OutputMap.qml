@@ -54,6 +54,11 @@ QtObject {
     signal saveRequested()
     signal revertRequested()
 
+    //! a stand-in for a slice that has just gone (a view's delegate may read it
+    //! before its Repeater has shrunk)
+    readonly property var blank: ({ name: "", output: "", enabled: false, input: { x: 0, y: 0, width: 1, height: 1 },
+                                    columns: 2, rows: 2, perspective: true, points: [], mask: [] })
+
     // --- outputs -------------------------------------------------------------
     //! an output's id: an id kept as it is (its display may come back), an
     //! index (older mappings) turned into that output's id
@@ -95,7 +100,8 @@ QtObject {
         const c = Math.max(2, s.columns ?? 2), r = Math.max(2, s.rows ?? 2)
         const pts = Array.isArray(s.points) && s.points.length === c * r ? s.points : Warp.grid(c, r)
         return {
-            name: String(s.name ?? "Slice"), output: outputId(s.output),
+            // (a number is from before outputs had ids: a canvas, not a display)
+            name: String(s.name ?? "Slice"), output: typeof s.output === "number" ? "" : outputId(s.output),
             enabled: s.enabled !== false,
             input: onSource(s.input ?? {}),
             columns: c, rows: r, perspective: s.perspective !== false,
@@ -144,8 +150,9 @@ QtObject {
         _lastKind = ""
         revision++; dirty = true
     }
-    function undo() { _restore(_undo, _redo) }
-    function redo() { _restore(_redo, _undo) }
+    // not in the middle of a drag (its step is still open)
+    function undo() { if (_group === 0) _restore(_undo, _redo) }
+    function redo() { if (_group === 0) _restore(_redo, _undo) }
 
     function set(i, changes) {
         if (i < 0 || i >= slices.length) return
