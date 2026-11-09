@@ -9,38 +9,52 @@
 
 namespace {
 
-// The mesh node. A layer's texture (ShaderEffectSource) is only brought up to
-// date when something asks; this asks every frame it is drawn.
+// The mesh node. It keeps its source (the texture provider), not a texture:
+// each frame it takes the provider's texture as it is then (an Image's is
+// replaced, and freed, with each new picture), and asks a layer's
+// (ShaderEffectSource) to be brought up to date, unless told not to (a
+// second reader in a grab).
 class WarpNode : public QSGGeometryNode
 {
 public:
-    explicit WarpNode(bool refresh)
+    WarpNode()
     {
-        setFlag(UsePreprocess, refresh);
+        setFlag(UsePreprocess, true);
         setFlag(OwnsGeometry, true);
         setMaterial(&m_material);
         setOpaqueMaterial(&m_opaque);
-        m_material.setFiltering(QSGTexture::Linear);
-        m_opaque.setFiltering(QSGTexture::Linear);
-        m_material.setHorizontalWrapMode(QSGTexture::ClampToEdge);
-        m_material.setVerticalWrapMode(QSGTexture::ClampToEdge);
-        m_opaque.setHorizontalWrapMode(QSGTexture::ClampToEdge);
-        m_opaque.setVerticalWrapMode(QSGTexture::ClampToEdge);
+        for (QSGOpaqueTextureMaterial *m : std::initializer_list<QSGOpaqueTextureMaterial *>{ &m_material, &m_opaque }) {
+            m->setFiltering(QSGTexture::Linear);
+            m->setHorizontalWrapMode(QSGTexture::ClampToEdge);
+            m->setVerticalWrapMode(QSGTexture::ClampToEdge);
+        }
     }
 
-    void setTexture(QSGTexture *t)
+    QPointer<QSGTextureProvider> provider;
+    bool refresh = true;
+    int cells = -1; // the mesh's subdivisions (its triangles only change with them)
+
+    //! the provider's texture as it is now
+    QSGTexture *takeTexture()
     {
-        if (m_material.texture() == t) return;
-        m_material.setTexture(t);
-        m_opaque.setTexture(t);
-        markDirty(DirtyMaterial);
+        QSGTexture *t = provider ? provider->texture() : nullptr;
+        // a small Image's texture is a piece of a shared atlas: the mesh wants
+        // the picture on its own (0..1 across it)
+        if (t && t->isAtlasTexture()) t = t->removedFromAtlas();
+        if (t != m_material.texture()) {
+            m_material.setTexture(t);
+            m_opaque.setTexture(t);
+            markDirty(DirtyMaterial);
+        }
+        return t;
     }
-    QSGTexture *texture() const { return m_material.texture(); }
 
     void preprocess() override
     {
-        if (auto *d = qobject_cast<QSGDynamicTexture *>(texture()))
-            d->updateTexture();
+        QSGTexture *t = takeTexture();
+        if (refresh)
+            if (auto *d = qobject_cast<QSGDynamicTexture *>(t))
+                d->updateTexture();
     }
 
 private:
@@ -147,7 +161,7 @@ QSGNode *WarpMesh::updatePaintNode(QSGNode *old, UpdatePaintNodeData *)
 {
     auto *node = static_cast<WarpNode *>(old);
 
-    // the texture, from the source's provider (render thread)
+    // the source's provider (render thread); its texture is read each frame
     QSGTextureProvider *provider = m_source && m_source->isTextureProvider() ? m_source->textureProvider() : nullptr;
     if (provider != m_provider) {
         if (m_provider) disconnect(m_provider, nullptr, this, nullptr);
@@ -155,30 +169,41 @@ QSGNode *WarpMesh::updatePaintNode(QSGNode *old, UpdatePaintNodeData *)
         if (provider)
             connect(provider, &QSGTextureProvider::textureChanged, this, &QQuickItem::update, Qt::QueuedConnection);
     }
-    QSGTexture *texture = provider ? provider->texture() : nullptr;
-    const warpmath::Grid grid = warpmath::fromVariant(m_points, m_columns, m_rows, m_perspective);
-    if (!texture || width() <= 0 || height() <= 0) {
+    if (!provider || !provider->texture() || width() <= 0 || height() <= 0) {
         delete node;
         return nullptr;
     }
 
-    if (node && node->flags().testFlag(QSGNode::UsePreprocess) != m_refreshSource) {
-        delete node;
-        node = nullptr;
-    }
     if (!node) {
-        node = new WarpNode(m_refreshSource);
+        node = new WarpNode;
         m_meshDirty = true;
     }
-    node->setTexture(texture);
+    node->provider = provider;
+    node->refresh = m_refreshSource;
+    node->takeTexture(); // the texture now, for this frame's batching
 
     if (m_meshDirty) {
         m_meshDirty = false;
+        const warpmath::Grid grid = warpmath::fromVariant(m_points, m_columns, m_rows, m_perspective);
         const int n = m_subdivisions;
         const int perRow = n + 1;
-        auto *geometry = new QSGGeometry(QSGGeometry::defaultAttributes_TexturedPoint2D(), perRow * perRow, n * n * 6,
-                                         QSGGeometry::UnsignedIntType);
-        geometry->setDrawingMode(QSGGeometry::DrawTriangles);
+        // the triangles only change with the subdivisions: otherwise only the vertices move
+        QSGGeometry *geometry = node->geometry();
+        if (node->cells != n || !geometry) {
+            geometry = new QSGGeometry(QSGGeometry::defaultAttributes_TexturedPoint2D(), perRow * perRow, n * n * 6,
+                                       QSGGeometry::UnsignedIntType);
+            geometry->setDrawingMode(QSGGeometry::DrawTriangles);
+            quint32 *idx = geometry->indexDataAsUInt();
+            for (int j = 0; j < n; ++j) {
+                for (int i = 0; i < n; ++i) {
+                    const quint32 a = j * perRow + i, b = a + 1, c = a + perRow, d = c + 1;
+                    *idx++ = a; *idx++ = b; *idx++ = c;
+                    *idx++ = b; *idx++ = d; *idx++ = c;
+                }
+            }
+            node->setGeometry(geometry);
+            node->cells = n;
+        }
         auto *v = geometry->vertexDataAsTexturedPoint2D();
         const QRectF s = m_sourceRect;
         const qreal w = width(), h = height();
@@ -197,15 +222,6 @@ QSGNode *WarpMesh::updatePaintNode(QSGNode *old, UpdatePaintNodeData *)
                 v[j * perRow + i].set(float(p.x() * w), float(p.y() * h), float(s.x() + u * s.width()), float(ty));
             }
         }
-        quint32 *idx = geometry->indexDataAsUInt();
-        for (int j = 0; j < n; ++j) {
-            for (int i = 0; i < n; ++i) {
-                const quint32 a = j * perRow + i, b = a + 1, c = a + perRow, d = c + 1;
-                *idx++ = a; *idx++ = b; *idx++ = c;
-                *idx++ = b; *idx++ = d; *idx++ = c;
-            }
-        }
-        node->setGeometry(geometry);
         node->markDirty(QSGNode::DirtyGeometry);
     }
     return node;

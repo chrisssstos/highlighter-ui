@@ -61,7 +61,7 @@ Item {
         model: root.map ? root.map.slices.length : 0
         Item {
             required property int index
-            readonly property var s: { root.map.revision; return root.map.slices[index] ?? root.map.blank }
+            readonly property var s: root.map.sliceAt(index)
             readonly property color tint: ["#def243", "#5cc8ff", "#f0b44a", "#e0664f", "#b48cff"][index % 5]
             x: s.input.x; y: s.input.y; width: s.input.width; height: s.input.height
             Rectangle { anchors.fill: parent; color: "transparent"; border.color: parent.tint; border.width: 8 }

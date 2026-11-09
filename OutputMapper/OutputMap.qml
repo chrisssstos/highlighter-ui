@@ -26,8 +26,7 @@ QtObject {
     //! other slices (source px): where the app's own parts meet, say
     property var snapX: []
     property var snapY: []
-    //! slices to start from, and to go back to (Reset all); the app's
-    //! one-per-output layout, say
+    //! slices to start from (nothing saved): the app's layout, say
     property var defaults: []
 
     property var slices: []
@@ -52,7 +51,6 @@ QtObject {
     property string view: "input"
 
     signal saveRequested()
-    signal revertRequested()
 
     //! a stand-in for a slice that has just gone (a view's delegate may read it
     //! before its Repeater has shrunk)
@@ -93,7 +91,6 @@ QtObject {
         dirty = false
         _undo = []; _redo = []
     }
-    function resetAll() { record(); slices = defaults.map(normalised); selected = slices.length ? 0 : -1; selectedPoint = -1; touch() }
     function saved() { dirty = false }
 
     function normalised(s) {
@@ -116,7 +113,8 @@ QtObject {
         return { x: Math.round(r.x ?? 0), y: Math.round(r.y ?? 0),
                  width: Math.max(1, Math.round(r.width ?? sourceWidth)), height: Math.max(1, Math.round(r.height ?? sourceHeight)) }
     }
-    function touch() { slices = slices.slice(); revision++; dirty = true }
+    //! slice i, or a stand-in while a view's Repeater hasn't shrunk yet
+    function sliceAt(i) { revision; return slices[i] ?? blank }
     function copyOf(i) { return JSON.parse(JSON.stringify(slices[i])) }
     function put(i, s, kind) { record(kind); const list = slices.slice(); list[i] = s; slices = list; revision++; dirty = true }
 
@@ -177,15 +175,6 @@ QtObject {
         s.mask = s.mask.map(p => ({ x: p.x + dx, y: p.y + dy }))
         put(i, s, kind)
     }
-    //! the slice's points (and mask) as given: a stretch worked out from where
-    //! a drag started
-    function setShape(i, points, mask) {
-        if (i < 0 || i >= slices.length) return
-        const s = copyOf(i)
-        s.points = points.map(p => ({ x: p.x, y: p.y }))
-        if (mask) s.mask = mask.map(p => ({ x: p.x, y: p.y }))
-        put(i, s)
-    }
     //! The slice's points (and mask) moved and scaled so their bounding box is
     //! `rect` (output-normalised): a warp keeps its shape.
     function setBounds(i, rect) {
@@ -245,13 +234,6 @@ QtObject {
             === JSON.stringify(Warp.grid(s.columns, s.rows).map(p => [Math.round(p.x * 1e4), Math.round(p.y * 1e4)]))
     }
 
-    //! the warp back to the output's full rectangle
-    function resetWarp(i) {
-        if (i < 0 || i >= slices.length) return
-        const s = copyOf(i)
-        s.points = Warp.grid(s.columns, s.rows)
-        put(i, s)
-    }
 
     function add() {
         const list = slices.slice()

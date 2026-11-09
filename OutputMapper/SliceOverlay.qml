@@ -77,10 +77,11 @@ Item {
 
     // the control points (the mask's in mask mode)
     Repeater {
-        model: root.selected ? (root.maskMode ? (root.slice?.mask ?? []) : root.pts) : []
+        // a count, not the points: the handles move in place as the points change
+        model: root.selected ? (root.maskMode ? (root.slice?.mask?.length ?? 0) : root.pts.length) : 0
         Rectangle {
-            required property var modelData
             required property int index
+            readonly property var modelData: (root.maskMode ? root.slice?.mask : root.pts)?.[index] ?? ({ x: 0, y: 0 })
             readonly property bool hot: !root.maskMode && index === root.selectedPoint
             readonly property real size: (hot ? 16 : 11) * root.unit
             x: modelData.x * root.width - size / 2

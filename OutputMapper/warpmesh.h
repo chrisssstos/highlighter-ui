@@ -9,8 +9,8 @@
 class QSGTextureProvider;
 
 // One slice drawn to its output: a rectangle of a texture (sourceRect, 0..1
-// of `source`, which must give a texture: a ShaderEffectSource, or an item
-// with layer.enabled) through the warp its points describe (see warpmath.h),
+// of `source`, any texture provider: a ShaderEffectSource, an item with
+// layer.enabled, an Image) through the warp its points describe (see warpmath.h),
 // over this item's whole area. Drawing it is one textured mesh, so any
 // number of slices can read the same source, rendered once.
 class WarpMesh : public QQuickItem
