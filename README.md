@@ -177,7 +177,7 @@ OutputMap {
     id: mapping
     sourceWidth: 7680; sourceHeight: 2160
     outputs: displays.displays   // or areas: [{ id, name, x, y, width, height }]
-    defaults: [slice("Left", "display:\\.\DISPLAY1", { x: 0, y: 0, width: 3840, height: 2160 })]
+    defaults: [slice("Whole", displays.displays[0]?.id, { x: 0, y: 0, width: 7680, height: 2160 })]
     Component.onCompleted: load(savedJson)
     onSaveRequested: { save(toJson()); saved() }
 }
