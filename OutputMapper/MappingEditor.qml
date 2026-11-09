@@ -22,6 +22,8 @@ Item {
     //! `thumbnail` (null: none)
     property Item previewSource: null
     property int previewMs: 33
+    //! its own Save button (off where the app saves another way)
+    property bool showSave: true
 
     readonly property var sel: { map.revision; return map.selected >= 0 && map.selected < map.slices.length ? map.slices[map.selected] : null }
     //! the output the Output view shows, by id (outputs come and go: a
@@ -208,13 +210,6 @@ rows: ed.tableRows
                 onActivated: i => i === 0 ? ed.map.setGrid(ed.map.selected, 2, 2, true)
                                           : ed.map.setGrid(ed.map.selected, i + 2, i + 2, false)
             }
-            ParamCheck {
-                width: parent.width
-                visible: ed.sel?.columns === 2 && ed.sel?.rows === 2
-                text: "Perspective"
-                checked: ed.sel?.perspective ?? true
-                onToggled: c => ed.map.setGrid(ed.map.selected, 2, 2, c)
-            }
             ParamHeading { width: parent.width; text: "Size"; note: "on its display" }
             Flow {
                 width: parent.width
@@ -281,10 +276,6 @@ rows: ed.tableRows
                     }
                 }
             }
-            ParamButton {
-                text: "Whole source"
-                onClicked: ed.map.setInput(ed.map.selected, { x: 0, y: 0, width: ed.map.sourceWidth, height: ed.map.sourceHeight })
-            }
 
             ParamHeading { width: parent.width; text: "Mask"; note: (ed.sel?.mask.length ?? 0) >= 3 ? ed.sel.mask.length + " points" : "none" }
             ParamToggle {
@@ -301,47 +292,6 @@ rows: ed.tableRows
             }
         }
 
-        ParamSection {
-            width: parent.width
-            title: "View"
-            ParamChoice {
-                width: parent.width
-                model: ["Input", "Output"]
-                currentIndex: ed.map.view === "input" ? 0 : 1
-                onActivated: i => ed.map.view = i === 0 ? "input" : "output"
-            }
-            ParamCombo {
-                width: parent.width
-                visible: ed.map.view === "output" && ed.outputNames.length > 1
-                label: "Showing"
-                model: ed.outputNames
-                currentIndex: ed.viewedOutput
-                onActivated: i => ed.viewedId = ed.map.outputs[i].id
-            }
-            ParamToggle {
-                width: parent.width
-                text: "Test card"
-                checked: ed.map.testCard
-                onToggled: c => ed.map.testCard = c
-            }
-            ParamToggle {
-                width: parent.width
-                text: "Show on output"
-                checked: ed.map.showOnOutput
-                onToggled: c => ed.map.showOnOutput = c
-            }
-        }
-
-        Flow {
-            width: parent.width
-            spacing: Theme.s(6)
-            ParamButton { text: "Undo"; enabled: ed.map.canUndo; onClicked: ed.map.undo() }
-            ParamButton { text: "Redo"; enabled: ed.map.canRedo; onClicked: ed.map.redo() }
-            ParamButton { text: "Save"; accent: true; enabled: ed.map.dirty; onClicked: ed.map.saveRequested() }
-            ParamButton { text: "Revert"; enabled: ed.map.dirty; onClicked: ed.map.revertRequested() }
-            ParamButton { text: "Reset all"; danger: true; onClicked: ed.map.resetAll() }
-        }
-        ParamText { width: parent.width; small: true; text: ed.map.dirty ? "Not saved" : "Saved" }
     }
 
     // --- the view ---------------------------------------------------------------
@@ -351,8 +301,44 @@ rows: ed.tableRows
         // what reaches past the view (an input far off the picture) stays in it
         clip: true
 
+        // the toolbar: which view, what's shown, undo, save
+        Row {
+            id: toolbar
+            width: parent.width
+            spacing: Theme.s(16)
+            ParamChoice {
+                width: Theme.s(220)
+                model: ["Input", "Output"]
+                currentIndex: ed.map.view === "input" ? 0 : 1
+                cellHeight: Theme.s(30)
+                onActivated: i => ed.map.view = i === 0 ? "input" : "output"
+            }
+            ParamToggle {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Test card"
+                checked: ed.map.testCard
+                onToggled: c => ed.map.testCard = c
+            }
+            ParamToggle {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Show on output"
+                checked: ed.map.showOnOutput
+                onToggled: c => ed.map.showOnOutput = c
+            }
+        }
+        Row {
+            anchors.right: parent.right
+            anchors.verticalCenter: toolbar.verticalCenter
+            spacing: Theme.s(6)
+            ParamButton { text: "Undo"; enabled: ed.map.canUndo; onClicked: ed.map.undo() }
+            ParamButton { text: "Redo"; enabled: ed.map.canRedo; onClicked: ed.map.redo() }
+            ParamButton { visible: ed.showSave; text: "Save"; accent: true; enabled: ed.map.dirty; onClicked: ed.map.saveRequested() }
+        }
+
         ParamText {
             id: caption
+            anchors.top: toolbar.bottom
+            anchors.topMargin: Theme.s(12)
             width: parent.width
             mono: true
             small: true
