@@ -154,7 +154,8 @@ slices, like Resolume's Advanced Output.
   textured mesh read from it (`WarpMesh`, C++). Nothing renders twice.
 - **Editor** (`MappingWindow`, drawn with HighlighterUI): slices list, Input (the
   whole picture) and Output (one display) views with a live preview, drag points
-  or a whole slice, bars outside its edges to stretch it, Undo / Redo
+  or a whole slice, bars outside its edges to stretch it, Size (Fit, Fill,
+  Stretch, 1:1; a slice put on a display starts fitted), Undo / Redo
   (Ctrl+Z, Ctrl+Y; a drag or a run of nudges is one step), Shift for fine,
   Ctrl to stop snapping, arrow keys to nudge a pixel (Shift: ten), Tab for the
   next point; mask mode (click to add, drag, right-click to remove); test card;

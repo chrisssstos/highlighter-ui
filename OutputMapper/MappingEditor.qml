@@ -140,7 +140,11 @@ Item {
                 onActivated: i => {
                     if (i > ed.outputNames.length) return
                     const id = i === 0 ? "" : ed.map.outputs[i - 1].id
+                    // a slice put on a display as a plain rectangle starts
+                    // fitted, its shape kept (not stretched to the display)
+                    const fresh = id !== "" && ed.map.untouched(ed.map.selected)
                     ed.map.set(ed.map.selected, { output: id })
+                    if (fresh) ed.map.sizeTo(ed.map.selected, "fit")
                     if (id !== "") ed.viewedId = id
                 }
             }
@@ -165,7 +169,20 @@ Item {
                 checked: ed.sel?.perspective ?? true
                 onToggled: c => ed.map.setGrid(ed.map.selected, 2, 2, c)
             }
-            ParamButton { text: "Reset warp"; onClicked: ed.map.resetWarp(ed.map.selected) }
+            ParamHeading { width: parent.width; text: "Size"; note: "on its display" }
+            Flow {
+                width: parent.width
+                spacing: Theme.s(6)
+                Repeater {
+                    model: [["fit", "Fit"], ["fill", "Fill"], ["stretch", "Stretch"], ["native", "1:1"]]
+                    ParamButton {
+                        required property var modelData
+                        text: modelData[1]
+                        enabled: !!ed.sel && ed.at(ed.sel) >= 0
+                        onClicked: ed.map.sizeTo(ed.map.selected, modelData[0])
+                    }
+                }
+            }
 
             ParamHeading { width: parent.width; text: "Input"; note: "source px" }
             ParamGrid {
@@ -569,6 +586,8 @@ Item {
                     //! output's edges and middle, every other point on this output
                     function lines(horizontal, skipSlice, skipPoint) {
                         const out = [0, 0.5, 1]
+                        // a whole slice moved: the display's edges and middle only
+                        if (dragging === "all") return out
                         ed.map.slices.forEach((s, i) => {
                             if (ed.at(s) !== ed.viewedOutput) return
                             s.points.forEach((q, k) => { if (!(i === skipSlice && (skipPoint < 0 || k === skipPoint))) out.push(horizontal ? q.x : q.y) })
@@ -579,7 +598,7 @@ Item {
                     function snap(v, horizontal, mods, skipSlice, skipPoint) {
                         if (mods & Qt.ControlModifier) return { v: v, line: NaN }
                         const size = horizontal ? outFrame.width : outFrame.height
-                        let best = NaN, d = Theme.s(10) / size
+                        let best = NaN, d = (dragging === "all" ? Theme.s(6) : Theme.s(10)) / size
                         for (const e of lines(horizontal, skipSlice, skipPoint)) if (Math.abs(v - e) < d) { d = Math.abs(v - e); best = e }
                         return { v: isNaN(best) ? v : best, line: best }
                     }

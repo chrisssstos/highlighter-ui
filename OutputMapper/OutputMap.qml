@@ -196,6 +196,37 @@ QtObject {
         put(i, s)
         selectedPoint = -1
     }
+    //! The slice's size on its output, its shape kept or not:
+    //!  "fit"     the whole input, its shape kept, as big as fits (bars round it)
+    //!  "fill"    the whole output, its shape kept (the input cropped to fit)
+    //!  "stretch" the whole output, the input stretched to it
+    //!  "native"  one source pixel to an output pixel, centred
+    function sizeTo(i, mode) {
+        if (i < 0 || i >= slices.length) return
+        const s = copyOf(i), o = outputOf(s)
+        if (!o || o.width <= 0 || o.height <= 0) return
+        const aIn = s.input.width / s.input.height, aOut = o.width / o.height
+        let w = 1, h = 1
+        if (mode === "fit") { if (aIn > aOut) h = aOut / aIn; else w = aIn / aOut }
+        if (mode === "native") { w = s.input.width / o.width; h = s.input.height / o.height }
+        if (mode === "fill") {
+            // the input cropped round its middle to the output's shape
+            const cx = s.input.x + s.input.width / 2, cy = s.input.y + s.input.height / 2
+            let iw = s.input.width, ih = s.input.height
+            if (aIn > aOut) iw = ih * aOut; else ih = iw / aOut
+            s.input = { x: Math.round(cx - iw / 2), y: Math.round(cy - ih / 2), width: Math.round(iw), height: Math.round(ih) }
+        }
+        const x0 = (1 - w) / 2, y0 = (1 - h) / 2
+        s.points = Warp.grid(s.columns, s.rows).map(p => ({ x: x0 + p.x * w, y: y0 + p.y * h }))
+        put(i, s)
+    }
+    //! the slice's points are still the plain full rectangle (never warped)
+    function untouched(i) {
+        const s = slices[i]
+        return !!s && JSON.stringify(s.points.map(p => [Math.round(p.x * 1e4), Math.round(p.y * 1e4)]))
+            === JSON.stringify(Warp.grid(s.columns, s.rows).map(p => [Math.round(p.x * 1e4), Math.round(p.y * 1e4)]))
+    }
+
     //! the warp back to the output's full rectangle
     function resetWarp(i) {
         if (i < 0 || i >= slices.length) return
