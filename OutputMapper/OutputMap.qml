@@ -12,7 +12,7 @@ import OutputMapper
 /// of the window), loads what it saved with `load(json)` (or starts from
 /// `defaults`), and saves `toJson()` when `saveRequested` comes.
 ///
-/// A slice: { name, output (an output's id), enabled, input: { x, y, width, height }
+/// A slice: { name, output (an output's id, "" for none), enabled, input: { x, y, width, height }
 /// (source pixels), columns, rows, perspective, points: [{ x, y }] (columns
 /// x rows, row by row, normalised to the output), mask: [{ x, y }] (the
 /// visible area, normalised to the output; fewer than 3 points: no mask) }.
@@ -31,6 +31,9 @@ QtObject {
     property int revision: 0
     //! changed since loaded or saved
     property bool dirty: false
+    //! some shown slice is on an output that is there now: the outputs are
+    //! in use (otherwise the app shows its content plain)
+    readonly property bool live: { revision; outputs; return slices.some(s => s.enabled && outputIndex(s.output) >= 0) }
 
     // --- what the editor and the outputs share -------------------------------
     property int selected: slices.length ? 0 : -1
@@ -42,7 +45,7 @@ QtObject {
     //! editing the selected slice's mask rather than its warp
     property bool maskMode: false
     //! the editor's view: "input" (the source) or "output"
-    property string view: "output"
+    property string view: "input"
 
     signal saveRequested()
     signal revertRequested()
@@ -50,16 +53,16 @@ QtObject {
     // --- outputs -------------------------------------------------------------
     //! an output's id: an id kept as it is (its display may come back), an
     //! index (older mappings) turned into that output's id
-    function outputId(o) { return typeof o === "number" ? (outputs[o]?.id ?? outputs[0]?.id ?? "") : String(o ?? outputs[0]?.id ?? "") }
-    //! where an output is in `outputs`, or -1 (a display not connected now)
-    function outputIndex(o) { const id = outputId(o); return outputs.findIndex(x => x.id === id) }
+    function outputId(o) { return typeof o === "number" ? (outputs[o]?.id ?? "") : String(o ?? "") }
+    //! where an output is in `outputs`, or -1 (none, or a display not connected now)
+    function outputIndex(o) { const id = outputId(o); return id === "" ? -1 : outputs.findIndex(x => x.id === id) }
     //! a slice's output, or null when it isn't there now (the slice isn't drawn)
     function outputOf(s) { const i = s ? outputIndex(s.output) : -1; return i >= 0 ? outputs[i] : null }
 
     // --- slices ----------------------------------------------------------------
     function slice(name, output, input) {
         return {
-            name: name, output: outputId(output ?? 0), enabled: true,
+            name: name, output: outputId(output ?? ""), enabled: true,
             input: input ?? { x: 0, y: 0, width: sourceWidth, height: sourceHeight },
             columns: 2, rows: 2, perspective: true,
             points: Warp.grid(2, 2), mask: []
@@ -79,8 +82,9 @@ QtObject {
         selectedPoint = -1
         revision++
         dirty = false
+        _undo = []; _redo = []
     }
-    function resetAll() { slices = defaults.map(normalised); selected = slices.length ? 0 : -1; selectedPoint = -1; touch() }
+    function resetAll() { record(); slices = defaults.map(normalised); selected = slices.length ? 0 : -1; selectedPoint = -1; touch() }
     function saved() { dirty = false }
 
     function normalised(s) {
@@ -98,7 +102,40 @@ QtObject {
 
     function touch() { slices = slices.slice(); revision++; dirty = true }
     function copyOf(i) { return JSON.parse(JSON.stringify(slices[i])) }
-    function put(i, s) { const list = slices.slice(); list[i] = s; slices = list; revision++; dirty = true }
+    function put(i, s, kind) { record(kind); const list = slices.slice(); list[i] = s; slices = list; revision++; dirty = true }
+
+    // --- undo --------------------------------------------------------------------
+    // Every change records the slices before it. A drag is one step
+    // (beginGroup on press, endGroup on release); changes with the same
+    // `kind` close together (arrow-key nudges) are one step too.
+    property var _undo: []
+    property var _redo: []
+    property int _group: 0
+    property bool _groupRecorded: false
+    property string _lastKind: ""
+    property real _lastAt: 0
+    readonly property bool canUndo: { revision; return _undo.length > 0 }
+    readonly property bool canRedo: { revision; return _redo.length > 0 }
+    function record(kind) {
+        if (_group > 0) { if (_groupRecorded) return; _groupRecorded = true }
+        else if (kind && kind === _lastKind && Date.now() - _lastAt < 800) { _lastAt = Date.now(); return }
+        _lastKind = kind ?? ""; _lastAt = Date.now()
+        _undo.push(JSON.stringify(slices))
+        if (_undo.length > 200) _undo.shift()
+        _redo = []
+    }
+    function beginGroup() { if (_group++ === 0) _groupRecorded = false }
+    function endGroup() { _group = Math.max(0, _group - 1) }
+    function _restore(from, to) {
+        if (!from.length) return
+        to.push(JSON.stringify(slices))
+        slices = JSON.parse(from.pop())
+        selected = Math.min(selected, slices.length - 1); selectedPoint = -1
+        _lastKind = ""
+        revision++; dirty = true
+    }
+    function undo() { _restore(_undo, _redo) }
+    function redo() { _restore(_redo, _undo) }
 
     function set(i, changes) {
         if (i < 0 || i >= slices.length) return
@@ -111,20 +148,37 @@ QtObject {
             x: Math.round(rect.x), y: Math.round(rect.y),
             width: Math.max(1, Math.round(rect.width)), height: Math.max(1, Math.round(rect.height)) } })
     }
-    function setPoint(i, k, p) {
+    function setPoint(i, k, p, kind) {
         if (i < 0 || i >= slices.length) return
         const s = copyOf(i)
         if (k < 0 || k >= s.points.length) return
         s.points[k] = { x: p.x, y: p.y }
-        put(i, s)
+        put(i, s, kind)
     }
     //! every point of the slice moved by (dx, dy), output-normalised
-    function moveAll(i, dx, dy) {
+    function moveAll(i, dx, dy, kind) {
         if (i < 0 || i >= slices.length) return
         const s = copyOf(i)
         s.points = s.points.map(p => ({ x: p.x + dx, y: p.y + dy }))
         s.mask = s.mask.map(p => ({ x: p.x + dx, y: p.y + dy }))
+        put(i, s, kind)
+    }
+    //! the slice's points (and mask) as given: a stretch worked out from where
+    //! a drag started
+    function setShape(i, points, mask) {
+        if (i < 0 || i >= slices.length) return
+        const s = copyOf(i)
+        s.points = points.map(p => ({ x: p.x, y: p.y }))
+        if (mask) s.mask = mask.map(p => ({ x: p.x, y: p.y }))
         put(i, s)
+    }
+    //! the bounding box of the slice's points (output-normalised)
+    function bounds(i) {
+        const pts = slices[i]?.points ?? []
+        if (!pts.length) return { x: 0, y: 0, width: 1, height: 1 }
+        const xs = pts.map(p => p.x), ys = pts.map(p => p.y)
+        const x0 = Math.min(...xs), y0 = Math.min(...ys)
+        return { x: x0, y: y0, width: Math.max(...xs) - x0, height: Math.max(...ys) - y0 }
     }
     //! a new grid of points for the same warp (Corners keeps its perspective)
     function setGrid(i, columns, rows, perspective) {
@@ -145,11 +199,13 @@ QtObject {
 
     function add() {
         const list = slices.slice()
-        list.push(slice("Slice " + (list.length + 1), selected >= 0 ? slices[selected].output : outputs[0]?.id))
+        record()
+        list.push(slice("Slice " + (list.length + 1), selected >= 0 ? slices[selected].output : ""))
         slices = list; selected = list.length - 1; selectedPoint = -1; revision++; dirty = true
     }
     function duplicate(i) {
         if (i < 0 || i >= slices.length) return
+        record()
         const list = slices.slice()
         const s = copyOf(i)
         s.name = s.name + " copy"
@@ -158,6 +214,7 @@ QtObject {
     }
     function remove(i) {
         if (i < 0 || i >= slices.length) return
+        record()
         const list = slices.slice()
         list.splice(i, 1)
         slices = list

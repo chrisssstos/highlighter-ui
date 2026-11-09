@@ -6,6 +6,8 @@ import OutputMapper
 /// from it onto its output, warped and masked. Fill the output window with
 /// it; the source item is hidden from view (it is only seen through the
 /// slices). With `map.testCard`, a test card is mapped in place of the content.
+/// While no slice is on an output (`map.live` false), the source shows
+/// plain at `plainRect`: the app as it is without a mapping.
 Item {
     id: root
 
@@ -15,6 +17,8 @@ Item {
     property bool flipSource: false
     //! cells of each slice's mesh (more: smoother bends)
     property int subdivisions: 32
+    //! where the source shows while no slice is on an output (this item's coordinates)
+    property rect plainRect: Qt.rect(0, 0, width, height)
 
     //! the rendered source, for anything else here that wants to read it
     readonly property alias texture: rendered
@@ -60,6 +64,17 @@ Item {
         }
     }
     readonly property Item _drawn: cardLoader.item ? cardLoader.item.texture : rendered
+
+    // no slice on an output: the source plain, where the app puts it
+    WarpMesh {
+        visible: !root.map.live
+        x: root.plainRect.x; y: root.plainRect.y
+        width: root.plainRect.width; height: root.plainRect.height
+        source: root._drawn
+        flipSource: root.flipSource
+        subdivisions: 1
+        points: Warp.grid(2, 2)
+    }
 
     Repeater {
         model: root.map.slices.length

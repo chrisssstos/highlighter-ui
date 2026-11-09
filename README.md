@@ -152,8 +152,10 @@ slices, like Resolume's Advanced Output.
   6 × 6), with an optional mask polygon (everything outside it black).
 - **Cheap:** the content renders once into a texture; each slice is one
   textured mesh read from it (`WarpMesh`, C++). Nothing renders twice.
-- **Editor** (`MappingWindow`, drawn with HighlighterUI): slices list, Input and
-  Output views with a live still, drag points or a whole slice, Shift for fine,
+- **Editor** (`MappingWindow`, drawn with HighlighterUI): slices list, Input (the
+  whole picture) and Output (one display) views with a live preview, drag points
+  or a whole slice, bars outside its edges to stretch it, Undo / Redo
+  (Ctrl+Z, Ctrl+Y; a drag or a run of nudges is one step), Shift for fine,
   Ctrl to stop snapping, arrow keys to nudge a pixel (Shift: ten), Tab for the
   next point; mask mode (click to add, drag, right-click to remove); test card;
   "Show on output" draws outlines, points and names on the outputs themselves.
@@ -162,7 +164,9 @@ slices, like Resolume's Advanced Output.
   Give a slice a display and `OutputWindow` puts the output window over the
   displays in use, borderless, so each goes full screen by itself (one window
   spanning them: windows can't share a rendered picture, so the content stays
-  rendered once). No slice on a display: the window goes back to how it was.
+  rendered once). A slice's output can be None; while no slice is on a
+  display, MappedOutput shows the source plain at `plainRect` (the app as it
+  is unmapped) and the window goes back to how it was.
   A slice keeps its display by id, so an unplugged one comes back.
 - **Saving is the app's:** `OutputMap.toJson()` / `load(json)`, on `saveRequested`.
 
