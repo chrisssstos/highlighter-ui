@@ -21,6 +21,8 @@ import "ParamMath.js" as PM
 /// and write it back there.
 Item {
     id: root
+    // greyed out when it can't be changed, as the other controls
+    opacity: enabled ? 1 : 0.4
 
     //! The accent it draws in: its window's own, if that declares one (see Theme).
     readonly property color tint: Theme.accentAt(root, Window.window)
