@@ -7,11 +7,12 @@ import OutputMapper
 /// different windows.
 ///
 /// The app gives `sourceWidth` / `sourceHeight` (its content's size) and
-/// `outputs` (where each display is in the output window: { name, x, y,
-/// width, height }), loads what it saved with `load(json)` (or starts from
+/// `outputs` (where each lands in the output window: { id, name, x, y,
+/// width, height }: the PC's displays, from DisplayOutputs, and / or areas
+/// of the window), loads what it saved with `load(json)` (or starts from
 /// `defaults`), and saves `toJson()` when `saveRequested` comes.
 ///
-/// A slice: { name, output (index), enabled, input: { x, y, width, height }
+/// A slice: { name, output (an output's id), enabled, input: { x, y, width, height }
 /// (source pixels), columns, rows, perspective, points: [{ x, y }] (columns
 /// x rows, row by row, normalised to the output), mask: [{ x, y }] (the
 /// visible area, normalised to the output; fewer than 3 points: no mask) }.
@@ -20,7 +21,7 @@ QtObject {
 
     property real sourceWidth: 1920
     property real sourceHeight: 1080
-    property var outputs: [{ name: "Output", x: 0, y: 0, width: 1920, height: 1080 }]
+    property var outputs: [{ id: "output", name: "Output", x: 0, y: 0, width: 1920, height: 1080 }]
     //! slices to start from, and to go back to (Reset all); the app's
     //! one-per-output layout, say
     property var defaults: []
@@ -46,10 +47,19 @@ QtObject {
     signal saveRequested()
     signal revertRequested()
 
+    // --- outputs -------------------------------------------------------------
+    //! an output's id: an id kept as it is (its display may come back), an
+    //! index (older mappings) turned into that output's id
+    function outputId(o) { return typeof o === "number" ? (outputs[o]?.id ?? outputs[0]?.id ?? "") : String(o ?? outputs[0]?.id ?? "") }
+    //! where an output is in `outputs`, or -1 (a display not connected now)
+    function outputIndex(o) { const id = outputId(o); return outputs.findIndex(x => x.id === id) }
+    //! a slice's output, or null when it isn't there now (the slice isn't drawn)
+    function outputOf(s) { const i = s ? outputIndex(s.output) : -1; return i >= 0 ? outputs[i] : null }
+
     // --- slices ----------------------------------------------------------------
     function slice(name, output, input) {
         return {
-            name: name, output: output ?? 0, enabled: true,
+            name: name, output: outputId(output ?? 0), enabled: true,
             input: input ?? { x: 0, y: 0, width: sourceWidth, height: sourceHeight },
             columns: 2, rows: 2, perspective: true,
             points: Warp.grid(2, 2), mask: []
@@ -77,7 +87,7 @@ QtObject {
         const c = Math.max(2, s.columns ?? 2), r = Math.max(2, s.rows ?? 2)
         const pts = Array.isArray(s.points) && s.points.length === c * r ? s.points : Warp.grid(c, r)
         return {
-            name: String(s.name ?? "Slice"), output: Math.max(0, Math.min(outputs.length - 1, s.output ?? 0)),
+            name: String(s.name ?? "Slice"), output: outputId(s.output),
             enabled: s.enabled !== false,
             input: { x: s.input?.x ?? 0, y: s.input?.y ?? 0, width: s.input?.width ?? sourceWidth, height: s.input?.height ?? sourceHeight },
             columns: c, rows: r, perspective: s.perspective !== false,
@@ -135,7 +145,7 @@ QtObject {
 
     function add() {
         const list = slices.slice()
-        list.push(slice("Slice " + (list.length + 1), selected >= 0 ? slices[selected].output : 0))
+        list.push(slice("Slice " + (list.length + 1), selected >= 0 ? slices[selected].output : outputs[0]?.id))
         slices = list; selected = list.length - 1; selectedPoint = -1; revision++; dirty = true
     }
     function duplicate(i) {

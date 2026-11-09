@@ -18,9 +18,11 @@ Item {
 
     //! the rendered source, for anything else here that wants to read it
     readonly property alias texture: rendered
-    //! the source at a quarter size, for the editor's views to grab
-    //! (grabbing the source itself would render it all again)
+    //! the source small, for the editor's views to grab (grabbing the
+    //! source itself would render it all again)
     readonly property alias thumbnail: thumb
+    //! the thumbnail's size, of the source's
+    property real thumbnailScale: 1 / 6
 
     ShaderEffectSource {
         id: rendered
@@ -65,9 +67,9 @@ Item {
             id: slot
             required property int index
             readonly property var s: { root.map.revision; return root.map.slices[index] }
-            readonly property var o: root.map.outputs[s?.output ?? 0] ?? { x: 0, y: 0, width: 0, height: 0 }
+            readonly property var o: { root.map.outputs; return root.map.outputOf(s) ?? { x: 0, y: 0, width: 0, height: 0 } }
             x: o.x; y: o.y; width: o.width; height: o.height
-            visible: !!s && s.enabled
+            visible: !!s && s.enabled && width > 0
             // a slice stays on its own output (its mask's surround too)
             clip: true
 
@@ -95,8 +97,8 @@ Item {
     WarpMesh {
         id: thumb
         x: -width - 16
-        width: Math.max(1, Math.round(root.map.sourceWidth / 4))
-        height: Math.max(1, Math.round(root.map.sourceHeight / 4))
+        width: Math.max(1, Math.round(root.map.sourceWidth * root.thumbnailScale))
+        height: Math.max(1, Math.round(root.map.sourceHeight * root.thumbnailScale))
         source: rendered
         refreshSource: false
         subdivisions: 1
@@ -109,8 +111,9 @@ Item {
         SliceOverlay {
             required property int index
             readonly property var s: { root.map.revision; return root.map.slices[index] }
-            readonly property var o: root.map.outputs[s?.output ?? 0] ?? { x: 0, y: 0, width: 0, height: 0 }
+            readonly property var o: { root.map.outputs; return root.map.outputOf(s) ?? { x: 0, y: 0, width: 0, height: 0 } }
             x: o.x; y: o.y; width: o.width; height: o.height
+            visible: width > 0
             slice: s
             selected: index === root.map.selected
             selectedPoint: root.map.selectedPoint
