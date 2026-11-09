@@ -10,7 +10,9 @@ Shape {
     property color color: "black"
 
     visible: points.length >= 3
-    preferredRendererType: Shape.CurveRenderer
+    // plain geometry, built off the GUI thread: it changes on every move of a drag
+    preferredRendererType: Shape.GeometryRenderer
+    asynchronous: true
 
     ShapePath {
         fillColor: root.color

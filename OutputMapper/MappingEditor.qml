@@ -32,9 +32,39 @@ Item {
     //! the output a slice is on, as an index here (-1: not connected now)
     function at(s) { map.outputs; return map.outputIndex(s.output) }
     readonly property var outputNames: map.outputs.map(o => o.name)
-    property url snapshot: ""
 
     Rectangle { anchors.fill: parent; color: Theme.page }
+
+    //! where a handle of the picked slice is, in the window (for test runs):
+    //! "inputcorner" 0..3, "point" k, "stretch" 0..3 (left, right, top, bottom)
+    function scenePoint(kind, k) {
+        const s = sel
+        if (!s) return Qt.point(-1, -1)
+        if (kind === "inputcorner")
+            return srcFrame.mapToItem(null, (s.input.x + (k % 2) * s.input.width) * inputView.k,
+                                            (s.input.y + Math.floor(k / 2) * s.input.height) * inputView.k)
+        if (kind === "point")
+            return outFrame.mapToItem(null, s.points[k].x * outFrame.width, s.points[k].y * outFrame.height)
+        const h = pointer.handleAt(["left", "right", "top", "bottom"][k])
+        return outFrame.mapToItem(null, h.x, h.y)
+    }
+
+    // The slice list, made again only when what it shows changes (a drag
+    // changes the slices on every move; their names and displays it doesn't).
+    property var tableRows: []
+    property string _tableKey: ""
+    function refreshTable() {
+        const rows = map.slices.map(s => [s.enabled ? s.name : { text: s.name, tone: "dim" },
+            s.output === "" ? { text: "none", tone: "dim" } : outputNames[at(s)] ?? { text: "not connected", tone: "bad" }])
+        const key = JSON.stringify(rows)
+        if (key !== _tableKey) { _tableKey = key; tableRows = rows }
+    }
+    Connections {
+        target: ed.map
+        function onRevisionChanged() { ed.refreshTable() }
+        function onOutputsChanged() { ed.refreshTable() }
+    }
+    Component.onCompleted: refreshTable()
 
     Shortcut { enabled: ed.visible; sequences: [StandardKey.Undo]; onActivated: ed.map.undo() }
     Shortcut { enabled: ed.visible; sequences: [StandardKey.Redo, "Ctrl+Y"]; onActivated: ed.map.redo() }
@@ -49,21 +79,37 @@ Item {
         onTriggered: {
             if (busy) return
             busy = true
-            if (!ed.previewSource.grabToImage(r => { ed.snapshot = r.url; busy = false })) busy = false
+            if (!ed.previewSource.grabToImage(r => { still.take(r.url); busy = false })) busy = false
         }
     }
 
     // the views' picture: the still, or the test card (drawn here, small)
     // (through a layer: an Image's own texture is replaced, and freed, with
     // each new still; a layer's stays the same one)
-    Image {
+    // Two stills, taking turns: the next loads off the GUI thread while the
+    // other is on show, so the views never flash blank and dragging never waits.
+    Item {
         id: still
         x: -width - 16 // beside the window, never seen
         width: ed.previewSource ? ed.previewSource.width : 1
         height: ed.previewSource ? ed.previewSource.height : 1
-        source: ed.snapshot
-        smooth: true
-        cache: false
+        property int shown: 0
+        //! a new still to load into whichever image is not on show
+        function take(url) { (shown === 0 ? stillB : stillA).source = url }
+        Image {
+            id: stillA
+            anchors.fill: parent
+            visible: still.shown === 0
+            asynchronous: true; cache: false; smooth: true
+            onStatusChanged: if (status === Image.Ready && still.shown !== 0) still.shown = 0
+        }
+        Image {
+            id: stillB
+            anchors.fill: parent
+            visible: still.shown === 1
+            asynchronous: true; cache: false; smooth: true
+            onStatusChanged: if (status === Image.Ready && still.shown !== 1) still.shown = 1
+        }
     }
     ShaderEffectSource {
         id: stillTexture
@@ -105,7 +151,7 @@ Item {
             ParamTable {
                 width: parent.width
                 columns: [{ title: "slice" }, { title: "output", width: 0.4 }]
-                rows: { ed.map.revision; return ed.map.slices.map(s => [s.enabled ? s.name : { text: s.name, tone: "dim" }, s.output === "" ? { text: "none", tone: "dim" } : ed.outputNames[ed.at(s)] ?? { text: "not connected", tone: "bad" }]) }
+rows: ed.tableRows
                 currentRow: ed.map.selected
                 visibleRows: 5
                 onActivated: r => { ed.map.selected = r; ed.map.selectedPoint = -1 }
@@ -180,6 +226,35 @@ Item {
                         text: modelData[1]
                         enabled: !!ed.sel && ed.at(ed.sel) >= 0
                         onClicked: ed.map.sizeTo(ed.map.selected, modelData[0])
+                    }
+                }
+            }
+
+            // where it lands, in the display's pixels (the bounding box of its points)
+            ParamHeading { width: parent.width; text: "Output"; note: "display px"; visible: !!ed.sel && ed.at(ed.sel) >= 0 }
+            ParamGrid {
+                width: parent.width
+                visible: !!ed.sel && ed.at(ed.sel) >= 0
+                minColumnWidth: Theme.s(120)
+                maxColumns: 2
+                readonly property var o: ed.sel ? ed.map.outputOf(ed.sel) : null
+                readonly property var b: { ed.map.revision; return ed.sel ? ed.map.bounds(ed.map.selected) : null }
+                Repeater {
+                    model: [["x", "x", "width"], ["y", "y", "height"], ["width", "width", "width"], ["height", "height", "height"]]
+                    ParamField {
+                        required property var modelData
+                        readonly property var grid: parent
+                        label: modelData[0]
+                        mono: true
+                        text: grid.o && grid.b ? String(Math.round(grid.b[modelData[1]] * grid.o[modelData[2]])) : ""
+                        onAccepted: t => {
+                            const n = Number(t)
+                            if (!grid.o || !grid.b || !isFinite(n)) return
+                            const r = Object.assign({}, grid.b)
+                            r[modelData[1]] = n / grid.o[modelData[2]]
+                            if (r.width <= 0 || r.height <= 0) return
+                            ed.map.setBounds(ed.map.selected, r)
+                        }
                     }
                 }
             }
@@ -540,7 +615,7 @@ Item {
                         height: across ? Theme.s(30) : Theme.s(6)
                         x: at.x - width / 2
                         y: at.y - height / 2
-                        color: pointer.dragging === "stretch" && pointer.side === modelData ? Theme.accent : Theme.accentDim
+                        color: pointer.dragging === "stretch" && pointer.stretchSide === modelData ? Theme.accent : Theme.accentDim
                         border.color: Theme.accent
                         border.width: 1
                     }
@@ -559,7 +634,7 @@ Item {
                     property var startPoints
                     property var startMask
                     property var startBounds
-                    property string side: ""
+                    property string stretchSide: ""
 
                     //! a stretch bar's centre, in outFrame's pixels
                     readonly property real reach: Theme.s(16)
@@ -606,7 +681,7 @@ Item {
                     onPressed: mouse => {
                         outputView.forceActiveFocus()
                         const p = norm(mouse.x, mouse.y)
-                        side = ""
+                        stretchSide = ""
                         start = p
                         dragging = ""
                         const s = ed.sel
@@ -624,7 +699,7 @@ Item {
                             for (const which of ["left", "right", "top", "bottom"]) {
                                 const h = handleAt(which)
                                 if (Math.hypot(mouse.x - pad - h.x, mouse.y - pad - h.y) < Theme.s(14)) {
-                                    dragging = "stretch"; side = which
+                                    dragging = "stretch"; stretchSide = which
                                     startPoints = s.points.map(q => ({ x: q.x, y: q.y }))
                                     startMask = s.mask.map(q => ({ x: q.x, y: q.y }))
                                     startBounds = ed.map.bounds(ed.map.selected)
@@ -690,10 +765,10 @@ Item {
                             // dragged edge snaps
                             const b = startBounds, min = 0.01
                             let ax = 0, sx = 1, ay = 0, sy = 1
-                            if (side === "right") { const s = snap(b.x + b.width + dx, true, m, i, -1); outputView.guideX = s.line; ax = b.x; sx = Math.max(min, s.v - b.x) / Math.max(min, b.width) }
-                            if (side === "left") { const s = snap(b.x + dx, true, m, i, -1); outputView.guideX = s.line; ax = b.x + b.width; sx = Math.max(min, b.x + b.width - s.v) / Math.max(min, b.width) }
-                            if (side === "bottom") { const s = snap(b.y + b.height + dy, false, m, i, -1); outputView.guideY = s.line; ay = b.y; sy = Math.max(min, s.v - b.y) / Math.max(min, b.height) }
-                            if (side === "top") { const s = snap(b.y + dy, false, m, i, -1); outputView.guideY = s.line; ay = b.y + b.height; sy = Math.max(min, b.y + b.height - s.v) / Math.max(min, b.height) }
+                            if (stretchSide === "right") { const s = snap(b.x + b.width + dx, true, m, i, -1); outputView.guideX = s.line; ax = b.x; sx = Math.max(min, s.v - b.x) / Math.max(min, b.width) }
+                            if (stretchSide === "left") { const s = snap(b.x + dx, true, m, i, -1); outputView.guideX = s.line; ax = b.x + b.width; sx = Math.max(min, b.x + b.width - s.v) / Math.max(min, b.width) }
+                            if (stretchSide === "bottom") { const s = snap(b.y + b.height + dy, false, m, i, -1); outputView.guideY = s.line; ay = b.y; sy = Math.max(min, s.v - b.y) / Math.max(min, b.height) }
+                            if (stretchSide === "top") { const s = snap(b.y + dy, false, m, i, -1); outputView.guideY = s.line; ay = b.y + b.height; sy = Math.max(min, b.y + b.height - s.v) / Math.max(min, b.height) }
                             const f = q => ({ x: ax + (q.x - ax) * sx, y: ay + (q.y - ay) * sy })
                             ed.map.setShape(i, startPoints.map(f), startMask.map(f))
                         }

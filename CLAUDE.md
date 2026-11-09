@@ -228,3 +228,11 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   sight (still rendering: the preview stays live) while no slice is on a
   display; keep `ready` false until the app has put its default slices on
   displays, or it parks too early.
+- Speed: a mouse move in the editor should cost about a millisecond. Shapes
+  that change on every move use GeometryRenderer with `asynchronous: true`
+  (the CurveRenderer triangulates on the GUI thread); the slice list is
+  rebuilt only when what it shows changes; WarpMesh skips unchanged points.
+  LaunchPortal's `drag:` test step (TestInput) logs the cost per move.
+- Never give a property in the editor a name an id already has (`side` was
+  the left column's id: assigning to it threw, and every press in the Output
+  view did nothing).
