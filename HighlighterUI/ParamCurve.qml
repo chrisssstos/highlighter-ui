@@ -18,7 +18,8 @@ import "ParamMath.js" as PM
 /// now. The labels name the ends: `fromLabel` / `toLabel` the value's (bottom,
 /// top), `startLabel` / `endLabel` the time's. As a slider, it changes
 /// itself and tells you with moved(points); bind `points` to your setting
-/// and write it back there.
+/// and write it back there. The min / max mark by the readout (on hover, as
+/// a slider's) makes the plot short or tall; the panel remembers it.
 Item {
     id: root
     // greyed out when it can't be changed, as the other controls
@@ -45,7 +46,15 @@ Item {
     property real duration: 0
     //! The line under the plot saying how to edit it.
     property bool hint: true
-    property real plotHeight: Theme.s(120)
+    //! What the panel remembers it by (whether it was minimised).
+    property string key: label
+    //! Whether it has its own min / max mark.
+    property bool sizeToggle: true
+    //! Minimised: the short plot. It starts tall, to shape finely, unless the
+    //! user minimised it before.
+    property bool compact: PanelMemory.isMinimised(key)
+    property real plotHeight: compact ? Theme.s(120) : Theme.s(300)
+    Behavior on plotHeight { NumberAnimation { duration: Theme.ease; easing.type: Easing.OutCubic } }
 
     signal moved(var points)
 
@@ -104,6 +113,8 @@ Item {
         visible: !Theme.classic
     }
 
+    HoverHandler { id: curveHover }
+
     Item {
         id: head
         x: Theme.s(10); y: Theme.s(4)
@@ -112,7 +123,8 @@ Item {
         Text {
             id: name
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - (readout.visible ? readout.width : 0) - (reset.visible ? reset.width + Theme.s(6) : 0) - Theme.s(8)
+            width: parent.width - (readout.visible ? readout.width : 0) - (reset.visible ? reset.width + Theme.s(6) : 0)
+                   - (sizeMark.visible ? sizeMark.width + Theme.s(12) : 0) - Theme.s(8)
             text: root.label
             elide: Text.ElideRight
             color: Theme.text
@@ -124,18 +136,34 @@ Item {
             id: reset
             objectName: "reset"
             visible: root.changed
-            anchors.right: readout.visible ? readout.left : parent.right
-            anchors.rightMargin: readout.visible ? Theme.s(6) : 0
+            anchors.right: readout.visible ? readout.left : sizeMark.visible ? sizeMark.left : parent.right
+            anchors.rightMargin: Theme.s(6)
             anchors.verticalCenter: parent.verticalCenter
             text: "Reset"
             implicitHeight: Theme.s(20)
             horizontalPadding: Theme.s(8)
             onClicked: root.setPoints(root.defaultPoints.slice())
         }
+        // min / max, there while hovered (as a slider's)
+        ParamSizeMark {
+            id: sizeMark
+            anchors.right: parent.right
+            anchors.rightMargin: Theme.s(6)
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.sizeToggle
+            compact: root.compact
+            shown: curveHover.hovered
+            tint: Theme.onPanel(root.tint)
+            onToggled: {
+                root.compact = !root.compact
+                PanelMemory.setMaximised(root.key, !root.compact)
+            }
+        }
         Rectangle {
             id: readout
             visible: root.readoutText !== ""
-            anchors.right: parent.right
+            anchors.right: sizeMark.visible ? sizeMark.left : parent.right
+            anchors.rightMargin: sizeMark.visible ? Theme.s(6) : 0
             width: Math.max(Theme.s(72), reading.implicitWidth + Theme.s(12))
             height: reading.implicitHeight + Theme.s(4)
             radius: Theme.radius
