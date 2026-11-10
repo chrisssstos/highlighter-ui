@@ -51,7 +51,10 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
    other than the lime, and `Theme.compact = true` for a dense panel.
    Two panels that should look apart: give one window, or the item holding
    one panel's controls, its own `property color accent` (Theme.accentAt).
-   Don't recolour controls one by one.
+   Don't recolour controls one by one. For a different background, set
+   `Theme.background` to one colour: every surface is worked out from it
+   keeping the skin's contrast, and text turns dark on light panels
+   ("transparent", the default, keeps the skin's own).
 8. Scale: if the window scales itself for DPI (an app's own `ui` scale), set
    `Theme.scale` to it once instead of multiplying sizes.
 9. Every kit control needs `width: parent.width` inside a Column, ParamPage
@@ -109,6 +112,9 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   pinned to t 0 and 1, points growing while hot, `preventStealing` on.
   `tests/tst_curve.qml` drives it with the mouse inside a ParamPage; a new
   editable graph gets the same tests.
+- **Colours.** A colour setting is a `ParamColor` (a chip that opens a
+  picker: square, hue strip, hex, `presets`); `ParamSwatches` only when the
+  choice is one of a few named colours.
 - **Tables.** Use `ParamTable` for read-only rows the app lists (presets,
   devices, files, a log), picked with `currentRow` / `onActivated` and opened
   with `onOpened`. Not for a setting with a few named options (that's a
@@ -173,8 +179,16 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   `--skin=<flat|classic>` to shoot a skin (`--flat` still works). Build and
   shoot new work in flat.
   Assets are rendered by `tools/render_assets.py`; never take graphics
-  from commercial plugins. Any new asset: own render (or CC0), listed in
-  `textures/CREDITS.txt`.
+  from commercial plugins. Any new asset: own render, CC0, or an open
+  icon set with its licence noted, listed in `textures/CREDITS.txt`.
+- Buttons: a universal action (undo, redo, copy, add, delete, save, full
+  screen, play…) is an icon with no text, plus a `tip` saying what it does.
+  Icons come from Material Symbols, Sharp, filled (fits the kit's solid,
+  sharp transport icons): add one by putting its path (from
+  github.com/google/material-design-icons, `symbols/web/<name>/
+  materialsymbolssharp/<name>_fill1_24px.svg`) in `ParamIconPaths.js` under
+  a kit name, and list it in CREDITS. Anything less than universal keeps
+  its words; ask Christos when unsure.
 - Hardware skin (`Theme.mode` "dark", the default, or "light"): rounded
   corners everywhere (`Theme.radius`; give every new surface it), screens
   always dark (`Theme.screenFill`) with `Theme.screenText` / `screenDim` /

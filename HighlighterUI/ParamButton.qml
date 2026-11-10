@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls.Basic as B
 
 /// A flat, slightly bevelled button: lime text on a dark slab, or a solid
 /// lime one (accent) for the action that matters. checkable makes it stay
@@ -10,15 +11,18 @@ Item {
     readonly property color tint: Theme.accentAt(root, Window.window)
 
     property string text: ""
-    //! A glyph drawn before the text: a ParamIcon name ("play", "pause",
+    //! A glyph drawn before the text (or alone, with no text): a ParamIcon name ("play", "pause",
     //! "loop"…, see ParamIcon) for a drawn icon, or any character (e.g. "✓").
     property string icon: ""
+    //! What it does, shown on hover: give one to every icon-only button.
+    property string tip: ""
     readonly property bool drawnIcon: drawn.names.indexOf(root.icon) >= 0
     property bool accent: false
     property bool danger: false
     property bool checkable: false
     property bool checked: false
-    property int horizontalPadding: Theme.s(12)
+    // an icon on its own: a square-ish button
+    property int horizontalPadding: root.text.length ? Theme.s(12) : Theme.s(8)
 
     signal clicked()
     signal toggled(bool checked)
@@ -30,12 +34,15 @@ Item {
     // From the texts' natural widths, so a button given less room (or the
     // kit scaled up) cuts its label short with an ellipsis instead of
     // spilling past its edges.
-    implicitWidth: (glyph.visible ? glyph.implicitWidth : 0)
+    // An icon on its own: one width for every icon, so a row of them lines up.
+    readonly property bool iconOnly: !label.visible && (glyph.visible || drawn.visible)
+    implicitWidth: Math.max(iconOnly ? Theme.s(34) : 0,
+                            (glyph.visible ? glyph.implicitWidth : 0)
                  + (drawn.visible ? drawn.width : 0)
                  + ((glyph.visible || drawn.visible) && label.visible ? content.spacing : 0)
                  + (label.visible ? label.implicitWidth : 0)
                  + 2 * horizontalPadding
-                 + (Theme.classic && checkable ? Theme.s(12) : 0)   // the LED
+                 + (Theme.classic && checkable ? Theme.s(12) : 0))   // the LED
     activeFocusOnTab: true
     opacity: enabled ? 1 : 0.4
 
@@ -51,8 +58,8 @@ Item {
 
     readonly property color ink: root.accent ? Theme.inkOf(root.tint)
                               : root.danger ? Theme.danger
-                              : root.checked ? (Theme.lightMode ? Theme.onPanel(root.tint) : Theme.litOf(root.tint))
-                              : Theme.classic || Theme.hardware ? Theme.text : root.tint
+                              : root.checked ? (Theme.lightPanels ? Theme.onPanel(root.tint) : Theme.litOf(root.tint))
+                              : Theme.classic || Theme.hardware ? Theme.text : Theme.onPanel(root.tint)
     Rectangle {
         id: slab
         anchors.fill: parent
@@ -172,6 +179,17 @@ Item {
         property bool focusedByMouse: false
         onPressed: { focusedByMouse = true; root.forceActiveFocus(Qt.MouseFocusReason) }
         onClicked: root.activate()
+
+        // the tip, after a moment's hover
+        B.ToolTip {
+            id: tipBox
+            visible: root.tip.length > 0 && area.containsMouse && !area.pressed
+            delay: 500
+            text: root.tip
+            padding: Theme.s(5)
+            contentItem: Text { text: tipBox.text; color: Theme.text; font.family: Theme.family; font.pixelSize: Theme.smallSize }
+            background: Rectangle { color: Theme.raised; radius: Theme.radius; border.width: 1; border.color: Theme.line }
+        }
     }
     onActiveFocusChanged: if (!activeFocus) area.focusedByMouse = false
     Keys.onPressed: e => {

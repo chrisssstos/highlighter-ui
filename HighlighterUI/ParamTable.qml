@@ -187,7 +187,7 @@ Item {
                         readonly property string tone: rich ? (cell.tone ?? "") : ""
                         text: cell === undefined || cell === null ? "" : rich ? String(cell.text ?? "") : String(cell)
                         elide: Text.ElideRight
-                        color: tone === "good" ? root.tint : tone === "ok" ? Theme.caution : tone === "bad" ? Theme.danger
+                        color: tone === "good" ? Theme.goodOf(root.tint) : tone === "ok" ? Theme.caution : tone === "bad" ? Theme.danger
                              : tone === "dim" ? Theme.screenFaint : row.on ? root.tint : Theme.screenText
                         font.family: root.mono ? Theme.mono : Theme.family
                         font.pixelSize: Theme.valueSize

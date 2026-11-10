@@ -74,8 +74,9 @@ Item {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             implicitHeight: Theme.s(22)
-            text: done.running ? "Copied" : "Copy"
-            icon: done.running ? "✓" : ""
+            icon: "copy"
+            text: done.running ? "Copied" : ""
+            tip: "Copy"
             onClicked: { edit.selectAll(); edit.copy(); edit.deselect(); done.restart() }
             Timer { id: done; interval: 1400 }
         }

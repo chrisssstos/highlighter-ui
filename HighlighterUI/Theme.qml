@@ -52,19 +52,85 @@ QtObject {
     readonly property bool lightMode: hardware && mode === "light"
     // hardware, dark: a warm dark-grey faceplate, darker keys, near-black screens;
     // light: a light warm-grey faceplate and keys on a mid grey, near-black screens
-    property color page:      classic ? "#2c3338" : lightMode ? "#a3a09a" : hardware ? "#454543" : "#4b4d4c"   // the window behind everything
-    property color well:      classic ? "#1f2529" : lightMode ? "#2c2d2f" : hardware ? "#28292b" : "#5d6260"   // a slider's empty track, a field's fill (hardware: a dark screen)
-    property color wellHover: classic ? "#283035" : lightMode ? "#343537" : hardware ? "#303133" : "#666b69"
-    property color raised:    classic ? "#4a555c" : lightMode ? "#cdcac3" : hardware ? "#52524f" : "#545756"   // a group's body (hardware: the faceplate)
-    property color sunken:    classic ? "#3a444a" : lightMode ? "#bcb9b2" : hardware ? "#2d2e2f" : "#3f4241"   // buttons, code, the knob's face (hardware: keys)
-    property color sunkenHover: classic ? "#455058" : lightMode ? "#c6c3bc" : hardware ? "#363739" : "#464948"
-    property color line:      classic ? "#5f6c73" : lightMode ? "#8d8981" : hardware ? "#686763" : "#6a6f6d"   // quiet outlines and dividers
-    property color panelBar:  classic ? "#5b6870" : lightMode ? "#bfbcb5" : hardware ? "#5d5d59" : "#636866"   // a graph panel's title bar
-    property color panelEdge: lightMode ? "#8f8b84" : hardware ? "#2f302f" : "#3b3e3d"   // the thin outline round a graph panel
+    readonly property color skinPage:      classic ? "#2c3338" : lightMode ? "#a3a09a" : hardware ? "#454543" : "#4b4d4c"   // the window behind everything
+    readonly property color skinWell:      classic ? "#1f2529" : lightMode ? "#2c2d2f" : hardware ? "#28292b" : "#5d6260"   // a slider's empty track, a field's fill (hardware: a dark screen)
+    readonly property color skinWellHover: classic ? "#283035" : lightMode ? "#343537" : hardware ? "#303133" : "#666b69"
+    readonly property color skinRaised:    classic ? "#4a555c" : lightMode ? "#cdcac3" : hardware ? "#52524f" : "#545756"   // a group's body (hardware: the faceplate)
+    readonly property color skinSunken:    classic ? "#3a444a" : lightMode ? "#bcb9b2" : hardware ? "#2d2e2f" : "#3f4241"   // buttons, code, the knob's face (hardware: keys)
+    readonly property color skinSunkenHover: classic ? "#455058" : lightMode ? "#c6c3bc" : hardware ? "#363739" : "#464948"
+    readonly property color skinLine:      classic ? "#5f6c73" : lightMode ? "#8d8981" : hardware ? "#686763" : "#6a6f6d"   // quiet outlines and dividers
+    readonly property color skinPanelBar:  classic ? "#5b6870" : lightMode ? "#bfbcb5" : hardware ? "#5d5d59" : "#636866"   // a graph panel's title bar
+    readonly property color skinPanelEdge: lightMode ? "#8f8b84" : hardware ? "#2f302f" : "#3b3e3d"   // the thin outline round a graph panel
+    // --- your own background ------------------------------------------------
+    //! One colour the panels are worked out from: the page, panels, keys,
+    //! tracks, lines and title bars take its hue and keep the skin's own steps
+    //! of lighter and darker between them, so they keep their contrast;
+    //! "transparent" (the default) keeps the skin's own colours. The hardware
+    //! skin's screens keep their darkness and only take the hue. Text turns
+    //! to dark ink when the panels come out light.
+    property color background: "transparent"
+    readonly property bool tinted: background.a > 0
+    readonly property real bgHue: background.hslHue < 0 ? 0 : background.hslHue
+    //! A skin colour moved onto the background: its hue, the colour's own
+    //! step from the skin's page.
+    function rebase(c) {
+        if (!tinted) return c
+        const l = Math.max(0.02, Math.min(0.98, background.hslLightness + c.hslLightness - skinPage.hslLightness))
+        return Qt.hsla(bgHue, background.hslSaturation, l, 1)
+    }
+    //! A track (flat): a step lighter than the page on dark panels, as the
+    //! skin has it; on light panels a darker recess, so a fill reads on it.
+    function recess(c) {
+        if (!tinted || !lightPanels) return rebase(c)
+        const l = Math.max(0.02, background.hslLightness - Math.abs(c.hslLightness - skinPage.hslLightness) - 0.10)
+        return Qt.hsla(bgHue, background.hslSaturation, l, 1)
+    }
+    //! A screen: the background's hue, a little, the screen's own darkness.
+    function tintScreen(c) { return tinted ? Qt.hsla(bgHue, background.hslSaturation * 0.35, c.hslLightness, 1) : c }
+    property color page:        rebase(skinPage)   // the window behind everything
+    property color well:        hardware ? tintScreen(skinWell) : recess(skinWell)   // a slider's empty track, a field's fill (hardware: a dark screen)
+    property color wellHover:   hardware ? tintScreen(skinWellHover) : recess(skinWellHover)
+    property color raised:      rebase(skinRaised)   // a group's body (hardware: the faceplate)
+    property color sunken:      rebase(skinSunken)   // buttons, code, the knob's face (hardware: keys)
+    property color sunkenHover: rebase(skinSunkenHover)
+    property color line:        rebase(skinLine)   // quiet outlines and dividers
+    property color panelBar:    rebase(skinPanelBar)   // a graph panel's title bar
+    property color panelEdge:   rebase(skinPanelEdge)   // the thin outline round a graph panel
+    //! The panels are light (light mode, or a light background): dark ink,
+    //! the accent deepened for text and thin lines on them.
+    readonly property bool lightPanels: tinted ? contrast("#262522", raised) > contrast("#f0f1ee", raised) : lightMode
+    //! How bright a colour looks (WCAG relative luminance), and the contrast
+    //! ratio between two (1 to 21; text wants 4.5 and up).
+    function luminance(c) {
+        const ch = v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
+        return 0.2126 * ch(c.r) + 0.7152 * ch(c.g) + 0.0722 * ch(c.b)
+    }
+    function contrast(a, b) {
+        const la = luminance(Qt.tint(a, "transparent")), lb = luminance(Qt.tint(b, "transparent"))
+        return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05)
+    }
+    //! A colour moved just far enough to stand apart from a background: its
+    //! lightness stepped toward darker or lighter (as it already leans, the
+    //! other way if that can't reach) until the contrast is `ratio`.
+    //! Unchanged if it already is: yellow on slate stays yellow.
+    function standOff(c, bg, ratio) {
+        c = Qt.tint(c, "transparent")
+        if (contrast(c, bg) >= ratio) return c
+        const h = c.hslHue < 0 ? 0 : c.hslHue, sat = c.hslSaturation
+        const at = l => Qt.hsla(h, sat, l, c.a)
+        const lighter = luminance(c) >= luminance(Qt.tint(bg, "transparent"))
+        const ways = lighter ? [1, -1] : [-1, 1]
+        for (const way of ways) {
+            for (let l = c.hslLightness; l >= 0 && l <= 1; l += way * 0.02)
+                if (contrast(at(l), bg) >= ratio) return at(l)
+        }
+        // neither way gets there: as far as it goes the better way
+        return contrast(at(0), bg) > contrast(at(1), bg) ? at(0) : at(1)
+    }
     //! A screen a graph, an envelope or a table is drawn on: dark glass in
     //! the hardware skin (either mode), the sunken colour otherwise; and the
     //! text and marks on it, always light on it.
-    property color screenFill: hardware ? (lightMode ? "#292a2c" : "#242527") : sunken
+    property color screenFill: hardware ? tintScreen(lightMode ? "#292a2c" : "#242527") : sunken
     //! A marked stretch of a screen (an animator's range): a lighter shade of
     //! it, a hint of the accent, so it stands apart from the rest.
     function screenMarked(c) { return hardware ? Qt.tint(Qt.lighter(well, lightMode ? 1.5 : 1.55), Qt.rgba(c.r, c.g, c.b, 0.12)) : screenFill }
@@ -86,11 +152,13 @@ QtObject {
     function hotOf(c)  { return Qt.tint(c, Qt.rgba(1, 0.96, 0.93, 0.74)) }
     //! What a lit thing is drawn in: hot in the hardware skin, the colour
     //! otherwise. In light mode less washed, so it stands out on light keys.
-    function litOf(c)  { return theme.lightMode ? Qt.tint(c, Qt.rgba(1, 0.96, 0.93, 0.38)) : theme.hardware ? hotOf(c) : c }
+    function litOf(c)  { return theme.hardware ? (theme.lightPanels ? Qt.tint(c, Qt.rgba(1, 0.96, 0.93, 0.38)) : hotOf(c))
+                                : theme.tinted ? standOff(c, theme.well, 2.2) : c }
     //! The accent as text or a thin line drawn straight on the faceplate or
     //! a key: deepened in light mode, so it always reads (an accent is made
     //! to read on dark grey).
-    function onPanel(c) { return theme.lightMode ? Qt.darker(c, 1.75) : c }
+    function onPanel(c) { return theme.tinted ? standOff(c, theme.raised, 3.5)
+                                : theme.lightPanels ? Qt.darker(c, 1.75) : c }
     //! The accent a control in this window draws with: the window's own
     //! accent if it declares one, the kit's otherwise.
     function accentIn(win) { return win && win.accent !== undefined ? win.accent : theme.accent }
@@ -102,6 +170,30 @@ QtObject {
         for (let p = item; p; p = p.parent)
             if (p.accent !== undefined && typeof p.accent !== "boolean") return p.accent
         return accentIn(win)
+    }
+
+    //! Looks: an accent on a background (and the glow), picked together.
+    //! "default" is the skin's own background and the lime.
+    readonly property var looks: [
+        { name: "default",         accent: "#def243", background: "transparent", glow: false },
+        { name: "yellow on slate", accent: "#ffed00", background: "#656f7b",     glow: false },
+        { name: "green on black",  accent: "#44ff4a", background: "#1e1e1e",     glow: true },
+        { name: "grey",            accent: "#a5a5a5", background: "#838383",     glow: false },
+        { name: "white on black",  accent: "#e7e7e7", background: "#202020",     glow: false }
+    ]
+    //! Puts a look on: its accent, background and glow.
+    function applyLook(i) {
+        const l = looks[i]
+        if (!l) return
+        accent = l.accent
+        background = l.background
+        glow = l.glow
+    }
+    //! The look that's on now, or -1 if the colours are your own.
+    readonly property int lookIndex: {
+        for (let i = 0; i < looks.length; ++i)
+            if (Qt.colorEqual(accent, looks[i].accent) && Qt.colorEqual(background, looks[i].background)) return i
+        return -1
     }
 
     //! Accents that read well on the grey, for a swatch row.
@@ -121,16 +213,25 @@ QtObject {
     property color arrow:     "#b9c0c4"   // an arrow drawn on the well
     property color arrowHot:  "#e6ecef"
     //! An arrow drawn on the faceplate (a knob's, a slider's past the bar's end).
-    property color panelArrow:    lightMode ? "#5f5c56" : arrow
-    property color panelArrowHot: lightMode ? "#262522" : arrowHot
-    property color text:      classic ? "#e2e9ed" : lightMode ? "#262522" : hardware ? "#ece8df" : "#f0f1ee"   // light mode: dark ink on the faceplate
-    property color textDim:   classic ? "#a7b4bb" : lightMode ? "#4c4a45" : hardware ? "#b0aca3" : "#b3b8b5"
-    property color textFaint: classic ? "#7f8c93" : lightMode ? "#6f6b64" : hardware ? "#85827b" : "#8c918f"
+    property color panelArrow:    lightPanels ? "#5f5c56" : arrow
+    property color panelArrowHot: lightPanels ? "#262522" : arrowHot
+    readonly property color skinText:      classic ? "#e2e9ed" : lightMode ? "#262522" : hardware ? "#ece8df" : "#f0f1ee"   // light mode: dark ink on the faceplate
+    readonly property color skinTextDim:   classic ? "#a7b4bb" : lightMode ? "#4c4a45" : hardware ? "#b0aca3" : "#b3b8b5"
+    readonly property color skinTextFaint: classic ? "#7f8c93" : lightMode ? "#6f6b64" : hardware ? "#85827b" : "#8c918f"
+    property color text:      !tinted ? skinText : lightPanels ? "#262522" : "#f0f1ee"
+    property color textDim:   !tinted ? skinTextDim : lightPanels ? "#4c4a45" : "#b3b8b5"
+    property color textFaint: !tinted ? skinTextFaint : lightPanels ? "#6f6b64" : "#8c918f"
     property color editFill:  "#a8abae"   // a value box while it is typed in
     property color editText:  "#4a25c9"
     property color danger:    "#e0664f"
     property color caution:   "#f0b44a"   // between fine and danger: a rating that's only OK
-    property color jump:      "#5cc8ff"   // a graph for a moment after its value jumps the good way
+    // a graph for a moment after its value jumps the good way: blue beside a
+    // coloured accent (green would fight a lime), green beside a colourless
+    // one (white, grey), where it reads most naturally
+    property color jump:      accent.hsvSaturation < 0.15 ? "#4cd964" : "#5cc8ff"
+    //! "Good" (a rating, a status): the accent, or green beside a colourless
+    //! accent, where the accent alone wouldn't stand out from plain text.
+    function goodOf(c) { return c.hsvSaturation < 0.15 ? "#4cd964" : c }
     property color jumpBad:   "#e0664f"   // and the bad way
     property color screen:    "#14191c"   // classic: a value box's LCD
     // hardware: a reflective LCD (ParamLCD): pale grey-green, dark segments

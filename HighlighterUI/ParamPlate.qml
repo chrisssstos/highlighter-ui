@@ -25,11 +25,11 @@ Item {
         visible: Theme.hardware
         anchors.fill: parent
         radius: Theme.radius * 1.5
-        color: "transparent"; border.width: 1; border.color: Qt.rgba(0, 0, 0, Theme.lightMode ? 0.28 : 0.45)
+        color: "transparent"; border.width: 1; border.color: Qt.rgba(0, 0, 0, Theme.lightPanels ? 0.28 : 0.45)
     }
     Rectangle {
         visible: Theme.hardware
         x: Theme.radius * 1.5; y: 1; width: parent.width - 2 * x; height: 1
-        color: Qt.rgba(1, 1, 1, Theme.lightMode ? 0.55 : 0.10)
+        color: Qt.rgba(1, 1, 1, Theme.lightPanels ? 0.55 : 0.10)
     }
 }

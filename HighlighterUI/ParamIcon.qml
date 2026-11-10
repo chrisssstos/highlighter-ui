@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import "ParamIconPaths.js" as IP
 
 /// A drawn transport icon, hard-edged, every one on the same size so a row
 /// of them lines up: "play", "back" (play reversed), "pause", "stop",
@@ -7,7 +8,9 @@ import QtQuick.Shapes
 /// "next" (a triangle to a bar); and an animation's modes: "loop" (round
 /// and round), "bounce" (↔), "once" (→, then back to the start), "hold"
 /// (→|, stays at the end), "animate" (a ball moving, a slider's animate mark) and
-/// "pencil" (edit a curve).
+/// "pencil" (edit a curve). And the everyday actions, drawn from Material
+/// Symbols (Sharp, filled): "undo", "redo", "copy", "add", "delete",
+/// "save", "fullscreen", "duplicate" and "clear".
 /// ParamButton draws one when its `icon` is one of these names.
 Item {
     id: icon
@@ -19,12 +22,16 @@ Item {
 
     //! Every name it draws (ParamButton checks against this).
     readonly property var names: ["play", "back", "pause", "stop", "record", "rewind", "forward", "prev", "next",
-                                  "loop", "bounce", "once", "hold", "animate", "pencil"]
+                                  "loop", "bounce", "once", "hold", "animate", "pencil"].concat(Object.keys(IP.paths))
+    //! One of the drawn-from-a-pack action icons.
+    readonly property bool action: IP.paths[name] !== undefined
     readonly property real s: icon.size
     // a stroke's thickness, for the line icons
     readonly property real t: Math.max(2, Math.round(s * 0.17))
     // each icon's natural width, so a button sizes round it
-    width: name === "pause" ? Math.round(s * 0.8)
+    // the action icons carry their own margin on Material's grid, so their box is a bit bigger
+    width: action ? Math.round(s * 1.35)
+         : name === "pause" ? Math.round(s * 0.8)
          : name === "stop" || name === "record" ? Math.round(s * 0.9)
          : name === "rewind" || name === "forward" ? Math.round(s * 1.3)
          : name === "prev" || name === "next" ? Math.round(s * 0.95)
@@ -34,7 +41,23 @@ Item {
          : name === "animate" ? Math.round(s * 1.5)
          : name === "pencil" ? Math.round(s * 1.1)
          : Math.round(s * 0.85)   // play
-    height: Math.round(s)
+    height: action ? Math.round(s * 1.35) : Math.round(s)
+
+    // --- the action icons: Material's path, scaled from its 960 grid (y -960..0) -------
+    // Always smoothed: they're curvy, and hard edges crunch at button size.
+    Shape {
+        visible: icon.action
+        y: icon.height
+        width: 960; height: 960
+        scale: icon.width / 960
+        transformOrigin: Item.TopLeft
+        preferredRendererType: Shape.CurveRenderer
+        antialiasing: true
+        ShapePath {
+            strokeWidth: -1; fillColor: icon.color
+            PathSvg { path: icon.action ? IP.paths[icon.name] : "" }
+        }
+    }
 
     // --- play: one triangle, full height (back: pointing left) -------------------
     Shape {

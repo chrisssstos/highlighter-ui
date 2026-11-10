@@ -1,3 +1,13 @@
 Classic-skin assets for HighlighterUI, made for the kit:
 knob_classic.png and sheen.png are rendered by tools/render_assets.py.
 No third-party graphics.
+
+Icons (HighlighterUI/ParamIconPaths.js): the path data for ParamIcon's
+action icons (undo, redo, copy, add, delete, save, fullscreen, duplicate,
+clear) is from Material
+Symbols, Sharp style, filled, 24 px: copyright Google LLC, licensed under
+the Apache License, Version 2.0
+(https://www.apache.org/licenses/LICENSE-2.0).
+Source: https://github.com/google/material-design-icons
+The transport and animation icons (play, pause, loop, pencil, the moving
+ball and the rest) are drawn for the kit.
