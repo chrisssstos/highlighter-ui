@@ -18,6 +18,19 @@ Item {
     id: ed
 
     required property OutputMap map
+
+    //! A drag's moves, newest only: a mouse reports up to 1000 a second, and
+    //! Qt hands every one over on Windows. Each rebuilds the mapping (~1 ms),
+    //! so the app fell behind, the moves queued, and it froze. Asked for each
+    //! move, it applies the latest one once the app gets to it: as fast as the
+    //! app keeps up, never a backlog.
+    component LatestMove: QtObject {
+        signal apply(real x, real y, int mods)
+        property var _q: null
+        function ask(x, y, mods) { _q = { x: x, y: y, m: mods }; Qt.callLater(flush) }
+        //! now, if one is waiting (a release mustn't lose the last move)
+        function flush() { const q = _q; _q = null; if (q) apply(q.x, q.y, q.m) }
+    }
     //! what the views show, grabbed every previewMs: a MappedOutput's
     //! `thumbnail` (null: none)
     property Item previewSource: null
@@ -41,13 +54,18 @@ Item {
     Rectangle { anchors.fill: parent; color: Theme.page }
 
     //! where a handle of the picked slice is, in the window (for test runs):
-    //! "inputcorner" 0..3, "point" k, "stretch" 0..3 (left, right, top, bottom)
+    //! "inputcorner" 0..3, "point" k, "stretch" 0..3 (left, right, top, bottom),
+    //! "slice" (its middle, to move it all)
     function scenePoint(kind, k) {
         const s = sel
         if (!s) return Qt.point(-1, -1)
         if (kind === "inputcorner")
             return srcFrame.mapToItem(null, (s.input.x + (k % 2) * s.input.width) * inputView.k,
                                             (s.input.y + Math.floor(k / 2) * s.input.height) * inputView.k)
+        if (kind === "slice") { // inside the slice: its middle
+            const b = map.bounds(map.selected)
+            return outFrame.mapToItem(null, (b.x + b.width / 2) * outFrame.width, (b.y + b.height / 2) * outFrame.height)
+        }
         if (kind === "point")
             return outFrame.mapToItem(null, s.points[k].x * outFrame.width, s.points[k].y * outFrame.height)
         const h = pointer.handleAt(["left", "right", "top", "bottom"][k])
@@ -456,8 +474,12 @@ rows: ed.tableRows
                         const p = srcAt(mouse.x, mouse.y)
                         inputView.hoverText = Math.round(p.x) + ", " + Math.round(p.y)
                         if (!pressed || corner < 0) return
+                        inputMove.ask(mouse.x, mouse.y, mouse.modifiers)
+                    }
+                    LatestMove { id: inputMove; onApply: (x, y, m) => inputPointer.moveTo(x, y, m) }
+                    function moveTo(mx, my, m) {
+                        const p = srcAt(mx, my)
                         const dx = p.x - start.x, dy = p.y - start.y
-                        const m = mouse.modifiers
                         const r = Object.assign({}, startRect)
                         if (corner === 4) {
                             // the whole rectangle: whichever of its edges (or middle) is nearest a key line
@@ -503,8 +525,8 @@ rows: ed.tableRows
                             linesX = lines(true); linesY = lines(false)
                         }
                     }
-                    onPressedChanged: pressed ? ed.map.beginGroup() : ed.map.endGroup()
-                    onReleased: corner = -1
+                    onPressedChanged: { if (!pressed) inputMove.flush(); pressed ? ed.map.beginGroup() : ed.map.endGroup() }
+                    onReleased: { inputMove.flush(); corner = -1 }
                 }
             }
         }
@@ -744,9 +766,14 @@ rows: ed.tableRows
                         const o = outputView.o
                         outputView.hoverText = Math.round(p.x * o.width) + ", " + Math.round(p.y * o.height)
                         if (!pressed || dragging === "") return
-                        const fine = (mouse.modifiers & Qt.ShiftModifier) ? 0.1 : 1
+                        outputMove.ask(mouse.x, mouse.y, mouse.modifiers)
+                    }
+                    LatestMove { id: outputMove; onApply: (x, y, m) => pointer.moveTo(x, y, m) }
+                    function moveTo(mx, my, m) {
+                        const p = norm(mx, my)
+                        const fine = (m & Qt.ShiftModifier) ? 0.1 : 1
                         const dx = (p.x - start.x) * fine, dy = (p.y - start.y) * fine
-                        const m = mouse.modifiers, i = ed.map.selected
+                        const i = ed.map.selected
                         outputView.guideX = NaN; outputView.guideY = NaN
                         if (dragging === "point" || dragging === "mask") {
                             const q = startPoints[index]
@@ -775,8 +802,8 @@ rows: ed.tableRows
                                                        : { x: b.x, y: from, width: b.width, height: to - from })
                         }
                     }
-                    onPressedChanged: pressed ? ed.map.beginGroup() : ed.map.endGroup()
-                    onReleased: dragging = ""
+                    onPressedChanged: { if (!pressed) outputMove.flush(); pressed ? ed.map.beginGroup() : ed.map.endGroup() }
+                    onReleased: { outputMove.flush(); dragging = "" }
                     onExited: outputView.hoverText = ""
                 }
             }
