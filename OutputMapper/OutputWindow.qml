@@ -21,6 +21,9 @@ QtObject {
     //! false until the app has had its say (it may put slices on displays
     //! first): nothing is parked before
     property bool ready: true
+    //! the window has been put where it belongs once (the app may keep it
+    //! hidden till then: shown first, it flashes in its old place)
+    property bool placed: false
 
     //! the displays enabled slices are on
     readonly property var used: {
@@ -45,7 +48,7 @@ QtObject {
         const want = enabled ? used : []
         const park = enabled && !want.length && parkWhenUnused && ready
         const key = JSON.stringify(want) + park
-        if (key === _placed) return
+        if (key === _placed) { if (ready) placed = true; return }
         _placed = key
         if (want.length) {
             const x0 = Math.min(...want.map(d => d.gx)), y0 = Math.min(...want.map(d => d.gy))
@@ -69,6 +72,7 @@ QtObject {
             _was = null
             console.info("OutputMapper: output window back to its own place")
         }
+        if (ready) placed = true
     }
 
     onUsedChanged: Qt.callLater(place)
