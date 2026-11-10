@@ -18,6 +18,7 @@ qt_add_qml_module(HighlighterUI
         Theme.qml
         PanelMemory.qml
         ParamMath.js
+        ParamIconPaths.js
         ParamArrow.qml
         ParamIcon.qml
         ParamAnimator.qml
@@ -52,6 +53,7 @@ qt_add_qml_module(HighlighterUI
         ParamGauge.qml
         ParamLevel.qml
         ParamSwatches.qml
+        ParamColor.qml
         ParamXY.qml
         ParamText.qml
         ParamLight.qml

@@ -153,9 +153,9 @@ rows: ed.tableRows
             Flow {
                 width: parent.width
                 spacing: Theme.s(6)
-                ParamButton { text: "Add"; onClicked: ed.map.add() }
-                ParamButton { text: "Duplicate"; enabled: !!ed.sel; onClicked: ed.map.duplicate(ed.map.selected) }
-                ParamButton { text: "Remove"; danger: true; enabled: !!ed.sel; onClicked: ed.map.remove(ed.map.selected) }
+                ParamButton { icon: "add"; tip: "Add a slice"; onClicked: ed.map.add() }
+                ParamButton { icon: "duplicate"; tip: "Duplicate"; enabled: !!ed.sel; onClicked: ed.map.duplicate(ed.map.selected) }
+                ParamButton { icon: "delete"; tip: "Remove"; danger: true; enabled: !!ed.sel; onClicked: ed.map.remove(ed.map.selected) }
             }
         }
 
@@ -267,7 +267,7 @@ rows: ed.tableRows
                 width: parent.width
                 spacing: Theme.s(6)
                 ParamButton { text: "From outline"; onClicked: ed.map.maskFromOutline(ed.map.selected, 1) }
-                ParamButton { text: "Clear"; enabled: (ed.sel?.mask.length ?? 0) > 0; onClicked: ed.map.clearMask(ed.map.selected) }
+                ParamButton { icon: "clear"; tip: "Clear the mask"; enabled: (ed.sel?.mask.length ?? 0) > 0; onClicked: ed.map.clearMask(ed.map.selected) }
             }
         }
 
@@ -309,9 +309,9 @@ rows: ed.tableRows
             anchors.right: parent.right
             anchors.verticalCenter: toolbar.verticalCenter
             spacing: Theme.s(6)
-            ParamButton { text: "Undo"; enabled: ed.map.canUndo; onClicked: ed.map.undo() }
-            ParamButton { text: "Redo"; enabled: ed.map.canRedo; onClicked: ed.map.redo() }
-            ParamButton { visible: ed.showSave; text: "Save"; accent: true; enabled: ed.map.dirty; onClicked: ed.map.saveRequested() }
+            ParamButton { icon: "undo"; tip: "Undo"; enabled: ed.map.canUndo; onClicked: ed.map.undo() }
+            ParamButton { icon: "redo"; tip: "Redo"; enabled: ed.map.canRedo; onClicked: ed.map.redo() }
+            ParamButton { visible: ed.showSave; icon: "save"; tip: "Save"; accent: true; enabled: ed.map.dirty; onClicked: ed.map.saveRequested() }
         }
 
         ParamText {

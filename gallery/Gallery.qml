@@ -29,6 +29,10 @@ Window {
         if (Qt.application.arguments.indexOf("--flat") >= 0) Theme.skin = "flat"
         const sk = Qt.application.arguments.find(a => a.startsWith("--skin="))
         if (sk) Theme.skin = sk.substring(7)
+        const lk = Qt.application.arguments.find(a => a.startsWith("--look="))
+        if (lk) Theme.applyLook(Number(lk.substring(7)))
+        const bg = Qt.application.arguments.find(a => a.startsWith("--background="))
+        if (bg) Theme.background = bg.substring(13)
         const md = Qt.application.arguments.find(a => a.startsWith("--mode="))
         if (md) Theme.mode = md.substring(7)
         if (Qt.application.arguments.indexOf("--glow") >= 0) Theme.glow = true
@@ -75,7 +79,7 @@ Window {
                 height: Theme.s(28)
                 verticalAlignment: Text.AlignVCenter
                 text: "HIGHLIGHTER UI"
-                color: Theme.accent
+                color: Theme.onPanel(Theme.accent)
                 font.family: Theme.family
                 font.pixelSize: Theme.s(17)
                 font.weight: Font.Black
@@ -84,11 +88,30 @@ Window {
             Row {
                 spacing: Theme.s(10)
                 height: Theme.s(28)
-                ParamSwatches {
+                ParamColor {
                     anchors.verticalCenter: parent.verticalCenter
-                    width: implicitWidth
-                    current: Theme.accent
+                    label: "accent"
+                    color: Theme.accent
+                    presets: Theme.accents
+                    resettable: !Qt.colorEqual(Theme.accent, "#def243")
                     onPicked: c => Theme.accent = c
+                    onReset: Theme.accent = "#def243"
+                }
+                ParamColor {
+                    anchors.verticalCenter: parent.verticalCenter
+                    label: "background"
+                    color: Theme.tinted ? Theme.background : Theme.skinPage
+                    resettable: Theme.tinted
+                    onPicked: c => Theme.background = c
+                    onReset: Theme.background = "transparent"
+                }
+                ParamCombo {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Theme.s(170)
+                    model: Theme.looks.map(l => l.name)
+                    currentIndex: Theme.lookIndex
+                    displayText: Theme.lookIndex < 0 ? "your own" : currentText
+                    onActivated: i => Theme.applyLook(i)
                 }
             }
             Row {
@@ -248,15 +271,33 @@ Window {
                 ParamChoice { width: parent.width; label: "an empty slot picked: outlined, not filled"; model: ["1", "2", "3", "4", "5", "6", "7", "8"]; currentIndex: 3; faint: [3, 5, 6, 7] }
             }
             ParamSection {
+                width: parent.width; title: "Icons"; note: "every ParamIcon, by the name a button takes"
+                ParamIcon { id: iconList; visible: false }
+                Flow {
+                    width: parent.width
+                    spacing: Theme.s(6)
+                    Repeater {
+                        model: iconList.names
+                        Column {
+                            required property string modelData
+                            spacing: Theme.s(3)
+                            width: Theme.s(70)
+                            ParamButton { anchors.horizontalCenter: parent.horizontalCenter; icon: modelData; tip: modelData }
+                            ParamText { width: parent.width; small: true; tone: "faint"; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight; text: modelData }
+                        }
+                    }
+                }
+            }
+            ParamSection {
                 width: parent.width; title: "Buttons"
                 Flow {
                     width: parent.width
                     spacing: Theme.s(6)
                     ParamButton { text: "Save as defaults"; accent: true; onClicked: win.saveDefaults() }
                     ParamButton { text: "Reset to installed defaults"; onClicked: win.resetAll() }
-                    ParamButton { text: "Copy"; icon: "\u2398" }
-                    ParamButton { text: "Preview full screen"; checkable: true }
-                    ParamButton { text: "Delete preset"; danger: true }
+                    ParamButton { icon: "copy"; tip: "Copy" }
+                    ParamButton { icon: "fullscreen"; tip: "Preview full screen"; checkable: true }
+                    ParamButton { icon: "delete"; tip: "Delete preset"; danger: true }
                     ParamButton { text: "Disabled"; enabled: false }
                     ParamButton { text: "Disabled accent"; accent: true; enabled: false }
                 }
@@ -298,7 +339,7 @@ Window {
                 Flow {
                     width: parent.width
                     spacing: Theme.s(6)
-                    ParamButton { text: "Play"; accent: true }
+                    ParamButton { icon: "play"; tip: "Play"; accent: true }
                     ParamButton { text: "Sync"; checkable: true; checked: true }
                     ParamToggle { text: "Loop"; checked: true }
                 }

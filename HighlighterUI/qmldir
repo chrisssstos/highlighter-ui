@@ -31,6 +31,7 @@ ParamSection 1.0 ParamSection.qml
 ParamGauge 1.0 ParamGauge.qml
 ParamLevel 1.0 ParamLevel.qml
 ParamSwatches 1.0 ParamSwatches.qml
+ParamColor 1.0 ParamColor.qml
 ParamText 1.0 ParamText.qml
 ParamLight 1.0 ParamLight.qml
 ParamXY 1.0 ParamXY.qml

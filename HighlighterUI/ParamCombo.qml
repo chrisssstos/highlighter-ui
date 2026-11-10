@@ -12,6 +12,8 @@ Item {
     property alias model: combo.model
     property alias currentIndex: combo.currentIndex
     readonly property alias currentText: combo.currentText
+    //! What the box shows: the picked option, unless you say otherwise.
+    property alias displayText: combo.displayText
     signal activated(int index)
 
     implicitWidth: Theme.s(220)

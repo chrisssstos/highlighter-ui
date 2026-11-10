@@ -12,6 +12,9 @@ Item {
 
     //! The accent it draws in: the nearest one declared around it (see Theme).
     readonly property color tint: Theme.accentAt(box, Window.window)
+    //! The figures and outline: the accent, deepened on light panels (a
+    //! hardware value box is a dark screen, so it keeps the accent).
+    readonly property color ink: Theme.hardware ? box.tint : Theme.onPanel(box.tint)
 
     property real value: 0
     property int decimals: 0
@@ -76,7 +79,7 @@ Item {
              : Theme.hardware ? Theme.well    // a little dark screen
              : Qt.rgba(Theme.page.r, Theme.page.g, Theme.page.b, 0.85)
         border.width: 1
-        border.color: box.bad ? Theme.danger : box.tint
+        border.color: box.bad ? Theme.danger : box.ink
         ParamBevel { anchors.fill: parent; anchors.margins: 1; visible: Theme.classic && !box.editing; inset: true; dark: 0.5; light: 0.08 }
     }
 
@@ -88,7 +91,7 @@ Item {
         horizontalAlignment: box.align
         verticalAlignment: Text.AlignVCenter
         text: PM.format(box.value, box.decimals) + box.unit
-        color: box.tint
+        color: box.ink
         font.family: Theme.family
         font.pixelSize: box.fontSize
     }
