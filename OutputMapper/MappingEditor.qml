@@ -285,34 +285,45 @@ rows: ed.tableRows
         // what reaches past the view (an input far off the picture) stays in it
         clip: true
 
-        // the toolbar: which view, what's shown, undo, save
-        Row {
+        // the toolbar: which view, what's shown, undo, save. It wraps onto a
+        // second line when the view is narrow, the actions staying at the right.
+        Flow {
             id: toolbar
-            width: parent.width
+            width: parent.width - actions.width - Theme.s(16)
             spacing: Theme.s(16)
             ParamChoice {
+                id: viewChoice
                 width: Theme.s(220)
                 model: ["Input", "Output"]
                 currentIndex: ed.map.view === "input" ? 0 : 1
                 cellHeight: Theme.s(30)
                 onActivated: i => ed.map.view = i === 0 ? "input" : "output"
             }
-            ParamToggle {
-                anchors.verticalCenter: parent.verticalCenter
-                text: "Test card"
-                checked: ed.map.testCard
-                onToggled: c => ed.map.testCard = c
+            Item {
+                width: cardToggle.implicitWidth; height: viewChoice.height
+                ParamToggle {
+                    id: cardToggle
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "Test card"
+                    checked: ed.map.testCard
+                    onToggled: c => ed.map.testCard = c
+                }
             }
-            ParamToggle {
-                anchors.verticalCenter: parent.verticalCenter
-                text: "Show on output"
-                checked: ed.map.showOnOutput
-                onToggled: c => ed.map.showOnOutput = c
+            Item {
+                width: showToggle.implicitWidth; height: viewChoice.height
+                ParamToggle {
+                    id: showToggle
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "Show on output"
+                    checked: ed.map.showOnOutput
+                    onToggled: c => ed.map.showOnOutput = c
+                }
             }
         }
         Row {
+            id: actions
             anchors.right: parent.right
-            anchors.verticalCenter: toolbar.verticalCenter
+            y: (viewChoice.height - height) / 2
             spacing: Theme.s(6)
             ParamButton { icon: "undo"; tip: "Undo"; enabled: ed.map.canUndo; onClicked: ed.map.undo() }
             ParamButton { icon: "redo"; tip: "Redo"; enabled: ed.map.canRedo; onClicked: ed.map.redo() }
