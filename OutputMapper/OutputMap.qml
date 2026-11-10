@@ -216,13 +216,8 @@ QtObject {
         let w = 1, h = 1
         if (mode === "fit") { if (aIn > aOut) h = aOut / aIn; else w = aIn / aOut }
         if (mode === "native") { w = s.input.width / o.width; h = s.input.height / o.height }
-        if (mode === "fill") {
-            // the input cropped round its middle to the output's shape
-            const cx = s.input.x + s.input.width / 2, cy = s.input.y + s.input.height / 2
-            let iw = s.input.width, ih = s.input.height
-            if (aIn > aOut) iw = ih * aOut; else ih = iw / aOut
-            s.input = { x: Math.round(cx - iw / 2), y: Math.round(cy - ih / 2), width: Math.round(iw), height: Math.round(ih) }
-        }
+        // covering the output, past its edges (the display cuts them off; the input stays)
+        if (mode === "fill") { if (aIn > aOut) w = aIn / aOut; else h = aOut / aIn }
         // on whole display pixels
         const pw = Math.round(w * o.width), ph = Math.round(h * o.height)
         const px = Math.round((o.width - pw) / 2), py = Math.round((o.height - ph) / 2)
