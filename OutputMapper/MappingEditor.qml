@@ -24,6 +24,9 @@ Item {
     property int previewMs: 33
     //! its own Save button (off where the app saves another way)
     property bool showSave: true
+    //! the Mask section (off where the slices never need one)
+    property bool showMask: true
+    onShowMaskChanged: if (!showMask && map) map.maskMode = false
 
     readonly property var sel: { map.revision; return map.selected >= 0 && map.selected < map.slices.length ? map.slices[map.selected] : null }
     //! the output the Output view shows, by id (outputs come and go: a
@@ -256,14 +259,16 @@ rows: ed.tableRows
                 }
             }
 
-            ParamHeading { width: parent.width; text: "Mask"; note: (ed.sel?.mask.length ?? 0) >= 3 ? ed.sel.mask.length + " points" : "none" }
+            ParamHeading { visible: ed.showMask; width: parent.width; text: "Mask"; note: (ed.sel?.mask.length ?? 0) >= 3 ? ed.sel.mask.length + " points" : "none" }
             ParamToggle {
+                visible: ed.showMask
                 width: parent.width
                 text: "Edit mask"
                 checked: ed.map.maskMode
                 onToggled: c => { ed.map.maskMode = c; if (c) ed.map.view = "output" }
             }
             Flow {
+                visible: ed.showMask
                 width: parent.width
                 spacing: Theme.s(6)
                 ParamButton { text: "From outline"; onClicked: ed.map.maskFromOutline(ed.map.selected, 1) }
