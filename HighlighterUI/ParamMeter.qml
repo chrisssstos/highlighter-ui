@@ -16,6 +16,8 @@ Item {
     property int decimals: 2
     property string unit: ""
     property bool showPeak: true
+    //! the reading as text instead of the number (a time, "0:41 / 2:30")
+    property string valueText: ""
 
     implicitWidth: Theme.s(280)
     implicitHeight: head.implicitHeight + Theme.rowGap + bar.height
@@ -43,7 +45,7 @@ Item {
         Text {
             id: reading
             anchors.right: parent.right
-            text: PM.format(root.value, root.decimals) + root.unit
+            text: root.valueText !== "" ? root.valueText : PM.format(root.value, root.decimals) + root.unit
             color: Theme.onPanel(root.tint)
             font.family: Theme.family
             font.pixelSize: Theme.valueSize
