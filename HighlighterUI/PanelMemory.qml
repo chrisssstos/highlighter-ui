@@ -4,13 +4,19 @@ import QtCore
 
 /// What the panel remembers between runs: which sliders the user has
 /// maximised (sliders start minimised) and which minimised (an illustrated
-/// slider starts maximised). Kept in highlighterui.ini in the
-/// app's own config folder, so each app remembers its own panel.
+/// slider starts maximised). Kept in highlighterui.ini in folder, so each
+/// app remembers its own panel.
 QtObject {
     id: memory
 
+    //! The folder of highlighterui.ini, a file URL: the app's own config
+    //! folder unless the app sets it (e.g. its settings folder in Documents,
+    //! kept out of AppData and the install folder). Set it at start; set
+    //! later, the file is read again from there.
+    property url folder: StandardPaths.writableLocation(StandardPaths.AppConfigLocation)
+
     readonly property Settings store: Settings {
-        location: StandardPaths.writableLocation(StandardPaths.AppConfigLocation) + "/highlighterui.ini"
+        location: memory.folder + "/highlighterui.ini"
         category: "sliders"
         //! The keys of the maximised sliders, as a JSON list.
         property string maximised: "[]"
