@@ -11,3 +11,13 @@ the Apache License, Version 2.0
 Source: https://github.com/google/material-design-icons
 The transport and animation icons (play, pause, loop, pencil, the moving
 ball and the rest) are drawn for the kit.
+
+Font (HighlighterUI/fonts/Tektur.ttf): Tektur, copyright 2023 The Tektur
+Project Authors (https://www.github.com/hyvyys/Tektur), licensed under the
+SIL Open Font License, Version 1.1 (fonts/OFL-Tektur.txt).
+Source: https://github.com/google/fonts/tree/main/ofl/tektur
+
+Font (HighlighterUI/fonts/IBMPlexSansCondensed-SemiBold.ttf): IBM Plex
+Sans Condensed, copyright IBM Corp., licensed under the SIL Open Font
+License, Version 1.1 (fonts/OFL-IBMPlexSansCondensed.txt).
+Source: https://github.com/google/fonts/tree/main/ofl/ibmplexsanscondensed
