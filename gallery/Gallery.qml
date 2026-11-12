@@ -75,15 +75,20 @@ Window {
             width: parent.width - 2 * Theme.s(24)
             spacing: Theme.s(28)
 
-            Text {
+            // the name, its capitals centred on the row (the font's own line box sits high)
+            Item {
+                width: titleText.implicitWidth
                 height: Theme.s(28)
-                verticalAlignment: Text.AlignVCenter
-                text: "HIGHLIGHTER UI"
-                color: Theme.onPanel(Theme.accent)
-                font.family: Theme.displayFamily
-                font.pixelSize: Theme.s(19)
-                font.variableAxes: ({ "wght": 700 })
-                font.letterSpacing: Theme.s(1)
+                Text {
+                    id: titleText
+                    text: "Highlighter UI"
+                    color: Theme.onPanel(Theme.accent)
+                    font.family: Theme.displayFamily
+                    font.pixelSize: Theme.s(28)
+                    font.letterSpacing: Theme.s(1)
+                    y: Math.round((parent.height - caps.tightBoundingRect.height) / 2 - baselineOffset - caps.tightBoundingRect.y)
+                    TextMetrics { id: caps; font: titleText.font; text: "HUI" }
+                }
             }
             Row {
                 spacing: Theme.s(10)

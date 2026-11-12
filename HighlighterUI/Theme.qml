@@ -260,9 +260,9 @@ QtObject {
     readonly property bool mac: Qt.platform.os === "osx"
     property string family: classic ? "Tahoma" : mac ? "Helvetica Neue" : "Segoe UI"
     property string mono: mac ? "Menlo" : "Consolas"
-    //! A display face for a panel's own name (the gallery's title): Tektur,
-    //! bundled (fonts/, SIL Open Font License); bold through font.variableAxes.
-    readonly property FontLoader displayLoader: FontLoader { source: "fonts/Tektur.ttf" }
+    //! A display face for a panel's own name (the gallery's title):
+    //! Computerfont, bundled (fonts/).
+    readonly property FontLoader displayLoader: FontLoader { source: "fonts/Computerfont.ttf" }
     readonly property string displayFamily: displayLoader.status === FontLoader.Ready ? displayLoader.name : family
     //! Section titles and headings: IBM Plex Sans Condensed SemiBold, bundled
     //! (fonts/, SIL Open Font License), in every skin but classic (which
