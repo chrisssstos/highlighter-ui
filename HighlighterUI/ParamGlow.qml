@@ -12,7 +12,8 @@ Item {
     property real strength: 1
     //! The lit thing's corner radius.
     property real radius: Theme.radius
-    visible: Theme.hardware && strength > 0
+    // Not for a size that isn't a real number: Qt (6.11) hangs on an infinite one.
+    visible: Theme.hardware && strength > 0 && isFinite(width) && isFinite(height)
 
     RectangularShadow {
         anchors.fill: parent
@@ -21,6 +22,8 @@ Item {
         spread: Theme.s(2)
         radius: glow.radius
         opacity: 0.85 * glow.strength
-        cached: true
+        // Not cached: the cache (a ShaderEffectSource) loops forever when the
+        // size is infinite, and one quad is cheap to draw anyway.
+        cached: false
     }
 }
