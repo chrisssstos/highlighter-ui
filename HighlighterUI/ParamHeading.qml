@@ -18,9 +18,9 @@ Item {
             id: t
             text: root.text.toUpperCase()
             color: Theme.textDim
-            font.family: Theme.family
+            font.family: Theme.headingFamily
             font.pixelSize: Theme.smallSize
-            font.weight: Font.Bold
+            font.weight: Theme.classic ? Font.Bold : Font.DemiBold
             style: Theme.titleStyle; styleColor: Theme.titleStyleColor
             font.letterSpacing: Theme.s(1)
         }

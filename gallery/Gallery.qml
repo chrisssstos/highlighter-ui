@@ -80,10 +80,10 @@ Window {
                 verticalAlignment: Text.AlignVCenter
                 text: "HIGHLIGHTER UI"
                 color: Theme.onPanel(Theme.accent)
-                font.family: Theme.family
-                font.pixelSize: Theme.s(17)
-                font.weight: Font.Black
-                font.letterSpacing: Theme.s(2)
+                font.family: Theme.displayFamily
+                font.pixelSize: Theme.s(19)
+                font.variableAxes: ({ "wght": 700 })
+                font.letterSpacing: Theme.s(1)
             }
             Row {
                 spacing: Theme.s(10)
