@@ -45,10 +45,11 @@ Item {
     //! Its animator is open under it (the animate mark flips it).
     property bool animOpen: false
     //! The animator is moving the value.
-    readonly property bool animating: anim.playing
+    readonly property bool animating: anim.item?.playing ?? false
     //! Its animator, for an app to save and restore its state (range, points,
-    //! mode, duration, playing) with its presets.
-    readonly property alias animator: anim
+    //! mode, duration, playing) with its presets; null until it is first
+    //! opened (set animOpen to make it).
+    readonly property Item animator: anim.item
     //! Minimised: a thin bar. Sliders start minimised, unless the user
     //! maximised this one before; the min / max button by the label flips it.
     //! An illustrated slider starts maximised, so its picture shows; the
@@ -118,7 +119,7 @@ Item {
 
     // Drawn from an eased copy of the value, so steps glide and drags don't lag.
     property real shown: value
-    Behavior on shown { enabled: !ma.dragging && !anim.playing; NumberAnimation { duration: Theme.quick; easing.type: Easing.OutCubic } }
+    Behavior on shown { enabled: !ma.dragging && !root.animating; NumberAnimation { duration: Theme.quick; easing.type: Easing.OutCubic } }
     function fraction(v) { return root.to === root.from ? 0 : PM.clamp((v - root.from) / (root.to - root.from), 0, 1) }
     readonly property real edgeX: track.width * fraction(root.shown)
     readonly property real originX: track.width * fraction(root.origin)
@@ -186,8 +187,8 @@ Item {
             anchors.verticalCenter: resetMark.verticalCenter
             name: "animate"
             size: Theme.s(9)
-            color: animHover.hovered || root.animOpen || anim.playing ? Theme.onPanel(root.tint) : Theme.textFaint
-            opacity: hover.hovered || root.activeFocus || root.animOpen || anim.playing ? 1 : 0
+            color: animHover.hovered || root.animOpen || root.animating ? Theme.onPanel(root.tint) : Theme.textFaint
+            opacity: hover.hovered || root.activeFocus || root.animOpen || root.animating ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.ease } }
             HoverHandler { id: animHover; margin: Theme.s(4); cursorShape: Qt.PointingHandCursor }
             TapHandler { margin: Theme.s(4); enabled: animMark.opacity > 0; onTapped: root.animOpen = !root.animOpen }
@@ -211,15 +212,24 @@ Item {
     }
 
     // --- the illustration, maximised only -------------------------------------
+    // Made only for an illustrated slider, as the animator is: a strip of
+    // frames in every plain slider, unseen, weighed a long panel down.
     Item {
         id: pictures
         y: head.height
         width: root.width - root.gutterR
         height: root.illustrated ? strip.height + Theme.s(4) : 0
         visible: root.illustrated
-        ParamFrames {
+        Loader {
             id: strip
+            active: root.illustrated
             width: parent.width
+            sourceComponent: stripFrames
+        }
+    }
+    Component {
+        id: stripFrames
+        ParamFrames {
             frames: root.frames
             position: root.fraction(root.shown)
             pattern: root.pattern
@@ -495,20 +505,30 @@ Item {
     }
 
     // --- the animator, under the value (the animate mark opens it) --------------
-    ParamAnimator {
+    // Made the first time it opens, then kept (with its state): a whole
+    // animator in every slider, unseen, made a panel of many sliders slow to
+    // lay out (a group folding open ran at a quarter of the frame rate).
+    property bool animMade: false
+    Loader {
         id: anim
+        active: root.animOpen || root.animMade
         visible: root.animOpen
         y: box.y + box.height + Theme.s(6)
         width: root.width
-        stripWidth: track.width
-        from: root.from; to: root.to; stepSize: root.stepSize
-        decimals: root.decimals; unit: root.unit
-        value: root.value
-        enabled: root.enabled
-        onSwept: v => root.setSmooth(v)
+        sourceComponent: ParamAnimator {
+            stripWidth: track.width
+            from: root.from; to: root.to; stepSize: root.stepSize
+            decimals: root.decimals; unit: root.unit
+            value: root.value
+            enabled: root.enabled
+            onSwept: v => root.setSmooth(v)
+        }
     }
     // grabbing the bar takes the value back from the animation
-    Connections { target: ma; function onPressedChanged() { if (ma.pressed) anim.pause() } }
+    Connections { target: ma; function onPressedChanged() { if (ma.pressed) anim.item?.pause() } }
     // closing it stops it
-    onAnimOpenChanged: if (!animOpen) anim.pause()
+    onAnimOpenChanged: {
+        if (animOpen) animMade = true
+        else anim.item?.pause()
+    }
 }
