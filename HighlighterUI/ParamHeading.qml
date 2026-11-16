@@ -20,7 +20,7 @@ Item {
             color: Theme.textDim
             font.family: Theme.headingFamily
             font.pixelSize: Theme.smallSize
-            font.weight: Theme.classic ? Font.Bold : Font.DemiBold
+            font.weight: Font.Bold
             style: Theme.titleStyle; styleColor: Theme.titleStyleColor
             font.letterSpacing: Theme.s(1)
         }

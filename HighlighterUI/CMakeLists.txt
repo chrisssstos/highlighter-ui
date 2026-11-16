@@ -63,6 +63,7 @@ qt_add_qml_module(HighlighterUI
         textures/knob_classic.png
         textures/sheen.png
         fonts/Computerfont.ttf
-        fonts/IBMPlexSansCondensed-SemiBold.ttf
+        fonts/texgyreheros-regular.otf
+        fonts/texgyreheros-bold.otf
 )
 target_link_libraries(HighlighterUI PRIVATE Qt6::Quick Qt6::QuickControls2)

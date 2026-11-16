@@ -127,7 +127,7 @@ Item {
                 color: root.open || headArea.containsMouse || root.window ? Theme.text : Theme.textDim
                 font.family: root.window ? Theme.family : Theme.headingFamily
                 font.pixelSize: Theme.labelSize
-                font.weight: root.window || Theme.classic ? Font.Bold : Font.DemiBold
+                font.weight: Font.Bold
                 font.letterSpacing: root.window ? 0 : Theme.s(0.5)
                 font.capitalization: root.window ? Font.MixedCase : Font.AllUppercase
                 style: root.window ? Text.Raised : Theme.titleStyle

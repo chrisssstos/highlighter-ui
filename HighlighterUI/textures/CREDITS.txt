@@ -15,7 +15,7 @@ ball and the rest) are drawn for the kit.
 Font (HighlighterUI/fonts/Computerfont.ttf): Computerfont, chosen by the
 kit's author for the title; the file carries no licence of its own.
 
-Font (HighlighterUI/fonts/IBMPlexSansCondensed-SemiBold.ttf): IBM Plex
-Sans Condensed, copyright IBM Corp., licensed under the SIL Open Font
-License, Version 1.1 (fonts/OFL-IBMPlexSansCondensed.txt).
-Source: https://github.com/google/fonts/tree/main/ofl/ibmplexsanscondensed
+Fonts (HighlighterUI/fonts/texgyreheros-regular.otf, texgyreheros-bold.otf):
+TeX Gyre Heros, copyright GUST e-foundry (B. Jackowski, J. M. Nowacki),
+licensed under the GUST Font License (fonts/GUST-FONT-LICENSE-TeXGyreHeros.txt).
+Source: https://www.gust.org.pl/projects/e-foundry/tex-gyre/heros
