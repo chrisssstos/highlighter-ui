@@ -12,6 +12,8 @@ Item {
     property string text: ""
     property string placeholder: ""
     property bool mono: false
+    //! The most characters it takes (typing stops there), as TextInput's.
+    property int maximumLength: 32767
     signal accepted(string text)
 
     readonly property bool editing: input.activeFocus
@@ -48,6 +50,7 @@ Item {
             leftPadding: Theme.s(8); rightPadding: Theme.s(8)
             verticalAlignment: Text.AlignVCenter
             text: root.text
+            maximumLength: root.maximumLength
             clip: true
             selectByMouse: true
             color: root.editing ? Theme.text : Theme.screenText
@@ -59,6 +62,11 @@ Item {
             onAccepted: focus = false
             onActiveFocusChanged: if (!activeFocus && !cancelling && text !== root.text) { root.text = text; root.accepted(text) }
             Keys.onEscapePressed: { cancelling = true; text = root.text; focus = false; cancelling = false }
+            // Esc is the field's own while editing: claimed before any
+            // shortcut sees it, so an app-wide Esc (the app quits on it)
+            // doesn't fire instead of the cancel. Qt's TextInput leaves Esc
+            // to the shortcuts.
+            Keys.onShortcutOverride: (event) => { if (event.key === Qt.Key_Escape) event.accepted = true }
         }
         Text {
             anchors.fill: parent

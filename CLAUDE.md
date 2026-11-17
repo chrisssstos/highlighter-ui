@@ -150,6 +150,8 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   (`qml.exe -I . tests/check.qml`; set `QT_FORCE_STDERR_LOGGING=1` to see its
   output). `tests/tst_editing.qml` drives the value box with real clicks and
   keys (`qmltestrunner.exe -import . -input tests/tst_editing.qml`).
+  `tests/tst_field.qml` checks ParamField takes Esc for itself while
+  editing: an app-wide Esc shortcut (the app quits on it) must not fire.
   `tests/build-check.bat` proves the CMake module compiles.
 - Every new control goes in `HighlighterUI/qmldir`, `HighlighterUI/CMakeLists.txt` and
   the gallery, with its awkward states shown.
