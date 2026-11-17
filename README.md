@@ -12,6 +12,25 @@ build. It shows every control in its normal and awkward states. The scale
 picker resizes the whole kit, the swatches change the accent, and "disable everything" shows the disabled
 states.
 
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/sliders.png" alt="Sliders"><br>Sliders: step arrows at the fill's edge, a click-to-type value box</td>
+<td width="50%"><img src="docs/screenshots/animation.png" alt="Animation"><br>Animation: any slider can loop, bounce or hold between two values</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/knobs.png" alt="Knobs"><br>Knobs</td>
+<td><img src="docs/screenshots/xy-pad.png" alt="XY pad"><br>XY pad: Shift for fine, Ctrl snaps</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/curve.png" alt="Curve editor"><br>Curve editor: click to add, drag to move, right-click to remove</td>
+<td><img src="docs/screenshots/meters.png" alt="Meters"><br>Meters, gauges and levels for live values</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/tables.png" alt="Tables"><br>Tables: pickable rows, logs</td>
+<td><img src="docs/screenshots/settings-toml.png" alt="Settings as TOML"><br>Values ready to paste into the app's settings file</td>
+</tr>
+</table>
+
 ## The slider
 
 - The lime fill grows from `origin`, which is `from` by default. Set it to 0
