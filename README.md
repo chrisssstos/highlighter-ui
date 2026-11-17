@@ -112,8 +112,8 @@ ParamSlider {
     width: parent.width
     label: "ring, from screen centre"; unit: " mm"
     from: -400; to: 400; origin: 0; defaultValue: 0
-    value: Tuning.read("fire.ringMm")
-    onMoved: v => Tuning.set("fire.ringMm", v)
+    value: Tuning.read("particles.ringMm")
+    onMoved: v => Tuning.set("particles.ringMm", v)
 }
 ```
 
@@ -197,5 +197,4 @@ OutputWindow { window: out.Window.window; map: mapping; displays: displays }
 MappingWindow { map: mapping; previewSource: out.thumbnail }
 ```
 
-Needs C++ (it isn't in the gallery, which runs without a build). the app
-(a client) is the first app using it.
+Needs C++ (it isn't in the gallery, which runs without a build).

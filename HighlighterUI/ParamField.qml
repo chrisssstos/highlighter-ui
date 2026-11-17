@@ -63,7 +63,7 @@ Item {
             onActiveFocusChanged: if (!activeFocus && !cancelling && text !== root.text) { root.text = text; root.accepted(text) }
             Keys.onEscapePressed: { cancelling = true; text = root.text; focus = false; cancelling = false }
             // Esc is the field's own while editing: claimed before any
-            // shortcut sees it, so an app-wide Esc (the app quits on it)
+            // shortcut sees it, so an app-wide Esc (an app that quits on it)
             // doesn't fire instead of the cancel. Qt's TextInput leaves Esc
             // to the shortcuts.
             Keys.onShortcutOverride: (event) => { if (event.key === Qt.Key_Escape) event.accepted = true }

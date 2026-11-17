@@ -10,7 +10,7 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
    (https://github.com/chrisssstos/highlighter-ui). Personal projects: add
    it as a submodule (`git submodule add <url> external/highlighter-ui`).
    Client projects: ask before adding a submodule, since the
-   client's build would need access to this private repo; the default there
+   client's build would depend on this repo; the default there
    is to copy `HighlighterUI/` in.
 1. Link the module. In the app's CMakeLists.txt:
    `add_subdirectory(<path>/highlighter-ui/HighlighterUI ${CMAKE_BINARY_DIR}/HighlighterUI)`
@@ -34,7 +34,7 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
    them and set your state in the handler, no re-syncing needed.
    Anything a panel needs that the kit lacks goes into the kit (with the
    gallery and the checks), not into the project.
-4. Give every slider `key:` its setting's key (e.g. "fire.reachMin"). The
+4. Give every slider `key:` its setting's key (e.g. "particles.reachMin"). The
    panel remembers which sliders the user maximised by that key; two
    sliders sharing a label would otherwise share the memory.
 5. Map ranges carefully: a centred range (−400..400 "from centre") gets
@@ -64,9 +64,10 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
 ## What goes where (only where appropriate)
 
 - **Sections and groups.** Use `ParamSection` (always open) for each thing on
-  screen a run of controls tunes (the info card, the call to action). Use
+  screen a run of controls tunes (an info card, a button). Use
   `ParamGroup` (folding) only when there are enough sections that some
-  should fold away, or when only one at a time makes sense (effects, "one open at a time"). Use `ParamHeading` for a light label over
+  should fold away, or when only one at a time makes sense (effects,
+  "one open at a time"). Use `ParamHeading` for a light label over
   a few controls that don't need a box. Nest at most one group inside
   another.
 - **Grids.** Use `ParamGrid` only for runs of short, alike controls: knobs,
@@ -151,7 +152,7 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   output). `tests/tst_editing.qml` drives the value box with real clicks and
   keys (`qmltestrunner.exe -import . -input tests/tst_editing.qml`).
   `tests/tst_field.qml` checks ParamField takes Esc for itself while
-  editing: an app-wide Esc shortcut (the app quits on it) must not fire.
+  editing: an app-wide Esc shortcut (an app that quits on Esc) must not fire.
   `tests/build-check.bat` proves the CMake module compiles.
 - Every new control goes in `HighlighterUI/qmldir`, `HighlighterUI/CMakeLists.txt` and
   the gallery, with its awkward states shown.
@@ -224,7 +225,7 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   ShaderEffectSources use `MirrorVertically` (`flipSource` if a backend
   differs).
 - Its qmldir deps are DEPENDENCIES, not IMPORTS: IMPORTS re-exports QtQuick
-  and shadows the app's own types (the app's Canvas became Qt's).
+  and shadows the app's own types (an app's own Canvas became Qt's).
 - The editor's shared state (selected slice and point, view, mask mode, test
   card, show on output) lives on OutputMap, so scripts and the outputs see it.
 - Outputs have ids (DisplayOutputs: "display:<screen name>"); slices keep
@@ -239,8 +240,8 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   content item, never inside a fit / scale view, so it is 1:1 on displays.
 - Windows can't share a scene graph texture: one window per display would
   render the content once per display. Hence the one spanning window.
-- An app can host MappingEditor in its own panel (the app: the panel's
-  Output tab) instead of MappingWindow; the editor carries its own Undo /
+- An app can host MappingEditor in its own panel (an Output tab in
+  its settings panel) instead of MappingWindow; the editor carries its own Undo /
   Redo shortcuts. OutputWindow.parkWhenUnused moves the output window out of
   sight (still rendering: the preview stays live) while no slice is on a
   display; keep `ready` false until the app has put its default slices on
@@ -252,7 +253,7 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   and keeps its mesh's triangles; Repeaters of handles take a count, not the
   points (an array model rebuilds every handle on every move); snapping
   lines are worked out once per drag.
-  the app's `drag:` test step (TestInput) logs the cost per move.
+  Time a drag in the host app to check it.
 - Never give a property in the editor a name an id already has (`side` was
   the left column's id: assigning to it threw, and every press in the Output
   view did nothing).

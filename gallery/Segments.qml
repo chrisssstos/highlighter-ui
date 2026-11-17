@@ -3,7 +3,7 @@ import QtQuick.Window
 import HighlighterUI
 
 /// A breakout page for slider illustrations (ParamFrames above the bar, when
-/// maximised), tried on an example's settings (a client project) before they go anywhere else. Only settings a
+/// maximised), tried on example settings before they go anywhere else. Only settings a
 /// picture explains get one; the rest stay plain sliders. Dot matrices
 /// (pattern) and custom drawings of ParamSegments (illustration) side by side.
 /// Run with run-segments.bat; "-- --shot=<png>" saves a picture and quits,

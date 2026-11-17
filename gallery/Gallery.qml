@@ -226,7 +226,7 @@ Window {
                 ParamSlider { width: parent.width; label: "top edge from centre (fills from 0)"; unit: " mm"; from: -400; to: 400; origin: 0; value: -300; defaultValue: 0 }
                 ParamSlider { width: parent.width; label: "left edge from centre"; unit: " mm"; from: -400; to: 400; origin: 0; value: 201; defaultValue: 0 }
                 ParamSlider { width: parent.width; label: "preview reach"; from: 0; to: 1; stepSize: 0.01; value: 0.5; defaultValue: 0.5 }
-                ParamSlider { width: parent.width; label: "kaleidoscope blooms over (step 50)"; unit: " ms"; from: 0; to: 10000; stepSize: 50; value: 4500; defaultValue: 4500 }
+                ParamSlider { width: parent.width; label: "mirror blooms over (step 50)"; unit: " ms"; from: 0; to: 10000; stepSize: 50; value: 4500; defaultValue: 4500 }
                 ParamSlider { width: parent.width; label: "fine: 0.001 steps"; from: 0; to: 0.1; stepSize: 0.001; value: 0.053 }
                 ParamSlider { width: parent.width; label: "all below zero"; from: -10; to: -2; value: -6 }
 
@@ -241,7 +241,7 @@ Window {
             }
             ParamSection {
                 width: parent.width; title: "Awkward"
-                ParamSlider { width: parent.width; label: "music dimming under every visual (0 none, 1 black), a label far too long for its row"; from: 0; to: 1; stepSize: 0.01; value: 1 }
+                ParamSlider { width: parent.width; label: "background dimming under every visual (0 none, 1 black), a label far too long for its row"; from: 0; to: 1; stepSize: 0.01; value: 1 }
                 ParamSlider { width: parent.width; label: "disabled"; from: 0; to: 100; value: 40; enabled: false }
                 ParamSlider { width: Theme.s(150); label: "narrow"; unit: " mm"; from: 0; to: 900; value: 690 }
                 ParamSlider { width: parent.width; label: "a big unit"; unit: " frames per second"; from: 0; to: 240; value: 60 }
@@ -264,7 +264,7 @@ Window {
                     minColumnWidth: Theme.s(120)
                     ParamKnob { label: "slices"; from: 3; to: 24; value: 15; defaultValue: 12 }
                     ParamKnob { label: "twist"; from: -1; to: 1; stepSize: 0.001; origin: 0; value: -0.297; defaultValue: 0 }
-                    ParamKnob { label: "ring ignites"; unit: " ms"; from: 0; to: 4500; stepSize: 50; value: 2500; ticks: 0 }
+                    ParamKnob { label: "ring lights up"; unit: " ms"; from: 0; to: 4500; stepSize: 50; value: 2500; ticks: 0 }
                     ParamKnob { label: "past the end"; from: 0; to: 10; limitFrom: 0; value: 12 }
                     ParamKnob { label: "disabled"; from: 0; to: 10; value: 4; enabled: false }
                 }
@@ -390,7 +390,7 @@ Window {
             ParamSection {
                 width: parent.width; title: "Choices"
                 ParamChoice { width: parent.width; label: "overall preset"; model: ["1", "2"]; currentIndex: 0; cellHeight: Theme.s(44); cellMinWidth: Theme.s(44) }
-                ParamChoice { width: parent.width; label: "shader"; model: ["ring", "kaleidoscope", "flood", "explosion"]; currentIndex: 1 }
+                ParamChoice { width: parent.width; label: "shader"; model: ["ring", "mirror", "wave", "burst"]; currentIndex: 1 }
                 ParamChoice { width: parent.width; label: "many (wraps)"; model: ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]; currentIndex: 6 }
                 ParamCombo { width: parent.width; label: "blend mode"; model: ["normal", "add", "screen", "multiply", "overlay", "difference"]; currentIndex: 1 }
                 ParamCombo { width: parent.width; label: "a long list (scrolls)"; model: 40; currentIndex: 12 }
@@ -530,16 +530,16 @@ Window {
             height: parent.height
 
             QtObject {
-                id: fire
+                id: particles
                 property int overall: 0
-                property real reachMin: 0.053
-                property real reachMax: 0.68
+                property real reachMin: 0.05
+                property real reachMax: 0.7
                 property real speed: 0.3
-                property real distortion: 0.812
-                property int slices: 15
-                property real twist: -0.297
+                property real distortion: 0.5
+                property int slices: 12
+                property real twist: -0.25
             }
-            property string openGroup: "fire"
+            property string openGroup: "particles"
 
             ParamSection {
                 width: parent.width; title: "Info card"
@@ -549,16 +549,16 @@ Window {
                     label: "card position on the screen, from centre"
                     unit: " mm"
                     xFrom: -960; xTo: 960; yFrom: -540; yTo: 540; gridStep: 120
-                    xValue: 201; yValue: -300; defaultX: 200; defaultY: -300
-                    footprintWidth: 431; footprintHeight: 160; footprintFromCorner: true
-                    ghosts: [{ x: 0, y: 380, label: "call to action" }, { x: 0, y: 126, label: "start" }]
+                    xValue: 240; yValue: -240; defaultX: 240; defaultY: -240
+                    footprintWidth: 400; footprintHeight: 150; footprintFromCorner: true
+                    ghosts: [{ x: 0, y: 360, label: "button" }, { x: 0, y: 120, label: "start" }]
                 }
                 // Sliders only pair up when each still gets a full-width row's worth.
                 ParamGrid {
                     width: parent.width
                     minColumnWidth: Theme.s(300)
-                    ParamSlider { label: "width"; unit: " mm"; from: 100; to: 800; value: 431; defaultValue: 430 }
-                    ParamSlider { label: "name size"; unit: " mm"; from: 10; to: 150; value: 70; defaultValue: 70 }
+                    ParamSlider { label: "width"; unit: " mm"; from: 100; to: 800; value: 400; defaultValue: 400 }
+                    ParamSlider { label: "title size"; unit: " mm"; from: 10; to: 150; value: 60; defaultValue: 60 }
                 }
             }
 
@@ -575,7 +575,7 @@ Window {
                             anchors.centerIn: parent
                             spacing: Theme.s(8)
                             ParamLevel { label: "music"; value: live.l; warnAt: 0.8; barHeight: Theme.s(80) }
-                            ParamLevel { label: "fire"; value: live.r; warnAt: 0.8; barHeight: Theme.s(80) }
+                            ParamLevel { label: "sparks"; value: live.r; warnAt: 0.8; barHeight: Theme.s(80) }
                         }
                     }
                 }
@@ -596,57 +596,57 @@ Window {
 
             ParamHeading { width: parent.width; text: "Effects"; note: "one open at a time" }
             ParamGroup {
-                width: parent.width; title: "Mechanical"
-                open: inUse.openGroup === "mechanical"
-                onToggled: o => inUse.openGroup = o ? "mechanical" : ""
-                ParamSlider { width: parent.width; label: "music dims over"; unit: " ms"; from: 0; to: 5000; stepSize: 50; value: 900 }
+                width: parent.width; title: "Motion"
+                open: inUse.openGroup === "motion"
+                onToggled: o => inUse.openGroup = o ? "motion" : ""
+                ParamSlider { width: parent.width; label: "fades over"; unit: " ms"; from: 0; to: 5000; stepSize: 50; value: 900 }
                 ParamSlider { width: parent.width; label: "shake"; from: 0; to: 1; stepSize: 0.01; value: 0.4 }
             }
             ParamGroup {
-                width: parent.width; title: "Fire"; note: "preset 2"
-                open: inUse.openGroup === "fire"
-                onToggled: o => inUse.openGroup = o ? "fire" : ""
-                ParamChoice { width: parent.width; label: "overall preset"; model: ["1", "2"]; currentIndex: fire.overall; onActivated: i => fire.overall = i; cellHeight: Theme.s(40); cellMinWidth: Theme.s(40) }
-                ParamSlider { width: parent.width; label: "reach min"; from: 0; to: 1; stepSize: 0.001; value: fire.reachMin; onMoved: v => fire.reachMin = v; defaultValue: 0.05 }
-                ParamSlider { width: parent.width; label: "reach max"; from: 0; to: 1; stepSize: 0.001; value: fire.reachMax; onMoved: v => fire.reachMax = v; defaultValue: 0.7 }
-                ParamSlider { width: parent.width; label: "speed"; from: 0; to: 2; stepSize: 0.01; value: fire.speed; onMoved: v => fire.speed = v; defaultValue: 0.3 }
-                ParamSlider { width: parent.width; label: "distortion"; from: 0; to: 1; stepSize: 0.001; value: fire.distortion; onMoved: v => fire.distortion = v }
+                width: parent.width; title: "Particles"; note: "preset 2"
+                open: inUse.openGroup === "particles"
+                onToggled: o => inUse.openGroup = o ? "particles" : ""
+                ParamChoice { width: parent.width; label: "overall preset"; model: ["1", "2"]; currentIndex: particles.overall; onActivated: i => particles.overall = i; cellHeight: Theme.s(40); cellMinWidth: Theme.s(40) }
+                ParamSlider { width: parent.width; label: "reach min"; from: 0; to: 1; stepSize: 0.001; value: particles.reachMin; onMoved: v => particles.reachMin = v; defaultValue: 0.05 }
+                ParamSlider { width: parent.width; label: "reach max"; from: 0; to: 1; stepSize: 0.001; value: particles.reachMax; onMoved: v => particles.reachMax = v; defaultValue: 0.7 }
+                ParamSlider { width: parent.width; label: "speed"; from: 0; to: 2; stepSize: 0.01; value: particles.speed; onMoved: v => particles.speed = v; defaultValue: 0.3 }
+                ParamSlider { width: parent.width; label: "distortion"; from: 0; to: 1; stepSize: 0.001; value: particles.distortion; onMoved: v => particles.distortion = v }
                 ParamGroup {
-                    width: parent.width; title: "Kaleidoscope"; open: true
+                    width: parent.width; title: "Mirror"; open: true
                     ParamGrid {
                         width: parent.width
                         minColumnWidth: Theme.s(110)
-                        ParamKnob { label: "slices"; from: 3; to: 24; value: fire.slices; onMoved: v => fire.slices = v; defaultValue: 12 }
-                        ParamKnob { label: "twist"; from: -1; to: 1; stepSize: 0.001; origin: 0; value: fire.twist; onMoved: v => fire.twist = v; defaultValue: 0 }
+                        ParamKnob { label: "slices"; from: 3; to: 24; value: particles.slices; onMoved: v => particles.slices = v; defaultValue: 12 }
+                        ParamKnob { label: "twist"; from: -1; to: 1; stepSize: 0.001; origin: 0; value: particles.twist; onMoved: v => particles.twist = v; defaultValue: 0 }
                         ParamKnob { label: "strength"; from: 0; to: 1; stepSize: 0.01; value: 0.9 }
                     }
                 }
             }
             ParamGroup {
-                width: parent.width; title: "Flood"
-                open: inUse.openGroup === "flood"
-                onToggled: o => inUse.openGroup = o ? "flood" : ""
+                width: parent.width; title: "Wave"
+                open: inUse.openGroup === "wave"
+                onToggled: o => inUse.openGroup = o ? "wave" : ""
                 ParamSlider { width: parent.width; label: "water line"; unit: " mm"; from: -400; to: 400; origin: 0; value: -120 }
             }
             ParamGroup {
-                width: parent.width; title: "Explosion (empty)"
-                open: inUse.openGroup === "explosion"
-                onToggled: o => inUse.openGroup = o ? "explosion" : ""
+                width: parent.width; title: "Burst (empty)"
+                open: inUse.openGroup === "burst"
+                onToggled: o => inUse.openGroup = o ? "burst" : ""
             }
 
             ParamCode {
                 width: parent.width
                 open: true
-                title: "Fire values (paste into settings/app_settings.toml)"
-                text: "[fire]\noverall = " + (fire.overall + 1)
-                    + "\n\n[fire.preset2]\nreachMin = " + fire.reachMin
-                    + "\nreachMax = " + fire.reachMax
-                    + "\nspeed = " + fire.speed
-                    + "\ndistortion = " + fire.distortion
-                    + "\n\n[fire.kaleidoscope.preset2]\nslices = " + fire.slices
-                    + "\ntwist = " + fire.twist
+                title: "Particle values (paste into settings/app_settings.toml)"
+                text: "[particles]\noverall = " + (particles.overall + 1)
+                    + "\n\n[particles.preset2]\nreachMin = " + particles.reachMin
+                    + "\nreachMax = " + particles.reachMax
+                    + "\nspeed = " + particles.speed
+                    + "\ndistortion = " + particles.distortion
+                    + "\n\n[particles.mirror.preset2]\nslices = " + particles.slices
+                    + "\ntwist = " + particles.twist
             }
-            ParamCode { width: parent.width; title: "Layout values (folded, the default)"; text: "[card]\nxMm = 201\nyMm = -300\n\n[touch]\nyMm = 126" }
+            ParamCode { width: parent.width; title: "Layout values (folded, the default)"; text: "[card]\nxMm = 120\nyMm = -80\n\n[touch]\nyMm = 60" }
 
             ParamSection {
                 width: parent.width; title: "Defaults on this machine"
@@ -674,8 +674,8 @@ Window {
         ParamPage {
             anchors.fill: parent
             ParamHeading { width: parent.width; text: "Sound panel"; note: "property color accent: pink" }
-            ParamSlider { width: parent.width; key: "second.volume"; label: "music volume"; unit: " %"; from: 0; to: 100; value: 70; defaultValue: 80; compact: false }
-            ParamSlider { width: parent.width; key: "second.fire"; label: "fire volume"; unit: " %"; from: 0; to: 100; value: 45 }
+            ParamSlider { width: parent.width; key: "second.music"; label: "music volume"; unit: " %"; from: 0; to: 100; value: 70; defaultValue: 80; compact: false }
+            ParamSlider { width: parent.width; key: "second.effects"; label: "effects volume"; unit: " %"; from: 0; to: 100; value: 45 }
             ParamGrid {
                 width: parent.width
                 minColumnWidth: Theme.s(110)

@@ -3,7 +3,7 @@ import QtTest
 import HighlighterUI
 
 // Run: qmltestrunner -import . -input tests/tst_field.qml
-// ParamField with an app-wide Esc shortcut around it (the app quits on Esc):
+// ParamField with an app-wide Esc shortcut around it (an app that quits on Esc):
 // Esc while editing must cancel the edit, not fire the shortcut.
 Item {
     id: top
