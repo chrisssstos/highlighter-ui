@@ -76,3 +76,24 @@ function curveAt(p, t, smooth) {
     return (2 * s3 - 3 * s2 + 1) * a.v + (s3 - 2 * s2 + s) * h * m[i - 1]
          + (-2 * s3 + 3 * s2) * b.v + (s3 - s2) * h * m[i]
 }
+
+//! Seconds as a time: "m:ss", "h:mm:ss" past an hour ("1:30", "0:05").
+function formatTime(v) {
+    if (!isFinite(v)) return "-"
+    let t = Math.max(0, Math.round(v))
+    const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), sec = t % 60
+    const ss = (sec < 10 ? "0" : "") + sec
+    return h > 0 ? h + ":" + (m < 10 ? "0" : "") + m + ":" + ss : m + ":" + ss
+}
+//! A typed time, in seconds: "1:30", "1:02:03", "90", "90s", "2m", "1m 30s".
+//! NaN when it can't be read.
+function parseTime(text) {
+    let t = String(text).trim().toLowerCase().replace(/,/g, ".")
+    if (/^\d+(\.\d+)?(:\d+(\.\d+)?){1,2}$/.test(t)) {
+        const p = t.split(":").map(Number)
+        return p.length === 2 ? p[0] * 60 + p[1] : p[0] * 3600 + p[1] * 60 + p[2]
+    }
+    const m = t.match(/^(?:(\d+(?:\.\d+)?)\s*h)?\s*(?:(\d+(?:\.\d+)?)\s*m(?:in)?)?\s*(?:(\d+(?:\.\d+)?)\s*s(?:ec)?)?$/)
+    if (m && (m[1] || m[2] || m[3])) return (Number(m[1] || 0)) * 3600 + Number(m[2] || 0) * 60 + Number(m[3] || 0)
+    return parse(t, "")
+}

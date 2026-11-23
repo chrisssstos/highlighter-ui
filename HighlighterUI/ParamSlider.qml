@@ -28,6 +28,8 @@ Item {
     property real stepSize: 1
     property int decimals: PM.decimalsFor(stepSize)
     property string unit: ""
+    //! The value is seconds: shown and typed as a time ("1:30"), see ParamValueBox.
+    property bool time: false
     //! Where the fill grows from: from by default, 0 for a centred range.
     property real origin: from
     property real limitFrom: -Infinity
@@ -495,6 +497,7 @@ Item {
         value: root.value
         decimals: root.decimals
         unit: root.unit
+        time: root.time
         interactive: root.enabled
         boxHeight: root.sz("box")
         fontSize: root.sz("value")

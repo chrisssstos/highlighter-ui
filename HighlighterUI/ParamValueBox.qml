@@ -19,6 +19,10 @@ Item {
     property real value: 0
     property int decimals: 0
     property string unit: ""
+    //! The value is seconds, shown as a time ("1:30") and typed as one
+    //! ("1:30", "90", "2m", "1m 30s").
+    property bool time: false
+    function shownText(v) { return box.time ? PM.formatTime(v) : PM.format(v, box.decimals) + box.unit }
     property bool interactive: true
     property int align: Text.AlignLeft
     property int boxHeight: Theme.boxHeight
@@ -41,13 +45,13 @@ Item {
     function begin() {
         if (!box.interactive || box.editing) return
         box.bad = false
-        input.text = PM.format(box.value, box.decimals)
+        input.text = box.time ? PM.formatTime(box.value) : PM.format(box.value, box.decimals)
         input.forceActiveFocus(Qt.MouseFocusReason)
         input.selectAll()
     }
     //! Reads the typed text and reports it; false (and a red flash) if it can't.
     function commit() {
-        const v = PM.parse(input.text, box.unit)
+        const v = box.time ? PM.parseTime(input.text) : PM.parse(input.text, box.unit)
         if (isNaN(v)) { box.bad = true; badTimer.restart(); return false }
         box.submitted(v)
         return true
@@ -90,7 +94,7 @@ Item {
         leftPadding: Theme.s(4); rightPadding: Theme.s(4)
         horizontalAlignment: box.align
         verticalAlignment: Text.AlignVCenter
-        text: PM.format(box.value, box.decimals) + box.unit
+        text: box.shownText(box.value)
         color: box.ink
         font.family: Theme.family
         font.pixelSize: box.fontSize
@@ -122,7 +126,7 @@ Item {
         e.accepted = true
         if (!box.commit()) return
         box.stepped(direction, e.modifiers & Qt.ShiftModifier)
-        input.text = PM.format(box.value, box.decimals)
+        input.text = box.time ? PM.formatTime(box.value) : PM.format(box.value, box.decimals)
         input.selectAll()
     }
 
