@@ -105,6 +105,27 @@ Item {
             tryCompare(view, "count", 2, 1000, "one row per change")
             dlg.targets = before
         }
+        function test_longValueFits() {
+            const before = dlg.targets
+            const t = before.slice()
+            const json = JSON.stringify({ slices: Array(12).fill({ x: 0.25, y: 0.75 }) })
+            t[2] = Object.assign({}, t[2], { changes: [
+                { key: "mapping.preview", from: "", to: json, kind: "adds", note: "" },
+                { key: "a.b", from: "1", to: "2", kind: "updates", note: "" }] })
+            dlg.targets = t
+            const view = find(dlg.contentItem, "changeList", [])[0]
+            tryCompare(view, "count", 2, 1000)
+            wait(50)
+            const rows = find(view, "changeRow", [])
+            const long = rows.find(r => r.stacked), short = rows.find(r => !r.stacked)
+            verify(long, "the long value goes under its key")
+            verify(short, "a short one stays beside it")
+            for (const r of rows) {
+                const diff = find(r, "changeValues", [])[0]
+                verify(diff.x + diff.width <= r.width + 0.5, "the values stay in the row")
+            }
+            dlg.targets = before
+        }
         function test_enterSavesEscCancels() {
             keyClick(Qt.Key_Return)
             compare(top.saved, [2])

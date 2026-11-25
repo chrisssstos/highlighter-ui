@@ -421,12 +421,27 @@ B.Popup {
                     spacing: Theme.s(2)
                     opacity: noEffect ? 0.55 : 1
                     Item {
+                        id: changeRow
+                        objectName: "changeRow"
                         width: parent.width
-                        height: Math.max(changeKey.implicitHeight, diff.height)
+                        readonly property real gap: Theme.s(10)
+                        readonly property var values: [
+                            { text: change.modelData.from, colour: Theme.diffRemoved },
+                            { text: change.modelData.to, colour: Theme.diffAdded }
+                        ].filter(v => v.text !== "")
+                        // the values' own width, uncut, and the key's
+                        readonly property real valuesWidth: values.reduce((w, v) => w + valueMeasure.advanceWidth(v.text) + Theme.s(10), 0)
+                                                            + Math.max(0, values.length - 1) * diff.spacing
+                        // too long to sit beside the key (a mapping's JSON): the
+                        // values go on their own line under it, each cut to fit
+                        readonly property bool stacked: changeKey.implicitWidth + gap + valuesWidth > width
+                        height: stacked ? changeKey.implicitHeight + Theme.s(2) + diff.height
+                                        : Math.max(changeKey.implicitHeight, diff.height)
+                        FontMetrics { id: valueMeasure; font.family: Theme.mono; font.pixelSize: Theme.smallSize }
                         ParamText {
                             id: changeKey
-                            width: parent.width - diff.width - Theme.s(10)
-                            anchors.verticalCenter: parent.verticalCenter
+                            width: changeRow.stacked ? parent.width : parent.width - diff.width - changeRow.gap
+                            y: changeRow.stacked ? 0 : (parent.height - height) / 2
                             text: change.modelData.key
                             tone: "normal"; small: true; mono: true
                             wrapMode: Text.NoWrap
@@ -435,26 +450,31 @@ B.Popup {
                         // as a diff: the old value red, the new one green
                         Row {
                             id: diff
-                            anchors.right: parent.right
+                            objectName: "changeValues"
+                            x: changeRow.stacked ? 0 : parent.width - width
+                            y: changeRow.stacked ? changeKey.implicitHeight + Theme.s(2) : (parent.height - height) / 2
                             spacing: Theme.s(4)
                             Repeater {
-                                model: [
-                                    { text: change.modelData.from, colour: Theme.diffRemoved },
-                                    { text: change.modelData.to, colour: Theme.diffAdded }
-                                ].filter(v => v.text !== "")
+                                model: changeRow.values
                                 delegate: Rectangle {
                                     required property var modelData
-                                    width: valueText.implicitWidth + Theme.s(10)
+                                    // stacked: an even share of the line each
+                                    readonly property real most: changeRow.stacked
+                                        ? (changeRow.width - (changeRow.values.length - 1) * diff.spacing) / changeRow.values.length
+                                        : Infinity
+                                    width: Math.min(valueText.implicitWidth + Theme.s(10), most)
                                     height: valueText.implicitHeight + Theme.s(2)
                                     radius: Theme.radius
                                     color: Qt.rgba(modelData.colour.r, modelData.colour.g, modelData.colour.b, 0.2)
                                     Text {
                                         id: valueText
                                         anchors.centerIn: parent
+                                        width: Math.min(implicitWidth, parent.width - Theme.s(10))
                                         text: parent.modelData.text
                                         color: parent.modelData.colour
                                         font.family: Theme.mono
                                         font.pixelSize: Theme.smallSize
+                                        elide: Text.ElideMiddle
                                     }
                                 }
                             }
