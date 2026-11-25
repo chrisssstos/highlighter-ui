@@ -41,3 +41,4 @@ ParamSegment 1.0 ParamSegment.qml
 ParamSevenSeg 1.0 ParamSevenSeg.qml
 ParamGlow 1.0 ParamGlow.qml
 ParamLCD 1.0 ParamLCD.qml
+ParamSaveDialog 1.0 ParamSaveDialog.qml

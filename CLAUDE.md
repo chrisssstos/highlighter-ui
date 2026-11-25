@@ -112,6 +112,11 @@ use these controls rather than stock `QtQuick.Controls` sliders and checkboxes.
   pinned to t 0 and 1, points growing while hot, `preventStealing` on.
   `tests/tst_curve.qml` drives it with the mouse inside a ParamPage; a new
   editable graph gets the same tests.
+- **Saving.** (Its buttons carry words beside their icons, a dialog has room; a card can give its own, so they follow the pick.) When a panel can save to more than one place (an app with layered settings:
+  Application, Application Platform, Local, Local Platform), its Save opens a
+  `ParamSaveDialog`: the app fills `targets` (path, Existing / New, why one
+  can't be used, and the Updates / Overrides / Overridden by lines) and
+  writes the file in `onAccepted`. `tests/tst_savedialog.qml` clicks it.
 - **Colours.** A colour setting is a `ParamColor` (a chip that opens a
   picker: square, hue strip, hex, `presets`); `ParamSwatches` only when the
   choice is one of a few named colours.

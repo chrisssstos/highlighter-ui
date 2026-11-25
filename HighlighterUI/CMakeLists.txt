@@ -59,6 +59,7 @@ qt_add_qml_module(HighlighterUI
         ParamLight.qml
         ParamGlow.qml
         ParamLCD.qml
+        ParamSaveDialog.qml
     RESOURCES
         textures/knob_classic.png
         textures/sheen.png

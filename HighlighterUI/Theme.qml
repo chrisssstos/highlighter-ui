@@ -225,6 +225,9 @@ QtObject {
     property color editText:  "#4a25c9"
     property color danger:    "#e0664f"
     property color caution:   "#f0b44a"   // between fine and danger: a rating that's only OK
+    // a diff's two sides (the save dialog's Changelog): the value going, the one coming
+    property color diffRemoved: "#f2705a"
+    property color diffAdded:   "#5fd38a"
     // a graph for a moment after its value jumps the good way: blue beside a
     // coloured accent (green would fight a lime), green beside a colourless
     // one (white, grey), where it reads most naturally

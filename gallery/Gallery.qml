@@ -36,6 +36,7 @@ Window {
         const md = Qt.application.arguments.find(a => a.startsWith("--mode="))
         if (md) Theme.mode = md.substring(7)
         if (Qt.application.arguments.indexOf("--glow") >= 0) Theme.glow = true
+        if (Qt.application.arguments.indexOf("--save-dialog") >= 0) saveDialog.open()   // shoot it open
         if (Qt.application.arguments.indexOf("--compact") >= 0) Theme.compact = true   // every slider starts minimised
         const acc = Qt.application.arguments.find(a => a.startsWith("--accent="))
         if (acc) Theme.accent = acc.substring(9)
@@ -320,6 +321,47 @@ Window {
                 }
                 ParamButton { width: parent.width; text: "A full-width button with a label long enough to need the room" }
 
+            }
+            ParamSection {
+                width: parent.width; title: "Save dialog"; note: "where a Save goes; click a chip for its values"
+                ParamButton {
+                    icon: "save"; tip: "Save to..."; accent: true
+                    onClicked: saveDialog.open()
+                }
+                ParamText { id: savedTo; width: parent.width; text: "" ; visible: text.length > 0 }
+                ParamSaveDialog {
+                    id: saveDialog
+                    currentIndex: 2
+                    onAccepted: i => savedTo.text = "Saved to " + targets[i].name
+                    resetText: "Delete"
+                    fromLabel: "in the file"
+                    toLabel: "on screen"
+                    resetTip: "Delete this file: back to the values under it"
+                    onResetClicked: i => savedTo.text = "Deleted " + targets[i].name
+                    loadText: "Load"
+                    loadTip: "This file's values onto the panel, unsaved"
+                    onLoadClicked: i => savedTo.text = "Loaded " + targets[i].name
+                    targets: [
+                        { name: "Application", path: "C:/Program Files/Studio/MyApp/settings/app_settings.toml",
+                          status: "existing", unusable: "Read-Only", detail: "You cannot write to the folder C:/Program Files/Studio/MyApp/settings." },
+                        { name: "Application Platform", path: "%APP%/settings/%CFG_FOLDER%/app_settings.toml",
+                          status: "new", unusable: "Not Set", detail: "%CFG_FOLDER% is not set, so this folder is not used." },
+                        { name: "Local", path: "C:/Users/user/Documents/studio/settings/MyApp/app_settings.toml",
+                          status: "existing", badge: "Loaded", active: true, updates: ["interactive.layout.titleYMm = 34"],
+                          overrides: ["touch.yMm = 400 (Application)", "interactive.guess.answerHoldMs = 1500 (Application)"],
+                          overridden: ["title.xMm = 120 (Local Platform)"],
+                          changes: [
+                              { key: "interactive.layout.titleYMm", from: "30", to: "34", kind: "updates", note: "" },
+                              { key: "touch.yMm", from: "380", to: "400", kind: "overrides", note: "" },
+                              { key: "interactive.guess.answerHoldMs", from: "1200", to: "1500", kind: "overrides", note: "" },
+                              { key: "title.xMm", from: "100", to: "110", kind: "overridden", note: "No effect: Local Platform sets it to 120" },
+                              { key: "interactive.layout.equipmentTitleSizeMm", from: "", to: "64", kind: "adds", note: "" }
+                          ] },
+                        { name: "Local Platform", path: "C:/Users/user/Documents/studio/settings/MyApp/a-platform-folder-with-a-long-name/app_settings.toml",
+                          status: "new", overrides: ["touch.yMm = 400 (Application)"] },
+                        { name: "Nothing changed here", path: "D:/somewhere/else.toml", status: "new" }
+                    ]
+                }
             }
             ParamSection {
                 width: parent.width; title: "On / off"; note: "in a grid"
