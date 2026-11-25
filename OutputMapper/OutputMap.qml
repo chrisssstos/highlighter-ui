@@ -49,6 +49,9 @@ QtObject {
     property bool maskMode: false
     //! the editor's view: "input" (the source) or "output"
     property string view: "input"
+    //! warp grids (3 x 3 and up) on offer; false: every slice is its four
+    //! corners (corner pin) and a grid loaded from a save is cut back to them
+    property bool warp: true
 
     signal saveRequested()
 
@@ -95,7 +98,10 @@ QtObject {
 
     function normalised(s) {
         const c = Math.max(2, s.columns ?? 2), r = Math.max(2, s.rows ?? 2)
-        const pts = Array.isArray(s.points) && s.points.length === c * r ? s.points : Warp.grid(c, r)
+        let pts = Array.isArray(s.points) && s.points.length === c * r ? s.points : Warp.grid(c, r)
+        if (!warp && (c > 2 || r > 2 || s.perspective === false))
+            return normalised(Object.assign({}, s, { columns: 2, rows: 2, perspective: true,
+                                                     points: Warp.resample(pts, c, r, s.perspective !== false, 2, 2) }))
         return {
             // (a number is from before outputs had ids: a canvas, not a display)
             name: String(s.name ?? "Slice"), output: typeof s.output === "number" ? "" : outputId(s.output),
@@ -196,6 +202,7 @@ QtObject {
     }
     //! a new grid of points for the same warp (Corners keeps its perspective)
     function setGrid(i, columns, rows, perspective) {
+        if (!warp) { columns = 2; rows = 2; perspective = true }
         if (i < 0 || i >= slices.length) return
         const s = copyOf(i)
         s.points = Warp.resample(s.points, s.columns, s.rows, s.perspective, columns, rows)

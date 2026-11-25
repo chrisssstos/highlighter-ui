@@ -219,6 +219,7 @@ rows: ed.tableRows
             }
             ParamChoice {
                 width: parent.width
+                visible: ed.map.warp
                 label: "Warp"
                 model: ["Corners", "3 × 3", "4 × 4", "5 × 5", "6 × 6"]
                 currentIndex: ed.sel ? Math.max(0, ed.sel.columns - 2) : 0
