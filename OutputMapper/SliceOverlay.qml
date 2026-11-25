@@ -13,6 +13,8 @@ Item {
     property bool selected: false
     property int selectedPoint: -1
     property bool maskMode: false
+    //! the warp's faint grid lines over the slice
+    property bool gridLines: true
     property color color: "#def243"
     property color otherColor: "#9aa3a0"
     property real unit: 1
@@ -36,7 +38,7 @@ Item {
             PathMultiline {
                 paths: {
                     const s = root.slice
-                    if (!s || root.width <= 0) return []
+                    if (!s || root.width <= 0 || !root.gridLines) return []
                     const n = Math.max(s.columns, s.rows, 5)
                     return Warp.lines(s.points, s.columns, s.rows, s.perspective, n, 24).map(l => l.map(p => root.px(p)))
                 }

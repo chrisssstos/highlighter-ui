@@ -131,6 +131,7 @@ Item {
             x: o.x; y: o.y; width: o.width; height: o.height
             visible: width > 0
             slice: s
+            gridLines: root.map.warp
             selected: index === root.map.selected
             selectedPoint: root.map.selectedPoint
             maskMode: root.map.maskMode

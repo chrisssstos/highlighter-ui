@@ -609,6 +609,7 @@ rows: ed.tableRows
                         anchors.fill: parent
                         visible: ed.at(s) === ed.viewedOutput
                         slice: s
+                        gridLines: ed.map.warp
                         selected: index === ed.map.selected
                         selectedPoint: ed.map.selectedPoint
                         maskMode: ed.map.maskMode

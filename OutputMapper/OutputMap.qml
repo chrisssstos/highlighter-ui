@@ -49,8 +49,10 @@ QtObject {
     property bool maskMode: false
     //! the editor's view: "input" (the source) or "output"
     property string view: "input"
-    //! warp grids (3 x 3 and up) on offer; false: every slice is its four
-    //! corners (corner pin) and a grid loaded from a save is cut back to them
+    //! warping on offer: warp grids and corners dragged anywhere (corner pin).
+    //! false: every slice is an upright rectangle, a corner's drag resizes it
+    //! (the opposite corner stays), and a warped slice loaded from a save is
+    //! squared to its bounding box
     property bool warp: true
 
     signal saveRequested()
@@ -99,9 +101,12 @@ QtObject {
     function normalised(s) {
         const c = Math.max(2, s.columns ?? 2), r = Math.max(2, s.rows ?? 2)
         let pts = Array.isArray(s.points) && s.points.length === c * r ? s.points : Warp.grid(c, r)
-        if (!warp && (c > 2 || r > 2 || s.perspective === false))
+        if (!warp && !upright(pts, c, r)) {
+            const xs = pts.map(p => Number(p.x)), ys = pts.map(p => Number(p.y))
+            const x0 = Math.min(...xs), y0 = Math.min(...ys), x1 = Math.max(...xs), y1 = Math.max(...ys)
             return normalised(Object.assign({}, s, { columns: 2, rows: 2, perspective: true,
-                                                     points: Warp.resample(pts, c, r, s.perspective !== false, 2, 2) }))
+                points: [{ x: x0, y: y0 }, { x: x1, y: y0 }, { x: x0, y: y1 }, { x: x1, y: y1 }] }))
+        }
         return {
             // (a number is from before outputs had ids: a canvas, not a display)
             name: String(s.name ?? "Slice"), output: typeof s.output === "number" ? "" : outputId(s.output),
@@ -111,6 +116,15 @@ QtObject {
             points: pts.map(p => ({ x: Number(p.x), y: Number(p.y) })),
             mask: (s.mask ?? []).map(p => ({ x: Number(p.x), y: Number(p.y) }))
         }
+    }
+
+    //! four points that are an upright rectangle (top left, top right,
+    //! bottom left, bottom right)
+    function upright(pts, c, r) {
+        if (c !== 2 || r !== 2 || pts.length !== 4) return false
+        const e = 1e-6, n = pts.map(p => ({ x: Number(p.x), y: Number(p.y) }))
+        return Math.abs(n[0].y - n[1].y) < e && Math.abs(n[2].y - n[3].y) < e
+            && Math.abs(n[0].x - n[2].x) < e && Math.abs(n[1].x - n[3].x) < e
     }
 
     //! an input rectangle in whole pixels; it may reach past the source
@@ -168,6 +182,18 @@ QtObject {
     function setInput(i, rect) { set(i, { input: onSource(rect) }) }
     function setPoint(i, k, p, kind) {
         if (i < 0 || i >= slices.length) return
+        if (!warp) {
+            // a corner resizes the rectangle; the opposite corner stays
+            if (k < 0 || k > 3) return
+            const b = bounds(i), right = k % 2 === 1, bottom = k >= 2
+            const ox = right ? b.x : b.x + b.width, oy = bottom ? b.y : b.y + b.height
+            // never past the opposite corner: the dragged one stays the same corner
+            const m = 1e-3
+            const x = right ? Math.max(p.x, ox + m) : Math.min(p.x, ox - m)
+            const y = bottom ? Math.max(p.y, oy + m) : Math.min(p.y, oy - m)
+            setBounds(i, { x: Math.min(ox, x), y: Math.min(oy, y), width: Math.abs(x - ox), height: Math.abs(y - oy) }, kind)
+            return
+        }
         const s = copyOf(i)
         if (k < 0 || k >= s.points.length) return
         s.points[k] = { x: p.x, y: p.y }
@@ -183,14 +209,14 @@ QtObject {
     }
     //! The slice's points (and mask) moved and scaled so their bounding box is
     //! `rect` (output-normalised): a warp keeps its shape.
-    function setBounds(i, rect) {
+    function setBounds(i, rect, kind) {
         if (i < 0 || i >= slices.length) return
         const b = bounds(i), s = copyOf(i)
         const sx = rect.width / Math.max(1e-6, b.width), sy = rect.height / Math.max(1e-6, b.height)
         const f = q => ({ x: rect.x + (q.x - b.x) * sx, y: rect.y + (q.y - b.y) * sy })
         s.points = s.points.map(f)
         s.mask = s.mask.map(f)
-        put(i, s)
+        put(i, s, kind)
     }
     //! the bounding box of the slice's points (output-normalised)
     function bounds(i) {
